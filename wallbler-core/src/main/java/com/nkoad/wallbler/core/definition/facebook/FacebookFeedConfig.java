@@ -1,0 +1,28 @@
+package com.nkoad.wallbler.core.definition.facebook;
+
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+@ObjectClassDefinition(name = "Wallbler Facebook Feed")
+public @interface FacebookFeedConfig {
+
+    @AttributeDefinition(name = "Name", description = "Unique Feed name")
+    String config_name() default "facebook feed";
+
+    @AttributeDefinition(name = "Account Name", description = "Linked Account Name")
+    String config_accountName() default "facebook account";
+
+    @AttributeDefinition(name = "Type of feed")
+    String[] config_typeOfFeed() default { "posts", "photos", "videos", "albums" };
+
+    @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the account")
+    boolean config_enabled() default true;
+
+    @AttributeDefinition(name = "Count", description = "Quantity", type = AttributeType.INTEGER)
+    int config_count() default 10;
+
+    @AttributeDefinition(name = "Delay", description = "Delay in seconds", type = AttributeType.INTEGER)
+    int config_delay() default 10;
+
+}
