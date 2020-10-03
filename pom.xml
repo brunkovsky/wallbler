@@ -12,7 +12,6 @@
 
     <modules>
         <module>wallbler-features</module>
-<!--        <module>wallbler-cache</module>-->
         <module>wallbler-core</module>
     </modules>
 

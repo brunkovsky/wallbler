@@ -1,5 +1,6 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
+import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.OSGIConfig;
 import com.nkoad.wallbler.core.implementation.FeedConfig;
 import org.osgi.service.component.annotations.*;
@@ -12,10 +13,12 @@ import java.util.Map;
 public class FacebookFeedConfig extends FeedConfig {
     @Reference
     private OSGIConfig osgiConfig;
+    @Reference
+    private Cache cache;
 
     @Override
     public void assignConnector(Map<String, Object> properties) {
-        connector = new FacebookConnector(properties, osgiConfig.extractAccountProperties(properties));
+        connector = new FacebookConnector(properties, osgiConfig.extractAccountProperties(properties), cache);
     }
 
     @Activate

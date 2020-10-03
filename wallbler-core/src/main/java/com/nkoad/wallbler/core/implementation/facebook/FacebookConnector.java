@@ -1,5 +1,6 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
+import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItemPack;
@@ -21,8 +22,8 @@ public class FacebookConnector extends Connector {
     private static final String API_ALBUM_ACCESS_URL = "/albums?access_token=";
     private static Map<String, FeedType> feedMap = new HashMap<>();
 
-    public FacebookConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties) {
-        super(feedProperties, accountProperties);
+    public FacebookConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
+        super(feedProperties, accountProperties, cache);
 
         feedMap.put("posts", new FeedType(API_POST_ACCESS_URL, "permalink_url,full_picture,message,created_time,comments") {
             @Override
@@ -66,18 +67,17 @@ public class FacebookConnector extends Connector {
     }
 
     @Override
-    public WallblerItemPack getData() {
+    public void getData() {
         try {
             String url = (String) feedProperties.get("config.url");
             int count = (int) feedProperties.get("config.count");
             HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                LOGGER.debug("Facebook 200");
+                LOGGER.info("Facebook 200");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
     }
 
     abstract class FeedType {

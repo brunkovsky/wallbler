@@ -21,19 +21,19 @@ public abstract class AccountConfig <V extends Validator> {
     }
 
     protected void activate(Map<String, Object> properties) {
-        LOGGER.debug("account activate: " + properties.get("config.name"));
+        LOGGER.info("account activate: " + properties.get("config.name"));
         assignValidator(properties);
         refreshLinkedFeeds(properties);
     }
 
     protected void modified(Map<String, Object> properties) {
-        LOGGER.debug("account modified: " + properties.get("config.name"));
+        LOGGER.info("account modified: " + properties.get("config.name"));
         deactivate(properties);
         activate(properties);
     }
 
     protected void deactivate(Map<String, Object> properties) {
-        LOGGER.debug("account deactivate: " + properties.get("config.name"));
+        LOGGER.info("account deactivate: " + properties.get("config.name"));
     }
 
     protected void setValid(Map<String, Object> properties) {
@@ -56,7 +56,7 @@ public abstract class AccountConfig <V extends Validator> {
             Configuration[] configurations = osgiConfig.getConfigAdmin().listConfigurations(filter);
             if (configurations != null) {
                 for (Configuration configuration : configurations) {
-                    LOGGER.debug("refreshing linked feed: " + configuration.getPid());
+                    LOGGER.info("refreshing linked feed: " + configuration.getPid());
                     configuration.update(configuration.getProperties());
                 }
             }

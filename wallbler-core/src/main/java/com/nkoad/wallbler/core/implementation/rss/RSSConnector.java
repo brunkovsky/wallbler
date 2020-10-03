@@ -1,5 +1,6 @@
 package com.nkoad.wallbler.core.implementation.rss;
 
+import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.WallblerItemPack;
 import com.nkoad.wallbler.core.implementation.Connector;
@@ -14,12 +15,12 @@ import java.util.Map;
 
 public class RSSConnector extends Connector {
 
-    public RSSConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties) {
-        super(feedProperties, accountProperties);
+    public RSSConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
+        super(feedProperties, accountProperties, cache);
     }
 
     @Override
-    public WallblerItemPack getData() {
+    public void getData() {
         String url = (String) feedProperties.get("config.url");
         int count = (int) feedProperties.get("config.count");
         try {
@@ -35,11 +36,11 @@ public class RSSConnector extends Connector {
                 item.generateSocialId();
                 wallblerItems.add(item);
             });
-            return new WallblerItemPack(wallblerItems);
+            LOGGER.info(wallblerItems.toString());
+            cache.add((String) feedProperties.get("service.pid"), new WallblerItemPack(wallblerItems));
         } catch (Exception e) {
             LOGGER.error("can't retrieve rss data, feed url: " + url);
         }
-        return null;
     }
 
 }

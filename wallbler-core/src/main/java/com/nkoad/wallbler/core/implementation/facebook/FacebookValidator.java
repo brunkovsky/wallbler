@@ -27,13 +27,13 @@ public class FacebookValidator extends Validator {
             String url = USERS_API_ACCESS_URL + properties.get("config.groupId") + API_USERNAME_ACCESS_URL + URLEncoder.encode((String) properties.get("config.oAuthAccessToken"), "UTF-8");
             HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                LOGGER.debug("facebook account is valid: " + new JSONObject(httpRequest.getBody()).getString("name"));
+                LOGGER.info("facebook account is valid: " + new JSONObject(httpRequest.getBody()).getString("name"));
                 return true;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LOGGER.debug("facebook account is not valid");
+        LOGGER.info("facebook account is not valid");
         return false;
     }
 

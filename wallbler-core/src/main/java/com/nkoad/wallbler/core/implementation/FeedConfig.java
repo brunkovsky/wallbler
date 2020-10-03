@@ -1,6 +1,5 @@
 package com.nkoad.wallbler.core.implementation;
 
-import com.nkoad.wallbler.core.WallblerItemPack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,19 +18,19 @@ public abstract class FeedConfig {
     protected abstract void assignConnector(Map<String, Object> properties);
 
     protected void activate(Map<String, Object> properties) {
-        LOGGER.debug("feed activate: " + properties.get("config.name"));
+        LOGGER.info("feed activate: " + properties.get("config.name"));
         assignConnector(properties);
         execute(properties);
     }
 
     protected void modified(Map<String, Object> properties) {
-        LOGGER.debug("feed modified: " + properties.get("config.name"));
+        LOGGER.info("feed modified: " + properties.get("config.name"));
         deactivate(properties);
         activate(properties);
     }
 
     protected void deactivate(Map<String, Object> properties) {
-        LOGGER.debug("feed deactivate: " + properties.get("config.name"));
+        LOGGER.info("feed deactivate: " + properties.get("config.name"));
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
@@ -42,8 +41,7 @@ public abstract class FeedConfig {
         Integer delay = (Integer) properties.get("config.delay");
         if (connector.isAccept()) {
             scheduledFuture = executorService.scheduleAtFixedRate(() -> {
-                WallblerItemPack data = connector.getData();
-                LOGGER.debug(data.getData().toString());
+                connector.getData();
             }, 1, delay, TimeUnit.SECONDS);
         }
     }

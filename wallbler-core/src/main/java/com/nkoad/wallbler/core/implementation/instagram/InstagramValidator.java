@@ -14,7 +14,7 @@ public class InstagramValidator extends RefreshableValidator {
     @Override
     public String refreshAccessToken() {
         String newAccessToken = "new access token " + new Date();
-        LOGGER.debug("got new instagram access token: " + newAccessToken);
+        LOGGER.info("got new instagram access token: " + newAccessToken);
         return newAccessToken;
     }
 
