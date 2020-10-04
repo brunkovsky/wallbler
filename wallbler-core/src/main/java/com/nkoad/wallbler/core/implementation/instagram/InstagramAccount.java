@@ -1,15 +1,16 @@
 package com.nkoad.wallbler.core.implementation.instagram;
 
 import com.nkoad.wallbler.core.OSGIConfig;
-import com.nkoad.wallbler.core.implementation.RefreshableAccountConfig;
+import com.nkoad.wallbler.core.definition.instagram.InstagramAccountConfig;
+import com.nkoad.wallbler.core.implementation.RefreshableAccount;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 
 import java.util.Map;
 
 @Component
-@Designate(ocd = com.nkoad.wallbler.core.definition.instagram.InstagramAccountConfig.class, factory = true)
-public class InstagramAccountConfig extends RefreshableAccountConfig {
+@Designate(ocd = InstagramAccountConfig.class, factory = true)
+public class InstagramAccount extends RefreshableAccount {
     @Reference
     private OSGIConfig refOsgiConfig;
 

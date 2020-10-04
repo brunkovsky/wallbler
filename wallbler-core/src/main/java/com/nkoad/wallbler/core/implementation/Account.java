@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-public abstract class AccountConfig <V extends Validator> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(AccountConfig.class);
+public abstract class Account<V extends Validator> {
+    private final static Logger LOGGER = LoggerFactory.getLogger(Account.class);
     protected V validator;
     protected OSGIConfig osgiConfig;
 
@@ -51,7 +51,7 @@ public abstract class AccountConfig <V extends Validator> {
     private void refreshLinkedFeeds(Map<String, Object> properties) {
         try {
             String accountName = (String) properties.get("config.name");
-            String factoryPid = ((String) properties.get("service.factoryPid")).replace("AccountConfig", "FeedConfig");
+            String factoryPid = ((String) properties.get("service.factoryPid")).replace("Account", "Feed");
             String filter = "(&(config.accountName=" + accountName + ")(service.factoryPid=" + factoryPid + "))";
             Configuration[] configurations = osgiConfig.getConfigAdmin().listConfigurations(filter);
             if (configurations != null) {

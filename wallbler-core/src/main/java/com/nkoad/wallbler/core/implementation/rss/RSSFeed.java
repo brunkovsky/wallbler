@@ -1,16 +1,17 @@
-package com.nkoad.wallbler.core.implementation.facebook;
+package com.nkoad.wallbler.core.implementation.rss;
 
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.OSGIConfig;
-import com.nkoad.wallbler.core.implementation.FeedConfig;
+import com.nkoad.wallbler.core.definition.rss.RSSFeedConfig;
+import com.nkoad.wallbler.core.implementation.Feed;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 
 import java.util.Map;
 
 @Component
-@Designate(ocd = com.nkoad.wallbler.core.definition.facebook.FacebookFeedConfig.class, factory = true)
-public class FacebookFeedConfig extends FeedConfig {
+@Designate(ocd = RSSFeedConfig.class, factory = true)
+public class RSSFeed extends Feed {
     @Reference
     private OSGIConfig osgiConfig;
     @Reference
@@ -18,7 +19,7 @@ public class FacebookFeedConfig extends FeedConfig {
 
     @Override
     public void assignConnector(Map<String, Object> properties) {
-        connector = new FacebookConnector(properties, osgiConfig.extractAccountProperties(properties), cache);
+        connector = new RSSConnector(properties, osgiConfig.extractAccountProperties(properties), cache);
     }
 
     @Activate

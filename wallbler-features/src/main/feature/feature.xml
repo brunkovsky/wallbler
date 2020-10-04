@@ -24,14 +24,14 @@
     <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/1.0.3/xml</repository>
 
     <feature name="wallbler" version="${project.version}">
-        <feature prerequisite="true">webconsole</feature>
         <bundle>mvn:com.nkoad/wallbler-core/${project.version}</bundle>
         <feature>wallbler-rest</feature>
+        <feature prerequisite="true">webconsole</feature>
     </feature>
 
     <feature name="wallbler-rest" version="${project.version}">
         <feature>aries-jax-rs-whiteboard</feature>
-<!--        <feature>aries-jax-rs-whiteboard-jackson</feature>-->
+        <feature>aries-jax-rs-whiteboard-jackson</feature>
         <bundle>mvn:com.nkoad/wallbler-rest/${project.version}</bundle>
     </feature>
 

@@ -1,7 +1,8 @@
 package com.nkoad.wallbler.core.implementation.rss;
 
 import com.nkoad.wallbler.core.OSGIConfig;
-import com.nkoad.wallbler.core.implementation.AccountConfig;
+import com.nkoad.wallbler.core.definition.rss.RSSAccountConfig;
+import com.nkoad.wallbler.core.implementation.Account;
 import com.nkoad.wallbler.core.implementation.Validator;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
@@ -9,8 +10,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import java.util.Map;
 
 @Component
-@Designate(ocd = com.nkoad.wallbler.core.definition.rss.RSSAccountConfig.class, factory = true)
-public class RSSAccountConfig extends AccountConfig<Validator> {
+@Designate(ocd = RSSAccountConfig.class, factory = true)
+public class RSSAccount extends Account<Validator> {
     @Reference
     private OSGIConfig refOsgiConfig;
 

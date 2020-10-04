@@ -1,36 +1,35 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
+import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.OSGIConfig;
-import com.nkoad.wallbler.core.implementation.AccountConfig;
-import com.nkoad.wallbler.core.implementation.Validator;
+import com.nkoad.wallbler.core.definition.facebook.FacebookFeedConfig;
+import com.nkoad.wallbler.core.implementation.Feed;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 
 import java.util.Map;
 
 @Component
-@Designate(ocd = com.nkoad.wallbler.core.definition.facebook.FacebookAccountConfig.class, factory = true)
-public class FacebookAccountConfig extends AccountConfig<Validator> {
+@Designate(ocd = FacebookFeedConfig.class, factory = true)
+public class FacebookFeed extends Feed {
     @Reference
-    private OSGIConfig refOsgiConfig;
+    private OSGIConfig osgiConfig;
+    @Reference
+    private Cache cache;
 
     @Override
-    public void assignValidator(Map<String, Object> properties) {
-        validator = new FacebookValidator(properties);
+    public void assignConnector(Map<String, Object> properties) {
+        connector = new FacebookConnector(properties, osgiConfig.extractAccountProperties(properties), cache);
     }
 
     @Activate
     public void activate(Map<String, Object> properties) {
-        super.setOsgiConfig(refOsgiConfig);
         super.activate(properties);
-        setValid(properties);
     }
 
     @Modified
     public void modified(Map<String, Object> properties) {
-        super.setOsgiConfig(refOsgiConfig);
         super.modified(properties);
-        setValid(properties);
     }
 
     @Deactivate

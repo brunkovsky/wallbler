@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public abstract class RefreshableAccountConfig extends AccountConfig<RefreshableValidator> {
+public abstract class RefreshableAccount extends Account<RefreshableValidator> {
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
     private ScheduledFuture scheduledFuture;
 

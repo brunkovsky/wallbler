@@ -57,11 +57,9 @@
                         <Export-Package>
                             org.json,
                             <!-- rss -->
-                            com.rometools.*,
-                            org.jdom2.*,
-                            org.jaxen,
-                            org.jaxen.saxpath,
-                            org.jaxen.util
+                            com.rometools.*,org.jdom2.*,org.jaxen,org.jaxen.saxpath,org.jaxen.util,
+                            <!-- cache -->
+                            com.nkoad.wallbler.cache.definition
                         </Export-Package>
                     </instructions>
                 </configuration>

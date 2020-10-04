@@ -1,21 +1,26 @@
 package com.nkoad.wallbler.rest;
 
+import com.nkoad.wallbler.cache.definition.Cache;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+
+import static javax.ws.rs.core.Response.status;
 
 @Path("/wallbler")
 @Component(name = "Wallbler Rest Service", service = WallblerRest.class, property = {"osgi.jaxrs.resource=true"})
 public class WallblerRest {
+    @Reference
+    private Cache cache;
     @Path("/")
     @Produces("application/json")
     @GET
-    public String getData() {
-        System.out.println("-------------");
-        System.out.println("-------------");
-        return "Hello Restful service";
+    public Response getData() {
+        return status(200).entity(cache.getAll()).build();
     }
 
 }

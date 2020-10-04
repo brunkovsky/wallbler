@@ -9,13 +9,7 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 public class FacebookValidator extends Validator {
-    private static final String FACEBOOK_URL = "https://www.facebook.com";
     private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v6.0/";
-    private static final String API_PHOTO_ACCESS_URL = "/photos/uploaded?access_token=";
-    private static final String API_POST_ACCESS_URL = "/posts?access_token=";
-    private static final String API_VIDEO_ACCESS_URL = "/videos/uploaded?access_token=";
-    private static final String API_ALBUM_ACCESS_URL = "/albums?access_token=";
-    private static final String API_USERNAME_ACCESS_URL = "?fields=name,link&access_token=";
 
     public FacebookValidator(Map<String, Object> properties) {
         super(properties);
@@ -24,10 +18,12 @@ public class FacebookValidator extends Validator {
     @Override
     public boolean isAccountValid() {
         try {
-            String url = USERS_API_ACCESS_URL + properties.get("config.groupId") + API_USERNAME_ACCESS_URL + URLEncoder.encode((String) properties.get("config.oAuthAccessToken"), "UTF-8");
+            String accessToken = URLEncoder.encode((String) properties.get("config.oAuthAccessToken"), "UTF-8");
+            String url = USERS_API_ACCESS_URL + properties.get("config.groupId") + "?access_token=" + accessToken;
             HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                LOGGER.info("facebook account is valid: " + new JSONObject(httpRequest.getBody()).getString("name"));
+                String accountName = new JSONObject(httpRequest.getBody()).getString("name");
+                LOGGER.info("facebook account is valid. name of the account is: " + accountName);
                 return true;
             }
         } catch (Exception e) {

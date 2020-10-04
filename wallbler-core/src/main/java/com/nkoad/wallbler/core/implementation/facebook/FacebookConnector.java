@@ -3,14 +3,18 @@ package com.nkoad.wallbler.core.implementation.facebook;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
+import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.WallblerItemPack;
 import com.nkoad.wallbler.core.implementation.Connector;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FacebookConnector extends Connector {
@@ -69,18 +73,29 @@ public class FacebookConnector extends Connector {
     @Override
     public void getData() {
         try {
-            String url = (String) feedProperties.get("config.url");
             int count = (int) feedProperties.get("config.count");
+            String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
+            FeedType feedType = feedMap.get(typeOfFeed);
+            String url = feedType.buildFullUrl(accountProperties);
             HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 LOGGER.info("Facebook 200");
+                List<WallblerItem> wallblerItems = new ArrayList<>();
+                JSONArray dataArray = new JSONObject(httpRequest.getBody()).getJSONArray("data");
+                int minSize = Math.min(dataArray.length(), count);
+                for (int i = 0; i < minSize; i++) {
+                    JSONObject json = dataArray.getJSONObject(i);
+                    FacebookWallblerItem item = feedType.retrieveData(json);
+                    wallblerItems.add(item);
+                }
+                cache.add((String) feedProperties.get("service.pid"), new WallblerItemPack(wallblerItems));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    abstract class FeedType {
+    abstract static class FeedType {
         String url;
         String fields;
 
@@ -91,7 +106,7 @@ public class FacebookConnector extends Connector {
 
         abstract FacebookWallblerItem retrieveData(JSONObject json) throws JSONException;
 
-        public String buildFullUrl(Map<String, Object> properties) throws UnsupportedEncodingException {
+        public String buildFullUrl(Map<String, Object> properties) {
             String accessToken = null;
             try {
                 accessToken = URLEncoder.encode((String) properties.get("config.oAuthAccessToken"), "UTF-8");

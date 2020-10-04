@@ -9,8 +9,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public abstract class FeedConfig {
-    private final static Logger LOGGER = LoggerFactory.getLogger(FeedConfig.class);
+public abstract class Feed {
+    private final static Logger LOGGER = LoggerFactory.getLogger(Feed.class);
     protected Connector connector;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
     private ScheduledFuture scheduledFuture;
