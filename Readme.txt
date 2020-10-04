@@ -1,4 +1,4 @@
-feature:repo-add mvn:com.nkoad/wallbler3-features/LATEST/xml
+feature:repo-add mvn:com.nkoad/wallbler-features/LATEST/xml
 feature:install wallbler
 feature:uninstall wallbler
 

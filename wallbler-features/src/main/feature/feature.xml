@@ -21,9 +21,18 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
+    <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/1.0.3/xml</repository>
+
     <feature name="wallbler" version="${project.version}">
-        <bundle>mvn:com.nkoad/wallbler-core/${project.version}</bundle>
         <feature prerequisite="true">webconsole</feature>
+        <bundle>mvn:com.nkoad/wallbler-core/${project.version}</bundle>
+        <feature>wallbler-rest</feature>
+    </feature>
+
+    <feature name="wallbler-rest" version="${project.version}">
+        <feature>aries-jax-rs-whiteboard</feature>
+<!--        <feature>aries-jax-rs-whiteboard-jackson</feature>-->
+        <bundle>mvn:com.nkoad/wallbler-rest/${project.version}</bundle>
     </feature>
 
 </features>
