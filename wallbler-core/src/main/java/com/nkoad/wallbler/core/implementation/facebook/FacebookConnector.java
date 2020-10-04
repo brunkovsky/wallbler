@@ -11,34 +11,75 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class FacebookConnector extends Connector {
-    private static final String FACEBOOK_URL = "https://www.facebook.com";
+    private static final String FACEBOOK_URL = "https://www.facebook.com/";
     private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v6.0/";
     private static final String API_PHOTO_ACCESS_URL = "/photos/uploaded?access_token=";
     private static final String API_POST_ACCESS_URL = "/posts?access_token=";
     private static final String API_VIDEO_ACCESS_URL = "/videos/uploaded?access_token=";
     private static final String API_ALBUM_ACCESS_URL = "/albums?access_token=";
+    private static String accountName;
     private static Map<String, FeedType> feedMap = new HashMap<>();
 
     public FacebookConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
+        fetchAccountName();
+        fillMapForPosts();
+        fillMapForPhotos();
+        fillMapForVideos();
+        fillMapForAlbums();
+    }
 
+    @Override
+    public void getData() {
+        try {
+            int count = (int) feedProperties.get("config.count");
+            String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
+            FeedType feedType = feedMap.get(typeOfFeed);
+            String url = feedType.buildFullUrl();
+            HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
+            if (httpRequest.getStatusCode() == 200) {
+                List<WallblerItem> wallblerItems = new ArrayList<>();
+                JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
+                int minSize = Math.min(data.length(), count);
+                for (int i = 0; i < minSize; i++) {
+                    JSONObject json = data.getJSONObject(i);
+                    FacebookWallblerItem item = feedType.retrieveData(json);
+                    wallblerItems.add(item);
+                }
+                cache.add((String) feedProperties.get("service.pid"), new WallblerItemPack(wallblerItems));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void fillMapForPosts() {
         feedMap.put("posts", new FeedType(API_POST_ACCESS_URL, "permalink_url,full_picture,message,created_time,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem();
-                item.setTitle("posts");
+                item.setTitle(accountName);
+                item.setUrl(FACEBOOK_URL);
+                item.setDate(setDateProperties(json));
+                item.setDescription(setDescriptionProperty(json, "message"));
+                item.setLinkToSMPage(json.getString("permalink_url"));
+                item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));
+                setLikesCommentsSharesProperties(item, json);
                 item.generateSocialId();
                 return item;
             }
         });
+    }
 
+    private void fillMapForPhotos() {
         feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL, "link,images,width,name,created_time,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
@@ -48,7 +89,9 @@ public class FacebookConnector extends Connector {
                 return item;
             }
         });
+    }
 
+    private void fillMapForVideos() {
         feedMap.put("videos", new FeedType(API_VIDEO_ACCESS_URL, "permalink_url,description,updated_time,picture,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
@@ -58,7 +101,9 @@ public class FacebookConnector extends Connector {
                 return item;
             }
         });
+    }
 
+    private void fillMapForAlbums() {
         feedMap.put("albums", new FeedType(API_ALBUM_ACCESS_URL, "name,link,picture,created_time,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
@@ -70,32 +115,70 @@ public class FacebookConnector extends Connector {
         });
     }
 
-    @Override
-    public void getData() {
+    private void fetchAccountName() {
         try {
-            int count = (int) feedProperties.get("config.count");
-            String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
-            FeedType feedType = feedMap.get(typeOfFeed);
-            String url = feedType.buildFullUrl(accountProperties);
+            String accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
+            String url = USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + "?fields=name,link&access_token=" + accessToken;
             HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                LOGGER.info("Facebook 200");
-                List<WallblerItem> wallblerItems = new ArrayList<>();
-                JSONArray dataArray = new JSONObject(httpRequest.getBody()).getJSONArray("data");
-                int minSize = Math.min(dataArray.length(), count);
-                for (int i = 0; i < minSize; i++) {
-                    JSONObject json = dataArray.getJSONObject(i);
-                    FacebookWallblerItem item = feedType.retrieveData(json);
-                    wallblerItems.add(item);
-                }
-                cache.add((String) feedProperties.get("service.pid"), new WallblerItemPack(wallblerItems));
+                accountName = new JSONObject(httpRequest.getBody()).getString("name");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    abstract static class FeedType {
+    private Date setDateProperties(JSONObject json) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            return sdf.parse(json.getString("created_time"));
+        } catch (ParseException | JSONException e) {
+            //do nothing
+        }
+        return null;
+    }
+
+    private String setDescriptionProperty(JSONObject json, String s) {
+        try {
+            return secreteURLsIntoLinks(json.getString(s));
+        } catch (JSONException e) {
+            // do nothing
+        }
+        return null;
+    }
+
+    private String secreteURLsIntoLinks(String text) {
+        StringBuilder result = new StringBuilder();
+        for (String item : text.split("\\s+"))
+            try {
+                URL url = new URL(item);
+                result.append("<a href=\"").append(url).append("\"target='_blank'>").append(url).append("</a> ");
+            } catch (MalformedURLException e) {
+                result.append(item).append(" ");
+            }
+        return result.toString();
+    }
+
+    private void setLikesCommentsSharesProperties(FacebookWallblerItem item, JSONObject json) {
+        // todo: need to investigate if we have more than 15 LikesCommentsShares!!!
+        try {
+            item.setLikedCount((long) json.getJSONObject("likes").getJSONArray("data").length());
+        } catch (JSONException e) {
+            item.setLikedCount(0L);
+        }
+        try {
+            item.setCommentsCount((long) json.getJSONObject("comments").getJSONArray("data").length());
+        } catch (JSONException e) {
+            item.setCommentsCount(0L);
+        }
+        try {
+            item.setSharedCount((long) json.getJSONObject("sharedposts").getJSONArray("data").length());
+        } catch (JSONException e) {
+            item.setSharedCount(0L);
+        }
+    }
+
+    abstract class FeedType {
         String url;
         String fields;
 
@@ -106,14 +189,14 @@ public class FacebookConnector extends Connector {
 
         abstract FacebookWallblerItem retrieveData(JSONObject json) throws JSONException;
 
-        public String buildFullUrl(Map<String, Object> properties) {
+        public String buildFullUrl() {
             String accessToken = null;
             try {
-                accessToken = URLEncoder.encode((String) properties.get("config.oAuthAccessToken"), "UTF-8");
+                accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            return USERS_API_ACCESS_URL + properties.get("config.groupId") + url + accessToken + "&fields=" + fields;
+            return USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + url + accessToken + "&fields=" + fields;
         }
     }
 

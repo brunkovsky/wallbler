@@ -9,4 +9,5 @@ public interface Cache {
     void add(String feedPid, WallblerItemPack data);
     List<WallblerItem> getAll();
     WallblerItemPack get(String feedPid);
+    void removeFromCache(String feedPid);
 }

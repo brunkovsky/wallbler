@@ -59,7 +59,9 @@
                             <!-- rss -->
                             com.rometools.*,org.jdom2.*,org.jaxen,org.jaxen.saxpath,org.jaxen.util,
                             <!-- cache -->
-                            com.nkoad.wallbler.cache.definition
+                            com.nkoad.wallbler.cache.definition,
+                            com.nkoad.wallbler.core,
+                            com.nkoad.wallbler.core.implementation
                         </Export-Package>
                     </instructions>
                 </configuration>

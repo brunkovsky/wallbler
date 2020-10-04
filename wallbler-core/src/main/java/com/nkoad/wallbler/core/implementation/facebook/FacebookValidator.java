@@ -3,7 +3,6 @@ package com.nkoad.wallbler.core.implementation.facebook;
 import com.nkoad.wallbler.core.HTTPConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.implementation.Validator;
-import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.Map;
@@ -22,8 +21,6 @@ public class FacebookValidator extends Validator {
             String url = USERS_API_ACCESS_URL + properties.get("config.groupId") + "?access_token=" + accessToken;
             HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                String accountName = new JSONObject(httpRequest.getBody()).getString("name");
-                LOGGER.info("facebook account is valid. name of the account is: " + accountName);
                 return true;
             }
         } catch (Exception e) {

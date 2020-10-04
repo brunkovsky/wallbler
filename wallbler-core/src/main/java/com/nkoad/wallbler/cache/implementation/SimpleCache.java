@@ -32,4 +32,9 @@ public class SimpleCache implements Cache {
     public WallblerItemPack get(String feedPid) {
         return cache.get(feedPid);
     }
+
+    @Override
+    public void removeFromCache(String feedPid) {
+        cache.remove(feedPid);
+    }
 }

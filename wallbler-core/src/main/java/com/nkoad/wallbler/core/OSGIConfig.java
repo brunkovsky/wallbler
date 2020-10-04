@@ -72,7 +72,9 @@ public class OSGIConfig {
             Configuration configuration = configAdmin.getConfiguration(pid);
             Dictionary<String, Object> props = configuration.getProperties();
             properties.forEach((key, value) -> props.put(key, value != null ? value : ""));
+            System.out.println(configuration.getBundleLocation());
             configuration.update(props);
+            configuration.setBundleLocation(null); // TODO :
         } catch (IOException e) {
             LOGGER.error("couldn't set properties. pid: " + pid);
         }

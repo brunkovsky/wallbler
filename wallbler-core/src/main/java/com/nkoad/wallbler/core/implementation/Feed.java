@@ -34,7 +34,7 @@ public abstract class Feed {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
-//        connector.removeFromCache((String) properties.get("service.pid"));
+        connector.removeFromCache((String) properties.get("service.pid"));
     }
 
     private void execute(Map<String, Object> properties) {

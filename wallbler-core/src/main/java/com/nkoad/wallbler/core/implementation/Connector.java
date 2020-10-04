@@ -18,6 +18,10 @@ public abstract class Connector {
         this.cache = cache;
     }
 
+    public void removeFromCache(String feedPid) {
+        cache.removeFromCache(feedPid);
+    }
+
     abstract public void getData();
 
     public boolean isAccept() {
