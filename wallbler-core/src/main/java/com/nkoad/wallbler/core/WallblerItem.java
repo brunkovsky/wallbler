@@ -11,10 +11,6 @@ public abstract class WallblerItem {
     private Date date;
     private String url;             // link to the account
     private String linkToSMPage;    // link to the post
-//    private String thumbnailUrl;  // link to the original image
-//    private Long likedCount;
-//    private Long sharedCount;
-//    private Long commentsCount;
     private Boolean accepted;
 
     public WallblerItem(String socialMediaType) {
@@ -52,15 +48,7 @@ public abstract class WallblerItem {
     public void setDate(Date date) {
         this.date = date;
     }
-   /*
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
 
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
-    }
-    */
     public String getLinkToSMPage() {
         return linkToSMPage;
     }
@@ -72,31 +60,7 @@ public abstract class WallblerItem {
     public String getSocialMediaType() {
         return socialMediaType;
     }
-    /*
-    public Long getLikedCount() {
-        return likedCount;
-    }
 
-    public void setLikedCount(Long likedCount) {
-        this.likedCount = likedCount;
-    }
-
-    public Long getSharedCount() {
-        return sharedCount;
-    }
-
-    public void setSharedCount(Long sharedCount) {
-        this.sharedCount = sharedCount;
-    }
-
-    public Long getCommentsCount() {
-        return commentsCount;
-    }
-
-    public void setCommentsCount(Long commentsCount) {
-        this.commentsCount = commentsCount;
-    }
-    */
     public Boolean isAccepted() {
         return accepted;
     }
