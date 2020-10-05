@@ -1,8 +1,8 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.core.definition.facebook.FacebookAccountConfig;
-import com.nkoad.wallbler.core.implementation.Account;
-import com.nkoad.wallbler.core.implementation.Validator;
+import com.nkoad.wallbler.core.Account;
+import com.nkoad.wallbler.core.Validator;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 

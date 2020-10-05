@@ -3,8 +3,7 @@ package com.nkoad.wallbler.core.implementation.instagram;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
-import com.nkoad.wallbler.core.WallblerItemPack;
-import com.nkoad.wallbler.core.implementation.Connector;
+import com.nkoad.wallbler.core.Connector;
 
 import java.util.Map;
 

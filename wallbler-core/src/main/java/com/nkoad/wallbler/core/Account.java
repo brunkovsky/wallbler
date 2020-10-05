@@ -1,7 +1,6 @@
-package com.nkoad.wallbler.core.implementation;
+package com.nkoad.wallbler.core;
 
 import com.nkoad.wallbler.activator.Activator;
-import com.nkoad.wallbler.core.Util;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
@@ -78,7 +77,6 @@ public abstract class Account<V extends Validator> {
             Configuration configuration = Activator.configAdmin.getConfiguration(pid);
             Dictionary<String, Object> props = configuration.getProperties();
             properties.forEach((key, value) -> props.put(key, value != null ? value : ""));
-            System.out.println(configuration.getBundleLocation());
             configuration.update(props);
             configuration.setBundleLocation(null); // TODO :
         } catch (IOException e) {

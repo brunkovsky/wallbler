@@ -1,6 +1,6 @@
 package com.nkoad.wallbler.core.implementation.instagram;
 
-import com.nkoad.wallbler.core.implementation.RefreshableValidator;
+import com.nkoad.wallbler.core.RefreshableValidator;
 
 import java.util.Date;
 import java.util.Map;

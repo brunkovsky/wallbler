@@ -1,4 +1,4 @@
-package com.nkoad.wallbler.core.implementation;
+package com.nkoad.wallbler.core;
 
 import com.nkoad.wallbler.cache.definition.Cache;
 import org.slf4j.Logger;

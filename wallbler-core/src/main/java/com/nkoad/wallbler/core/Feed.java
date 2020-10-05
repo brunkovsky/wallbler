@@ -1,7 +1,6 @@
-package com.nkoad.wallbler.core.implementation;
+package com.nkoad.wallbler.core;
 
 import com.nkoad.wallbler.activator.Activator;
-import com.nkoad.wallbler.core.Util;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;

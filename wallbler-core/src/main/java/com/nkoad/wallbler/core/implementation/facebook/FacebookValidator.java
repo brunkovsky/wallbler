@@ -2,7 +2,7 @@ package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.core.HTTPConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
-import com.nkoad.wallbler.core.implementation.Validator;
+import com.nkoad.wallbler.core.Validator;
 
 import java.net.URLEncoder;
 import java.util.Map;

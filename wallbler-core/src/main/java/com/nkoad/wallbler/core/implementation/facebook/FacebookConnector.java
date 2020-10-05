@@ -5,7 +5,7 @@ import com.nkoad.wallbler.core.HTTPConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.WallblerItemPack;
-import com.nkoad.wallbler.core.implementation.Connector;
+import com.nkoad.wallbler.core.Connector;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,4 +1,4 @@
-package com.nkoad.wallbler.core.implementation;
+package com.nkoad.wallbler.core;
 
 import java.util.Map;
 

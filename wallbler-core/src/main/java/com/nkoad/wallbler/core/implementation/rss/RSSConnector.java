@@ -3,7 +3,7 @@ package com.nkoad.wallbler.core.implementation.rss;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.WallblerItemPack;
-import com.nkoad.wallbler.core.implementation.Connector;
+import com.nkoad.wallbler.core.Connector;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;

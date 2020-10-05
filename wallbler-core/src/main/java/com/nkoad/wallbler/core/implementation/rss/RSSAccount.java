@@ -1,8 +1,8 @@
 package com.nkoad.wallbler.core.implementation.rss;
 
 import com.nkoad.wallbler.core.definition.rss.RSSAccountConfig;
-import com.nkoad.wallbler.core.implementation.Account;
-import com.nkoad.wallbler.core.implementation.Validator;
+import com.nkoad.wallbler.core.Account;
+import com.nkoad.wallbler.core.Validator;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

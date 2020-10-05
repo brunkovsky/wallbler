@@ -33,7 +33,6 @@
             <artifactId>json</artifactId>
             <version>20160810</version>
         </dependency>
-
         <!-- RSS -->
         <dependency>
             <groupId>com.rometools</groupId>
@@ -61,10 +60,8 @@
                             org.json,
                             <!-- rss -->
                             com.rometools.*,org.jdom2.*,org.jaxen,org.jaxen.saxpath,org.jaxen.util,
-                            <!-- cache -->
-                            com.nkoad.wallbler.cache.definition,
-                            com.nkoad.wallbler.core,
-                            com.nkoad.wallbler.core.implementation
+                            <!-- needs for other modules -->
+                            com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition
                         </Export-Package>
                     </instructions>
                 </configuration>

@@ -2,7 +2,7 @@ package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.definition.facebook.FacebookFeedConfig;
-import com.nkoad.wallbler.core.implementation.Feed;
+import com.nkoad.wallbler.core.Feed;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 

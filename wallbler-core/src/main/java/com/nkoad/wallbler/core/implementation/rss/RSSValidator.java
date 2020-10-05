@@ -1,6 +1,6 @@
 package com.nkoad.wallbler.core.implementation.rss;
 
-import com.nkoad.wallbler.core.implementation.Validator;
+import com.nkoad.wallbler.core.Validator;
 
 import java.util.Map;
 

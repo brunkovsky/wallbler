@@ -1,7 +1,7 @@
 package com.nkoad.wallbler.core.implementation.instagram;
 
 import com.nkoad.wallbler.core.definition.instagram.InstagramAccountConfig;
-import com.nkoad.wallbler.core.implementation.RefreshableAccount;
+import com.nkoad.wallbler.core.RefreshableAccount;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 
