@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class HTTPConnector {
+public class HTTPConnectorHelper {
 
     public HTTPRequest httpGetRequest(String url) throws IOException {
         return httpRequest(url, "GET");

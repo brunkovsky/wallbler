@@ -1,7 +1,7 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.cache.definition.Cache;
-import com.nkoad.wallbler.core.HTTPConnector;
+import com.nkoad.wallbler.core.HTTPConnectorHelper;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.WallblerItemPack;
@@ -44,7 +44,7 @@ public class FacebookConnector extends Connector {
             String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
             FeedType feedType = feedMap.get(typeOfFeed);
             String url = feedType.buildFullUrl();
-            HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
+            HTTPRequest httpRequest = new HTTPConnectorHelper().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 List<WallblerItem> wallblerItems = new ArrayList<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
@@ -119,7 +119,7 @@ public class FacebookConnector extends Connector {
         try {
             String accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
             String url = USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + "?fields=name,link&access_token=" + accessToken;
-            HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
+            HTTPRequest httpRequest = new HTTPConnectorHelper().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 accountName = new JSONObject(httpRequest.getBody()).getString("name");
             }
@@ -162,19 +162,19 @@ public class FacebookConnector extends Connector {
     private void setLikesCommentsSharesProperties(FacebookWallblerItem item, JSONObject json) {
         // todo: need to investigate if we have more than 15 LikesCommentsShares!!!
         try {
-            item.setLikedCount((long) json.getJSONObject("likes").getJSONArray("data").length());
+            item.setLikedCount(json.getJSONObject("likes").getJSONArray("data").length());
         } catch (JSONException e) {
-            item.setLikedCount(0L);
+            item.setLikedCount(0);
         }
         try {
-            item.setCommentsCount((long) json.getJSONObject("comments").getJSONArray("data").length());
+            item.setCommentsCount(json.getJSONObject("comments").getJSONArray("data").length());
         } catch (JSONException e) {
-            item.setCommentsCount(0L);
+            item.setCommentsCount(0);
         }
         try {
-            item.setSharedCount((long) json.getJSONObject("sharedposts").getJSONArray("data").length());
+            item.setSharedCount(json.getJSONObject("sharedposts").getJSONArray("data").length());
         } catch (JSONException e) {
-            item.setSharedCount(0L);
+            item.setSharedCount(0);
         }
     }
 

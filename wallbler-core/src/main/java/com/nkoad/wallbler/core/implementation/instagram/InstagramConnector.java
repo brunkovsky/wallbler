@@ -1,7 +1,7 @@
 package com.nkoad.wallbler.core.implementation.instagram;
 
 import com.nkoad.wallbler.cache.definition.Cache;
-import com.nkoad.wallbler.core.HTTPConnector;
+import com.nkoad.wallbler.core.HTTPConnectorHelper;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.Connector;
 
@@ -19,7 +19,7 @@ public class InstagramConnector extends Connector {
         try {
             String url = (String) feedProperties.get("config.url");
             int count = (int) feedProperties.get("config.count");
-            HTTPRequest httpRequest = new HTTPConnector().httpGetRequest(url);
+            HTTPRequest httpRequest = new HTTPConnectorHelper().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 LOGGER.info("Instagram 200");
             }

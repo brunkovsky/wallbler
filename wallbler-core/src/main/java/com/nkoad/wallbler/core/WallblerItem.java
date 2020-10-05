@@ -11,10 +11,10 @@ public abstract class WallblerItem {
     private Date date;
     private String url;             // link to the account
     private String linkToSMPage;    // link to the post
-    private String thumbnailUrl;    // link to the original image
-    private Long likedCount;
-    private Long sharedCount;
-    private Long commentsCount;
+//    private String thumbnailUrl;  // link to the original image
+//    private Long likedCount;
+//    private Long sharedCount;
+//    private Long commentsCount;
     private Boolean accepted;
 
     public WallblerItem(String socialMediaType) {
@@ -52,7 +52,7 @@ public abstract class WallblerItem {
     public void setDate(Date date) {
         this.date = date;
     }
-
+   /*
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
@@ -60,7 +60,7 @@ public abstract class WallblerItem {
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
     }
-
+    */
     public String getLinkToSMPage() {
         return linkToSMPage;
     }
@@ -72,7 +72,7 @@ public abstract class WallblerItem {
     public String getSocialMediaType() {
         return socialMediaType;
     }
-
+    /*
     public Long getLikedCount() {
         return likedCount;
     }
@@ -96,7 +96,7 @@ public abstract class WallblerItem {
     public void setCommentsCount(Long commentsCount) {
         this.commentsCount = commentsCount;
     }
-
+    */
     public Boolean isAccepted() {
         return accepted;
     }
@@ -123,16 +123,12 @@ public abstract class WallblerItem {
                 Objects.equals(description, that.description) &&
                 Objects.equals(date, that.date) &&
                 Objects.equals(url, that.url) &&
-                Objects.equals(linkToSMPage, that.linkToSMPage) &&
-                Objects.equals(thumbnailUrl, that.thumbnailUrl) &&
-                Objects.equals(likedCount, that.likedCount) &&
-                Objects.equals(sharedCount, that.sharedCount) &&
-                Objects.equals(commentsCount, that.commentsCount);
+                Objects.equals(linkToSMPage, that.linkToSMPage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(socialMediaType, title, description, date, url, linkToSMPage, thumbnailUrl, likedCount, sharedCount, commentsCount);
+        return Objects.hash(socialMediaType, title, description, date, url, linkToSMPage);
     }
 
     @Override
@@ -145,10 +141,6 @@ public abstract class WallblerItem {
                 ", date=" + date +
                 ", url='" + url + '\'' +
                 ", linkToSMPage='" + linkToSMPage + '\'' +
-                ", thumbnailUrl='" + thumbnailUrl + '\'' +
-                ", likedCount=" + likedCount +
-                ", sharedCount=" + sharedCount +
-                ", commentsCount=" + commentsCount +
                 ", accepted=" + accepted +
                 '}';
     }
