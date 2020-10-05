@@ -23,10 +23,4 @@ public class InstagramValidator extends RefreshableValidator {
         return true;
     }
 
-    public boolean isAccept() {
-        boolean accountEnabled = (boolean) properties.get("config.enabled");
-        boolean accountValid = (boolean) properties.get("config.valid");
-        return accountEnabled && accountValid;
-    }
-
 }
