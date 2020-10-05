@@ -1,7 +1,6 @@
 package com.nkoad.wallbler.core.implementation.rss;
 
 import com.nkoad.wallbler.cache.definition.Cache;
-import com.nkoad.wallbler.core.OSGIConfig;
 import com.nkoad.wallbler.core.definition.rss.RSSFeedConfig;
 import com.nkoad.wallbler.core.implementation.Feed;
 import org.osgi.service.component.annotations.*;
@@ -13,13 +12,11 @@ import java.util.Map;
 @Designate(ocd = RSSFeedConfig.class, factory = true)
 public class RSSFeed extends Feed {
     @Reference
-    private OSGIConfig osgiConfig;
-    @Reference
     private Cache cache;
 
     @Override
     public void assignConnector(Map<String, Object> properties) {
-        connector = new RSSConnector(properties, osgiConfig.extractAccountProperties(properties), cache);
+        connector = new RSSConnector(properties, extractAccountProperties(properties), cache);
     }
 
     @Activate

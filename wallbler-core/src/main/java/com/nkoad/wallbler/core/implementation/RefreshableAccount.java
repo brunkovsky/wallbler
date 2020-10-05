@@ -15,7 +15,7 @@ public abstract class RefreshableAccount extends Account<RefreshableValidator> {
         Integer refreshDelay = (Integer) properties.get("config.refresh");
         if (validator.isAccept()) {
             scheduledFuture = executorService.schedule(() -> {
-                osgiConfig.setAccessToken(properties, refreshAccessToken());
+                setAccessToken(properties, refreshAccessToken());
             }, refreshDelay, TimeUnit.SECONDS);
         }
     }

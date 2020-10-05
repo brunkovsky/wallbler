@@ -1,7 +1,6 @@
 package com.nkoad.wallbler.core.implementation.instagram;
 
 import com.nkoad.wallbler.cache.definition.Cache;
-import com.nkoad.wallbler.core.OSGIConfig;
 import com.nkoad.wallbler.core.definition.instagram.InstagramFeedConfig;
 import com.nkoad.wallbler.core.implementation.Feed;
 import org.osgi.service.component.annotations.*;
@@ -13,13 +12,11 @@ import java.util.Map;
 @Designate(ocd = InstagramFeedConfig.class, factory = true)
 public class InstagramFeed extends Feed {
     @Reference
-    private OSGIConfig osgiConfig;
-    @Reference
     private Cache cache;
 
     @Override
     public void assignConnector(Map<String, Object> properties) {
-        connector = new InstagramConnector(properties, osgiConfig.extractAccountProperties(properties), cache);
+        connector = new InstagramConnector(properties, extractAccountProperties(properties), cache);
     }
 
     @Activate

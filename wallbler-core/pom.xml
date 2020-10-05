@@ -54,6 +54,9 @@
                         <Bundle-SymbolicName>${pom.groupId}.${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${pom.name}</Bundle-Name>
                         <Bundle-Version>${pom.version}</Bundle-Version>
+                        <Bundle-Activator>
+                            com.nkoad.wallbler.activator.Activator
+                        </Bundle-Activator>
                         <Export-Package>
                             org.json,
                             <!-- rss -->
