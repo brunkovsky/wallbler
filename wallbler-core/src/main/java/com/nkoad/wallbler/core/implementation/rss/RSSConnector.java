@@ -10,12 +10,13 @@ import com.rometools.rome.io.XmlReader;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 
 public class RSSConnector extends Connector {
 
-    public RSSConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
+    public RSSConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
     }
 

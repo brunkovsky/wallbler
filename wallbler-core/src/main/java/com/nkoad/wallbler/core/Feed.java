@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,7 +44,7 @@ public abstract class Feed {
         connector.removeFromCache((String) properties.get("service.pid"));
     }
 
-    protected Map<String, Object> extractAccountProperties(Map<String, Object> feedProperties) {
+    protected Dictionary<String, Object> extractAccountProperties(Map<String, Object> feedProperties) {
         String accountName = (String) feedProperties.get("config.accountName");
         String serviceFactoryPid = (String) feedProperties.get("service.factoryPid");
         String accountIdentifier = "(&(config.name=" + accountName + ")(service.factoryPid=" + serviceFactoryPid.replace("Feed", "Account") + "))";
@@ -50,18 +52,18 @@ public abstract class Feed {
             Configuration[] configurations = Activator.configAdmin.listConfigurations(accountIdentifier);
             if (configurations == null || configurations.length == 0) {
                 LOGGER.warn("no account found");
-                return new HashMap<>();
+                return new Hashtable<>();
             }
             if (configurations.length > 1) {
                 LOGGER.warn("non unique account name found");
-                return new HashMap<>();
+                return new Hashtable<>();
             }
-            return Util.dictionaryToMap(configurations[0].getProperties());
+            return configurations[0].getProperties();
         } catch (IOException | InvalidSyntaxException e) {
             e.printStackTrace();
         }
         LOGGER.error("something unexpected happened");
-        return new HashMap<>();
+        return new Hashtable<>();
     }
 
     private void execute(Map<String, Object> properties) {

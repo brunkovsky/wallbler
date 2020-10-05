@@ -28,7 +28,7 @@ public class FacebookConnector extends Connector {
     private static String accountName;
     private static Map<String, FeedType> feedMap = new HashMap<>();
 
-    public FacebookConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
+    public FacebookConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
         fetchAccountName();
         fillMapForPosts();

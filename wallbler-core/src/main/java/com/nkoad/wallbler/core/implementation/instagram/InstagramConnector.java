@@ -5,11 +5,12 @@ import com.nkoad.wallbler.core.HTTPConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.Connector;
 
+import java.util.Dictionary;
 import java.util.Map;
 
 public class InstagramConnector extends Connector {
 
-    public InstagramConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
+    public InstagramConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
     }
 
