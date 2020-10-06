@@ -30,11 +30,11 @@ public class OsgiConfigurationService {
     private static final String FEED_FILTER = "(service.factoryPid=com.nkoad.wallbler.core.implementation.*.*Feed)";
 
     public List<Map<String, Object>> readAccounts() {
-        return filterRead(ACCOUNT_FILTER);
+        return filterRead(ACCOUNT_FILTER).collect(Collectors.toList());
     }
 
     public List<Map<String, Object>> readFeeds() {
-        return filterRead(FEED_FILTER);
+        return filterRead(FEED_FILTER).collect(Collectors.toList());
     }
 
     public List<String> getWallblerAccountFactories() {
@@ -45,20 +45,14 @@ public class OsgiConfigurationService {
         return getWallblerFactories().filter(a -> a.endsWith("Feed")).collect(Collectors.toList());
     }
 
-    private List<Map<String, Object>> filterRead(String filter) {
-        List<Map<String, Object>> result = new ArrayList<>();
+    private Stream<Map<String, Object>> filterRead(String filter) {
         try {
-            Configuration[] configurations = configAdmin.listConfigurations(filter);
-            if (configurations != null) {
-                for (Configuration configuration : configurations) {
-                    Map<String, Object> properties = dictionaryToMap(configuration.getProperties());
-                    result.add(properties);
-                }
-            }
-        } catch (IOException | InvalidSyntaxException e) {
+            return Arrays.stream(Objects.requireNonNull(configAdmin.listConfigurations(filter)))
+                    .map(a -> dictionaryToMap((a.getProperties())));
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
+        return Stream.empty();
     }
 
     private Stream<String> getWallblerFactories() {
