@@ -62,27 +62,11 @@ public class OsgiConfigurationService {
     }
 
     private Stream<String> getWallblerFactories() {
-//        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-//        MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(bundle);
-//        return Arrays.stream(metaTypeInformation.getFactoryPids());
-
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-        BundleContext bundleContext = bundle.getBundleContext();
-        Bundle[] bundles = bundleContext.getBundles();
-        List<Bundle> result = new ArrayList<>();
-        for (Bundle bundleItem : bundles) {
-            if (bundleItem.getSymbolicName().startsWith("com.nkoad.wallbler")) {
-                result.add(bundleItem);
-            }
-        }
-        System.out.println(result);
-        List<String> result2 = new ArrayList<>();
-        for (Bundle s : result) {
-            MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(s);
-            String[] factoryPids = metaTypeInformation.getFactoryPids();
-            result2.addAll(Arrays.asList(factoryPids)) ;
-        }
-        return result2.stream();
+        return Arrays.stream(bundle.getBundleContext().getBundles())
+                .filter(a -> a.getSymbolicName().startsWith("com.nkoad.wallbler"))
+                .map(a -> metaTypeService.getMetaTypeInformation(a).getFactoryPids())
+                .flatMap(Arrays::stream);
     }
 
     private <K, V> Map<K, V> dictionaryToMap(Dictionary<K, V> properties) {
