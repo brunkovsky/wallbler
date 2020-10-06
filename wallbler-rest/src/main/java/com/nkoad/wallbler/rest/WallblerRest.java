@@ -7,6 +7,7 @@ import org.osgi.service.component.annotations.Reference;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.Response.status;
@@ -19,8 +20,8 @@ public class WallblerRest {
     @Path("/")
     @Produces("application/json")
     @GET
-    public Response getData() {
-        return status(200).entity(cache.getAll()).build();
+    public Response getData(@QueryParam("socials") String socials) {
+        return status(200).entity(cache.getData(socials)).build();
     }
 
 }

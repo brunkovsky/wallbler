@@ -19,7 +19,7 @@ public @interface RSSFeedConfig {
     @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the account")
     boolean config_enabled() default true;
 
-    @AttributeDefinition(name = "Count", description = "Quantity", type = AttributeType.INTEGER)
+    @AttributeDefinition(name = "Count", description = "Quantity. 10 is maximum", type = AttributeType.INTEGER)
     int config_count() default 1;
 
     @AttributeDefinition(name = "Delay", description = "Delay in seconds", type = AttributeType.INTEGER)

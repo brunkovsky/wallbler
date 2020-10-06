@@ -7,6 +7,7 @@ import org.osgi.service.component.annotations.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component(name = "SimpleCache", service = Cache.class)
 public class SimpleCache implements Cache {
@@ -18,12 +19,9 @@ public class SimpleCache implements Cache {
     }
 
     @Override
-    public List<WallblerItem> getAll() {
-        List<WallblerItem> collect = cache
-                .values()
-                .stream()
-                .map(WallblerItemPack::getData)
-                .flatMap(Collection::stream)
+    public List<WallblerItem> getData(String socials) {
+        List<WallblerItem> collect = getWallblerItems()
+                .filter(a -> socials == null || socials.contains(a.getSocialMediaType()))
                 .collect(Collectors.toList());
         return collect;
     }
@@ -36,5 +34,13 @@ public class SimpleCache implements Cache {
     @Override
     public void removeFromCache(String feedPid) {
         cache.remove(feedPid);
+    }
+
+    private Stream<WallblerItem> getWallblerItems() {
+        return cache
+                .values()
+                .stream()
+                .map(WallblerItemPack::getData)
+                .flatMap(Collection::stream);
     }
 }

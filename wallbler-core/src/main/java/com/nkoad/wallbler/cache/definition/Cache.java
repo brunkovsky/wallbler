@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface Cache {
     void add(String feedPid, WallblerItemPack data);
-    List<WallblerItem> getAll();
+    List<WallblerItem> getData(String socials);
     WallblerItemPack get(String feedPid);
     void removeFromCache(String feedPid);
 }

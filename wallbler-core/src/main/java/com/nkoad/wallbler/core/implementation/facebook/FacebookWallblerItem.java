@@ -9,7 +9,6 @@ public class FacebookWallblerItem extends WallblerItem {
     private Integer sharedCount;
     private Integer commentsCount;
 
-
     public FacebookWallblerItem() {
         super("facebook");
     }
