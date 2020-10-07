@@ -3,6 +3,7 @@ package com.nkoad.wallbler.core.definition.rss;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 
 @ObjectClassDefinition(name = "Wallbler RSS Feed")
 public @interface RSSFeedConfig {
@@ -24,5 +25,8 @@ public @interface RSSFeedConfig {
 
     @AttributeDefinition(name = "Delay", description = "Delay in seconds", type = AttributeType.INTEGER)
     int config_delay() default 100;
+
+    @AttributeDefinition(name = "Accepted by default")
+    boolean config_acceptedByDefault() default true;
 
 }

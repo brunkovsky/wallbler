@@ -52,6 +52,7 @@ public class FacebookConnector extends Connector {
                 for (int i = 0; i < minSize; i++) {
                     JSONObject json = data.getJSONObject(i);
                     FacebookWallblerItem item = feedType.retrieveData(json);
+                    item.setAccepted((boolean) feedProperties.get("config.acceptedByDefault"));
                     wallblerItems.add(item);
                 }
                 cache.add((String) feedProperties.get("service.pid"), new WallblerItemPack(wallblerItems));

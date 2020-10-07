@@ -20,8 +20,9 @@ public class WallblerRest {
     @Path("/")
     @Produces("application/json")
     @GET
-    public Response getData(@QueryParam("socials") String socials) {
-        return status(200).entity(cache.getData(socials)).build();
+    public Response getData(@QueryParam("socials") String socials,
+                            @QueryParam("accepted") Boolean accepted) {
+        return status(200).entity(cache.getData(socials, accepted)).build();
     }
 
 }

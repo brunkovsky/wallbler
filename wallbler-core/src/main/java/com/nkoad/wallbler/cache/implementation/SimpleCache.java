@@ -19,11 +19,12 @@ public class SimpleCache implements Cache {
     }
 
     @Override
-    public List<WallblerItem> getData(String socials) {
-        List<WallblerItem> collect = getWallblerItems()
+    public List<WallblerItem> getData(String socials, Boolean accepted) {
+        Stream<WallblerItem> result = getWallblerItems()
                 .filter(a -> socials == null || socials.contains(a.getSocialMediaType()))
-                .collect(Collectors.toList());
-        return collect;
+                .filter(a -> accepted == null || a.isAccepted() == accepted);
+
+        return result.collect(Collectors.toList());
     }
 
     @Override
