@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class SimpleCache implements Cache {
     private Map<String, WallblerItemPack> cache = new HashMap<>();
 
-    /*@Override
+/*@Override
     public void add(String feedPid, WallblerItemPack data) {
         WallblerItemPack wallblerItemPack = cache.get(feedPid);
         if (wallblerItemPack == null) {
@@ -33,7 +33,7 @@ public class SimpleCache implements Cache {
         }
     }*/
 
-    @Override
+/*    @Override
     public void add(String feedPid, WallblerItemPack data) {
         WallblerItemPack wallblerItemPack = cache.get(feedPid);
         if (wallblerItemPack == null) {
@@ -41,11 +41,22 @@ public class SimpleCache implements Cache {
         } else {
             List<WallblerItem> result = new ArrayList<>();
             getWallblerItems().forEach(a -> {
-                List<WallblerItem> collect = getWallblerItems().filter(b -> b.getSocialId() != a.getSocialId()).collect(Collectors.toList());
-                result.addAll(collect);
+                result.addAll(getWallblerItems().filter(b -> b.getSocialId() != a.getSocialId()).collect(Collectors.toList()));
             });
             cache.remove(feedPid);
             cache.put(feedPid, new WallblerItemPack(result, data.getLastRefreshDate()));
+        }
+    }*/
+
+    @Override
+    public void add(String feedPid, WallblerItemPack data) {
+        WallblerItemPack wallblerItemPack = cache.get(feedPid);
+        if (wallblerItemPack == null) {
+            cache.put(feedPid, data);
+        } else {
+            List<WallblerItem> collect = getWallblerItems().collect(Collectors.toList());
+            cache.remove(feedPid);
+            cache.put(feedPid, new WallblerItemPack(collect, data.getLastRefreshDate()));
         }
     }
 
