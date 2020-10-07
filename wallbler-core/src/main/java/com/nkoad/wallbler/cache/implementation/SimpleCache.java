@@ -13,14 +13,16 @@ import java.util.stream.Stream;
 public class SimpleCache implements Cache {
     private Map<String, WallblerItemPack> cache = new HashMap<>();
 
-/*@Override
+    /*
+    @Override
     public void add(String feedPid, WallblerItemPack data) {
         WallblerItemPack wallblerItemPack = cache.get(feedPid);
         if (wallblerItemPack == null) {
             cache.put(feedPid, data);
+            System.out.println("null -> " + feedPid + " " + data);
         } else {
             List<WallblerItem> cacheCurrent = new ArrayList<>(wallblerItemPack.getData());
-            List<WallblerItem> result = new ArrayList<>();
+            List<WallblerItem> result = new ArrayList<>(cacheCurrent);
             for (WallblerItem datum : data.getData()) {
                 for (WallblerItem wallblerItem : cacheCurrent) {
                     if (datum.getSocialId() != wallblerItem.getSocialId()) {
@@ -29,11 +31,13 @@ public class SimpleCache implements Cache {
                 }
             }
             cache.remove(feedPid);
+            System.out.println("removed -> " + feedPid + " " + result);
             cache.put(feedPid, new WallblerItemPack(result, data.getLastRefreshDate()));
         }
-    }*/
+    }
+    */
 
-/*    @Override
+    /*    @Override
     public void add(String feedPid, WallblerItemPack data) {
         WallblerItemPack wallblerItemPack = cache.get(feedPid);
         if (wallblerItemPack == null) {
@@ -48,15 +52,33 @@ public class SimpleCache implements Cache {
         }
     }*/
 
+    /*@Override
+    public void add(String feedPid, WallblerItemPack data) {
+        WallblerItemPack wallblerItemPack = cache.get(feedPid);
+        if (wallblerItemPack == null) {
+            cache.put(feedPid, data);
+        } else {
+            Stream<WallblerItem> wallblerItems = getWallblerItems();
+            cache.remove(feedPid);
+            cache.put(feedPid, new WallblerItemPack(wallblerItems.collect(Collectors.toList())));
+        }
+    }*/
+
     @Override
     public void add(String feedPid, WallblerItemPack data) {
         WallblerItemPack wallblerItemPack = cache.get(feedPid);
         if (wallblerItemPack == null) {
             cache.put(feedPid, data);
         } else {
-            List<WallblerItem> collect = getWallblerItems().collect(Collectors.toList());
+            List<Integer> currentIds = cache.get(feedPid).getData().stream().map(a -> a.getSocialId()).collect(Collectors.toList());
+            List<WallblerItem> inputData = cache.get(feedPid).getData();
             cache.remove(feedPid);
-            cache.put(feedPid, new WallblerItemPack(collect, data.getLastRefreshDate()));
+            for (WallblerItem inputDatum : inputData) {
+                if (!currentIds.contains(inputDatum.getSocialId())) {
+                    inputData.add(inputDatum);
+                }
+            }
+            cache.put(feedPid, new WallblerItemPack(inputData));
         }
     }
 
@@ -94,5 +116,11 @@ public class SimpleCache implements Cache {
                 .stream()
                 .map(WallblerItemPack::getData)
                 .flatMap(Collection::stream);
+    }
+
+    private Stream<WallblerItem> getWallblerItems(String feedPid) {
+        return cache.get(feedPid)
+                .getData()
+                .stream();
     }
 }
