@@ -18,16 +18,16 @@ public class FeedWallblerRest {
     private OsgiConfigurationService osgiService;
 
     // Get feed factories
-    @Path("/feed/factory_pids")
+    @Path("/feed/factories")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public List<String> getFeedFactoryPids() {
+    public List<String> getFactories() {
         return osgiService.getWallblerFeedFactories();
     }
 
     // Get feed list
     @Path("/feed")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     public List<Map<String, Object>> getFeeds() {
         return osgiService.readFeeds();

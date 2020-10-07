@@ -26,8 +26,9 @@ public class OsgiConfigurationService {
     @Reference
     private MetaTypeService metaTypeService;
     private static final Logger LOGGER = LoggerFactory.getLogger(OsgiConfigurationService.class);
-    private static final String ACCOUNT_FILTER = "(service.factoryPid=com.nkoad.wallbler.core.implementation.*.*Account)";
-    private static final String FEED_FILTER = "(service.factoryPid=com.nkoad.wallbler.core.implementation.*.*Feed)";
+    private static final String WALLBLER_PREFIX = "com.nkoad.wallbler";
+    private static final String ACCOUNT_FILTER = "(service.factoryPid=" + WALLBLER_PREFIX + ".core.implementation.*.*Account)";
+    private static final String FEED_FILTER = "(service.factoryPid=" + WALLBLER_PREFIX + ".core.implementation.*.*Feed)";
 
     public List<Map<String, Object>> readAccounts() {
         return filterRead(ACCOUNT_FILTER).collect(Collectors.toList());
@@ -58,7 +59,7 @@ public class OsgiConfigurationService {
     private Stream<String> getWallblerFactories() {
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
         return Arrays.stream(bundle.getBundleContext().getBundles())
-                .filter(a -> a.getSymbolicName().startsWith("com.nkoad.wallbler"))
+                .filter(a -> a.getSymbolicName().startsWith(WALLBLER_PREFIX))
                 .map(a -> metaTypeService.getMetaTypeInformation(a).getFactoryPids())
                 .flatMap(Arrays::stream);
     }

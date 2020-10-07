@@ -17,7 +17,7 @@ public class AccountWallblerRest {
     @Reference
     private OsgiConfigurationService osgiService;
 
-    // Get account factories as map
+    // Get account factories
     @Path("/account/factories")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
@@ -27,7 +27,7 @@ public class AccountWallblerRest {
 
     // Get account list
     @Path("/account")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     public List<Map<String, Object>> getAccounts() {
         return osgiService.readAccounts();
