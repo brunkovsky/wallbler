@@ -70,8 +70,8 @@ public class SimpleCache implements Cache {
         if (wallblerItemPack == null) {
             cache.put(feedPid, data);
         } else {
-            List<Integer> currentIds = cache.get(feedPid).getData().stream().map(a -> a.getSocialId()).collect(Collectors.toList());
-            List<WallblerItem> inputData = cache.get(feedPid).getData();
+            List<WallblerItem> inputData = wallblerItemPack.getData();
+            List<Integer> currentIds = inputData.stream().map(WallblerItem::getSocialId).collect(Collectors.toList());
             cache.remove(feedPid);
             for (WallblerItem inputDatum : inputData) {
                 if (!currentIds.contains(inputDatum.getSocialId())) {
@@ -118,9 +118,4 @@ public class SimpleCache implements Cache {
                 .flatMap(Collection::stream);
     }
 
-    private Stream<WallblerItem> getWallblerItems(String feedPid) {
-        return cache.get(feedPid)
-                .getData()
-                .stream();
-    }
 }
