@@ -23,6 +23,11 @@ public abstract class Connector {
         cache.removeFromCache(feedPid);
     }
 
+    public void getDataLog() {
+        getData();
+        LOGGER.info("got new data. feed name: " + feedProperties.get("config.name"));
+    }
+
     abstract public void getData();
 
     public boolean isAccept() {

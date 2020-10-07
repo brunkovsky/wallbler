@@ -4,10 +4,8 @@ import com.nkoad.wallbler.cache.definition.Cache;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.Response.status;
@@ -17,12 +15,21 @@ import static javax.ws.rs.core.Response.status;
 public class WallblerRest {
     @Reference
     private Cache cache;
+
     @Path("/")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Response getData(@QueryParam("socials") String socials,
                             @QueryParam("accepted") Boolean accepted) {
         return status(200).entity(cache.getData(socials, accepted)).build();
+    }
+
+    @Path("/{social_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @PATCH
+    public Response setAccept(@PathParam("social_id") Integer socialId, Boolean accept) {
+        cache.setAccept(socialId, accept);
+        return status(200).build();
     }
 
 }

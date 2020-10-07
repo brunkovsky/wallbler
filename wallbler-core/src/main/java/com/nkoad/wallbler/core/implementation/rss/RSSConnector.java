@@ -41,6 +41,7 @@ public class RSSConnector extends Connector {
             cache.add((String) feedProperties.get("service.pid"), new WallblerItemPack(wallblerItems));
         } catch (Exception e) {
             LOGGER.error("can't retrieve rss data, feed url: " + url);
+            e.printStackTrace();
         }
     }
 

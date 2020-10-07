@@ -13,9 +13,44 @@ import java.util.stream.Stream;
 public class SimpleCache implements Cache {
     private Map<String, WallblerItemPack> cache = new HashMap<>();
 
+    /*@Override
+    public void add(String feedPid, WallblerItemPack data) {
+        WallblerItemPack wallblerItemPack = cache.get(feedPid);
+        if (wallblerItemPack == null) {
+            cache.put(feedPid, data);
+        } else {
+            List<WallblerItem> cacheCurrent = new ArrayList<>(wallblerItemPack.getData());
+            List<WallblerItem> result = new ArrayList<>();
+            for (WallblerItem datum : data.getData()) {
+                for (WallblerItem wallblerItem : cacheCurrent) {
+                    if (datum.getSocialId() != wallblerItem.getSocialId()) {
+                        result.add(wallblerItem);
+                    }
+                }
+            }
+            cache.remove(feedPid);
+            cache.put(feedPid, new WallblerItemPack(result, data.getLastRefreshDate()));
+        }
+    }*/
+
     @Override
     public void add(String feedPid, WallblerItemPack data) {
-        cache.put(feedPid, data);
+        WallblerItemPack wallblerItemPack = cache.get(feedPid);
+        if (wallblerItemPack == null) {
+            cache.put(feedPid, data);
+        } else {
+            List<WallblerItem> cacheCurrent = new ArrayList<>(wallblerItemPack.getData());
+            List<WallblerItem> result = new ArrayList<>();
+            for (WallblerItem datum : data.getData()) {
+                for (WallblerItem wallblerItem : cacheCurrent) {
+                    if (datum.getSocialId() != wallblerItem.getSocialId()) {
+                        result.add(wallblerItem);
+                    }
+                }
+            }
+            cache.remove(feedPid);
+            cache.put(feedPid, new WallblerItemPack(result, data.getLastRefreshDate()));
+        }
     }
 
     @Override
@@ -30,6 +65,15 @@ public class SimpleCache implements Cache {
     @Override
     public WallblerItemPack get(String feedPid) {
         return cache.get(feedPid);
+    }
+
+    @Override
+    public void setAccept(Integer socialId, boolean accept) {
+        getWallblerItems()
+                .filter(a -> a.getSocialId() == socialId)
+                .forEach(a -> {
+                    a.setAccepted(accept);
+                });
     }
 
     @Override

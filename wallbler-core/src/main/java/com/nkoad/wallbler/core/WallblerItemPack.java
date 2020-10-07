@@ -13,6 +13,11 @@ public class WallblerItemPack {
         this.data = data;
     }
 
+    public WallblerItemPack(List<WallblerItem> data, Date date) {
+        this.lastRefreshDate = date;
+        this.data = data;
+    }
+
     public void addData(WallblerItem wallblerItem) {
         data.add(wallblerItem);
     }

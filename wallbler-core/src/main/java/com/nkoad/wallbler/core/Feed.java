@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -70,7 +69,7 @@ public abstract class Feed {
         Integer delay = (Integer) properties.get("config.delay");
         if (connector.isAccept()) {
             scheduledFuture = executorService
-                    .scheduleAtFixedRate(connector::getData, 1, delay, TimeUnit.SECONDS);
+                    .scheduleAtFixedRate(connector::getDataLog, 1, delay, TimeUnit.SECONDS);
         }
     }
 
