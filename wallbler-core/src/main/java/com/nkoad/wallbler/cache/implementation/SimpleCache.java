@@ -39,15 +39,11 @@ public class SimpleCache implements Cache {
         if (wallblerItemPack == null) {
             cache.put(feedPid, data);
         } else {
-            List<WallblerItem> cacheCurrent = new ArrayList<>(wallblerItemPack.getData());
             List<WallblerItem> result = new ArrayList<>();
-            for (WallblerItem datum : data.getData()) {
-                for (WallblerItem wallblerItem : cacheCurrent) {
-                    if (datum.getSocialId() != wallblerItem.getSocialId()) {
-                        result.add(wallblerItem);
-                    }
-                }
-            }
+            getWallblerItems().forEach(a -> {
+                List<WallblerItem> collect = getWallblerItems().filter(b -> b.getSocialId() != a.getSocialId()).collect(Collectors.toList());
+                result.addAll(collect);
+            });
             cache.remove(feedPid);
             cache.put(feedPid, new WallblerItemPack(result, data.getLastRefreshDate()));
         }
