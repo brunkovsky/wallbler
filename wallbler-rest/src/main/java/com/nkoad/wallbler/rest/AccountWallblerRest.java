@@ -4,12 +4,14 @@ import com.nkoad.wallbler.service.OsgiConfigurationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static javax.ws.rs.core.Response.status;
 
 @Path("/wallbler")
 @Component(name = "Account Wallbler Rest Service", service = AccountWallblerRest.class, property = {"osgi.jaxrs.resource=true"})
@@ -31,6 +33,14 @@ public class AccountWallblerRest {
     @GET
     public List<Map<String, Object>> getAccounts() {
         return osgiService.readAccounts();
+    }
+
+    @Path("/account")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @POST
+    public Response createAccount(HashMap<String, Object> hashMap) {
+        return status(200).entity(osgiService.create(hashMap)).build();
     }
 
 }

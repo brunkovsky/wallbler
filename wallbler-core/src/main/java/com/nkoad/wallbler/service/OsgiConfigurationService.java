@@ -1,14 +1,11 @@
 package com.nkoad.wallbler.service;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +43,20 @@ public class OsgiConfigurationService {
         return getWallblerFactories().filter(a -> a.endsWith("Feed")).collect(Collectors.toList());
     }
 
+    public Map<String, Object> create(HashMap<String, Object> hashMap) {
+        try {
+            LOGGER.info("creating the account. name: " + hashMap.get("config.name"));
+            String factoryPid = (String) hashMap.get("service.factoryPid");
+            Configuration factoryConfiguration = configAdmin.createFactoryConfiguration(factoryPid);
+            factoryConfiguration.update(mapToDictionary(hashMap));
+            return dictionaryToMap(factoryConfiguration.getProperties());
+        } catch (IOException e) {
+            LOGGER.error("can not create the account: " + hashMap);
+            e.printStackTrace();
+        }
+        return new HashMap<>();
+    }
+
     private Stream<Map<String, Object>> filterRead(String filter) {
         try {
             return Arrays.stream(Objects.requireNonNull(configAdmin.listConfigurations(filter)))
@@ -70,6 +81,17 @@ public class OsgiConfigurationService {
         }
         List<K> keys = Collections.list(properties.keys());
         return keys.stream().collect(Collectors.toMap(Function.identity(), properties::get));
+    }
+
+    public static <K, V> Dictionary<K, V> mapToDictionary(Map<K, V> map) {
+        Dictionary<K, V> result = new Hashtable<>();
+        if (map == null || map.isEmpty()) {
+            return result;
+        }
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
     }
 
 }
