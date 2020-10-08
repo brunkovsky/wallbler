@@ -10,5 +10,6 @@ public interface Cache {
     List<WallblerItem> getData(String socials, Boolean accepted);
     WallblerItemPack get(String feedPid);
     void setAccept(Integer socialId, boolean accept);
+    void setAccept(WallblerItem wallblerItem);
     void removeFromCache(String feedPid);
 }

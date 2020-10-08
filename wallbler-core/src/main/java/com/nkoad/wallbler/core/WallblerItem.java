@@ -3,7 +3,7 @@ package com.nkoad.wallbler.core;
 import java.util.Date;
 import java.util.Objects;
 
-public abstract class WallblerItem {
+public class WallblerItem {
     private int socialId;
     private String socialMediaType;
     private String title;
@@ -12,6 +12,9 @@ public abstract class WallblerItem {
     private String url;             // link to the account
     private String linkToSMPage;    // link to the post
     private Boolean accepted;
+
+    public WallblerItem() {
+    }
 
     public WallblerItem(String socialMediaType) {
         this.socialMediaType = socialMediaType;
@@ -95,25 +98,16 @@ public abstract class WallblerItem {
         return Objects.hash(socialMediaType, title, description, date, url, linkToSMPage);
     }
 
-//    @Override
-//    public String toString() {
-//        return "SocialMediaItem{" +
-//                "socialId='" + socialId + '\'' +
-//                ", socialMediaType='" + socialMediaType + '\'' +
-//                ", title='" + title + '\'' +
-//                ", description='" + description + '\'' +
-//                ", date=" + date +
-//                ", url='" + url + '\'' +
-//                ", linkToSMPage='" + linkToSMPage + '\'' +
-//                ", accepted=" + accepted +
-//                '}';
-//    }
-
     @Override
     public String toString() {
-        return "SMI{" +
-                "id='" + socialId + '\'' +
+        return "SocialMediaItem{" +
+                "socialId='" + socialId + '\'' +
+                ", socialMediaType='" + socialMediaType + '\'' +
                 ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", date=" + date +
+                ", url='" + url + '\'' +
+                ", linkToSMPage='" + linkToSMPage + '\'' +
                 ", accepted=" + accepted +
                 '}';
     }

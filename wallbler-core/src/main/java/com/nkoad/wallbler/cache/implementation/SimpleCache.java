@@ -19,11 +19,9 @@ public class SimpleCache implements Cache {
         if (wallblerItemPack == null) {
             cache.put(feedPid, data);
         } else {
-            Set<WallblerItem> toInput = data.getData();
-            Set<WallblerItem> currentInCache = wallblerItemPack.getData();
             Set<WallblerItem> result = new HashSet<>();
-            for (WallblerItem toInputItem : toInput) {
-                for (WallblerItem wallblerItemInCacheItem : currentInCache) {
+            for (WallblerItem toInputItem : data.getData()) {
+                for (WallblerItem wallblerItemInCacheItem : wallblerItemPack.getData()) {
                     if (toInputItem.getSocialId() == wallblerItemInCacheItem.getSocialId()) {
                         toInputItem.setAccepted(wallblerItemInCacheItem.isAccepted());
                     }
@@ -55,6 +53,11 @@ public class SimpleCache implements Cache {
                 .forEach(a -> {
                     a.setAccepted(accept);
                 });
+    }
+
+    @Override
+    public void setAccept(WallblerItem wallblerItem) {
+        System.out.println(wallblerItem);
     }
 
     @Override
