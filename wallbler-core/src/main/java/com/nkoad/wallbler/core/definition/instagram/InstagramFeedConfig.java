@@ -13,7 +13,7 @@ public @interface InstagramFeedConfig {
     @AttributeDefinition(name = "Account Name", description = "Linked Account Name")
     String config_accountName() default "instagram account";
 
-    @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the account")
+    @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")
     boolean config_enabled() default true;
 
     @AttributeDefinition(name = "Count", description = "Quantity", type = AttributeType.INTEGER)

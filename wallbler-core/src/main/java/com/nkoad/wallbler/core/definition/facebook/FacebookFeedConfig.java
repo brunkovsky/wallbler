@@ -17,7 +17,7 @@ public @interface FacebookFeedConfig {
     @AttributeDefinition(name = "Type of feed", options = { @Option(label = "posts", value = "posts"), @Option(label = "photos", value = "photos"), @Option(label = "videos", value = "videos"), @Option(label = "albums", value = "albums")})
     String config_typeOfFeed() default "posts";
 
-    @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the account")
+    @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")
     boolean config_enabled() default true;
 
     @AttributeDefinition(name = "Count", description = "Quantity", type = AttributeType.INTEGER)

@@ -17,7 +17,7 @@ public @interface RSSFeedConfig {
     @AttributeDefinition(name = "RSS url", description = "RSS url")
     String config_url();
 
-    @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the account")
+    @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")
     boolean config_enabled() default true;
 
     @AttributeDefinition(name = "Count", description = "Quantity. 10 is maximum", type = AttributeType.INTEGER)
