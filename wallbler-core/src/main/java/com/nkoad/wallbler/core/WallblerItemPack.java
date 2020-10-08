@@ -1,19 +1,19 @@
 package com.nkoad.wallbler.core;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class WallblerItemPack {
     private Date lastRefreshDate;
-    private List<WallblerItem> data;
+    private Set<WallblerItem> data;
 
-    public WallblerItemPack(List<WallblerItem> data) {
+    public WallblerItemPack(Set<WallblerItem> data) {
         this.lastRefreshDate = new Date();
         this.data = data;
     }
 
-    public WallblerItemPack(List<WallblerItem> data, Date date) {
+    public WallblerItemPack(Set<WallblerItem> data, Date date) {
         this.lastRefreshDate = date;
         this.data = data;
     }
@@ -26,7 +26,7 @@ public class WallblerItemPack {
         return lastRefreshDate;
     }
 
-    public List<WallblerItem> getData() {
+    public Set<WallblerItem> getData() {
         return data;
     }
 

@@ -46,7 +46,7 @@ public class FacebookConnector extends Connector {
             String url = feedType.buildFullUrl();
             HTTPRequest httpRequest = new HTTPConnectorHelper().httpGetRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                List<WallblerItem> wallblerItems = new ArrayList<>();
+                Set<WallblerItem> wallblerItems = new HashSet<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
                 int minSize = Math.min(data.length(), count);
                 for (int i = 0; i < minSize; i++) {

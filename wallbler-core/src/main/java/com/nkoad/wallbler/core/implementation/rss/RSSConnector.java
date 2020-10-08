@@ -9,10 +9,7 @@ import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RSSConnector extends Connector {
 
@@ -26,7 +23,7 @@ public class RSSConnector extends Connector {
         int count = (int) feedProperties.get("config.count");
         try {
             SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(url)));
-            List<WallblerItem> wallblerItems = new ArrayList<>();
+            Set<WallblerItem> wallblerItems = new HashSet<>();
             feed.getEntries().stream().limit(count).forEach(entity -> {
                 WallblerItem item = new RSSWallblerItem();
                 item.setTitle(entity.getTitle());

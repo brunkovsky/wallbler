@@ -95,16 +95,25 @@ public abstract class WallblerItem {
         return Objects.hash(socialMediaType, title, description, date, url, linkToSMPage);
     }
 
+//    @Override
+//    public String toString() {
+//        return "SocialMediaItem{" +
+//                "socialId='" + socialId + '\'' +
+//                ", socialMediaType='" + socialMediaType + '\'' +
+//                ", title='" + title + '\'' +
+//                ", description='" + description + '\'' +
+//                ", date=" + date +
+//                ", url='" + url + '\'' +
+//                ", linkToSMPage='" + linkToSMPage + '\'' +
+//                ", accepted=" + accepted +
+//                '}';
+//    }
+
     @Override
     public String toString() {
-        return "SocialMediaItem{" +
-                "socialId='" + title + '\'' +
-                ", socialMediaType='" + socialMediaType + '\'' +
+        return "SMI{" +
+                "id='" + socialId + '\'' +
                 ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", date=" + date +
-                ", url='" + url + '\'' +
-                ", linkToSMPage='" + linkToSMPage + '\'' +
                 ", accepted=" + accepted +
                 '}';
     }
