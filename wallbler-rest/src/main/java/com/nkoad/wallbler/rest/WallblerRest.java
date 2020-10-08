@@ -27,23 +27,12 @@ public class WallblerRest {
         return status(200).entity(cache.getData(socials, accepted)).build();
     }
 
-    @Path("/{social_id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @PATCH
-    public Response setAccept(@PathParam("social_id") Integer socialId, Boolean accept) {
-        cache.setAccept(socialId, accept);
-        return status(200).build();
-    }
-
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @PATCH
     public Response setAccept(List<WallblerItem> wallblerItems) {
-        System.out.println("-----------");
-        System.out.println(wallblerItems);
-        System.out.println("-----------");
-//        cache.setAccept(wallblerItem);
+        cache.setAccept(wallblerItems);
         return status(200).build();
     }
 

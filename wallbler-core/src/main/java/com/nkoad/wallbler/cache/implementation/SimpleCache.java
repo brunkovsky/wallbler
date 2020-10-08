@@ -47,17 +47,15 @@ public class SimpleCache implements Cache {
     }
 
     @Override
-    public void setAccept(Integer socialId, boolean accept) {
-        getWallblerItems()
-                .filter(a -> a.getSocialId() == socialId)
-                .forEach(a -> {
-                    a.setAccepted(accept);
-                });
-    }
-
-    @Override
-    public void setAccept(WallblerItem wallblerItem) {
-        System.out.println(wallblerItem);
+    public void setAccept(List<WallblerItem> wallblerItems) {
+        System.out.println(wallblerItems);
+        for (WallblerItem wallblerItem : wallblerItems) {
+            for (WallblerItem item : getWallblerItems().collect(Collectors.toList())) {
+                if (wallblerItem.getSocialId() == item.getSocialId()) {
+                    item.setAccepted(wallblerItem.isAccepted());
+                }
+            }
+        }
     }
 
     @Override
