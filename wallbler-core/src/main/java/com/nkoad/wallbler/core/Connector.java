@@ -19,6 +19,8 @@ public abstract class Connector {
         this.cache = cache;
     }
 
+    abstract public void getData();
+
     public void removeFromCache(String feedPid) {
         cache.removeFromCache(feedPid);
     }
@@ -27,8 +29,6 @@ public abstract class Connector {
         getData();
         LOGGER.info("got new data. feed name: " + feedProperties.get("config.name"));
     }
-
-    abstract public void getData();
 
     public boolean isAccept() {
         boolean accountEnabled = (boolean) accountProperties.get("config.enabled");
