@@ -38,6 +38,13 @@ public class OsgiConfigurationService {
         return filterRead(FEED_FILTER).collect(Collectors.toList());
     }
 
+    public Map<String, Object> read(String pid) throws IOException {
+        if (!configurationExists(pid)) {
+            throw new ConfigNotFoundException(pid);
+        }
+        return dictionaryToMap(configAdmin.getConfiguration(pid).getProperties());
+    }
+
     public List<String> getWallblerAccountFactories() {
         return getWallblerFactories().filter(a -> a.endsWith("Account")).collect(Collectors.toList());
     }

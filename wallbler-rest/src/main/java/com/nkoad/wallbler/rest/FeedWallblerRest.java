@@ -38,6 +38,21 @@ public class FeedWallblerRest {
         return osgiService.readFeeds();
     }
 
+    // Get a single feed
+    @Path("/feed/{feed_pid:([^:]*[^/]$|$)}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public Response getFeed(@PathParam("feed_pid") String feedPid) {
+        try {
+            Map<String, Object> config = osgiService.read(feedPid);
+            return status(200).entity(config).build();
+        } catch (ConfigNotFoundException e) {
+            return status(404).entity(generateErrorMessage(e.getMessage())).build();
+        } catch (IOException e) {
+            return status(500).build();
+        }
+    }
+
     // Create a new feed
     @Path("/feed")
     @Produces(MediaType.APPLICATION_JSON)
@@ -56,6 +71,7 @@ public class FeedWallblerRest {
     // Update a feed
     @Path("/feed/{feed_pid}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @PUT
     public Response updateFeed(@PathParam("feed_pid") String feedPid, HashMap<String, Object> config) {
         try {
