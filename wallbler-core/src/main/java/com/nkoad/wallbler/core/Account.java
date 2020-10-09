@@ -41,6 +41,13 @@ public abstract class Account<V extends Validator> {
         }
     }
 
+    void setAccessToken(Map<String, Object> accountProperties, String newAccessToken) {
+        String factoryPid = (String) accountProperties.get("service.pid");
+        Map<String, Object> map = new HashMap<>();
+        map.put("config.accessToken", newAccessToken);
+        updateProperties(factoryPid, map);
+    }
+
     private void refreshLinkedFeeds(Map<String, Object> properties) {
         try {
             String accountName = (String) properties.get("config.name");
@@ -56,13 +63,6 @@ public abstract class Account<V extends Validator> {
         } catch (InvalidSyntaxException | IOException e) {
             e.printStackTrace();
         }
-    }
-
-    protected void setAccessToken(Map<String, Object> accountProperties, String newAccessToken) {
-        String factoryPid = (String) accountProperties.get("service.pid");
-        Map<String, Object> map = new HashMap<>();
-        map.put("config.accessToken", newAccessToken);
-        updateProperties(factoryPid, map);
     }
 
     private void setIsValid(Map<String, Object> accountProperties, boolean value) {
