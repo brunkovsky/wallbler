@@ -1,7 +1,10 @@
 package com.nkoad.wallbler.service;
 
+import com.nkoad.wallbler.exception.AccountAlreadyExistsException;
+import com.nkoad.wallbler.exception.ConfigNotFoundException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
@@ -43,29 +46,47 @@ public class OsgiConfigurationService {
         return getWallblerFactories().filter(a -> a.endsWith("Feed")).collect(Collectors.toList());
     }
 
-    public Map<String, Object> create(HashMap<String, Object> config) {
-        try {
-            String factoryPid = (String) config.get("service.factoryPid");
-            Configuration configuration = configAdmin.createFactoryConfiguration(factoryPid);
-            setProperties(configuration, mapToDictionary(config));
-            return dictionaryToMap(configuration.getProperties());
-        } catch (IOException e) {
-            LOGGER.error("can not create the account: " + config);
-            e.printStackTrace();
+    public Map<String, Object> create(HashMap<String, Object> config) throws IOException {
+        String factoryPid = (String) config.get("service.factoryPid");
+        String name = (String) config.get("config.name");
+        if (nameExists(factoryPid, name)) {
+            throw new AccountAlreadyExistsException(factoryPid, name);
         }
-        return new HashMap<>();
+        Configuration configuration = configAdmin.createFactoryConfiguration(factoryPid);
+        setProperties(configuration, mapToDictionary(config));
+        return dictionaryToMap(configuration.getProperties());
     }
 
-    public Map<String, Object> update(String accountPid, HashMap<String, Object> config) {
+    public Map<String, Object> update(String pid, HashMap<String, Object> config) throws IOException {
+        if (!configurationExists(pid)) {
+            throw new ConfigNotFoundException(pid);
+        }
+        Configuration configuration = configAdmin.getConfiguration(pid);
+        setProperties(configuration, mapToDictionary(config));
+        return dictionaryToMap(configuration.getProperties());
+    }
+
+    public void delete(String pid) throws IOException {
+        if (!configurationExists(pid)) {
+            throw new ConfigNotFoundException(pid);
+        }
+        configAdmin.getConfiguration(pid).delete();
+    }
+
+    private boolean nameExists (String factoryPid, String name) {
         try {
-            Configuration configuration = configAdmin.getConfiguration(accountPid);
-            setProperties(configuration, mapToDictionary(config));
-            return dictionaryToMap(configuration.getProperties());
-        } catch (IOException e) {
-            LOGGER.error("can not update the account. account: " + accountPid);
+            String filter = String.format("(&(config.name=%s)(service.factoryPid=%s))", name, factoryPid);
+            Configuration[] configurations = configAdmin.listConfigurations(filter);
+            return configurations != null && configurations.length > 0;
+        } catch (IOException | InvalidSyntaxException e) {
             e.printStackTrace();
         }
-        return new HashMap<>();
+        return false;
+    }
+
+    private boolean configurationExists(String pid) throws IOException {
+        Configuration configuration = configAdmin.getConfiguration(pid);
+        return configuration.getFactoryPid() != null;
     }
 
     private void setProperties(Configuration configuration, Dictionary<String, Object> properties) throws IOException {

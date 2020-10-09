@@ -61,7 +61,7 @@
                             <!-- rss -->
                             com.rometools.*,org.jdom2.*,org.jaxen,org.jaxen.saxpath,org.jaxen.util,
                             <!-- needs for other modules -->
-                            com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition,com.nkoad.wallbler.service
+                            com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition,com.nkoad.wallbler.service,com.nkoad.wallbler.exception
                         </Export-Package>
                     </instructions>
                 </configuration>
