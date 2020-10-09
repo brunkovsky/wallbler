@@ -35,12 +35,21 @@ public class AccountWallblerRest {
         return osgiService.readAccounts();
     }
 
+    // Create a new account
     @Path("/account")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @POST
-    public Response createAccount(HashMap<String, Object> hashMap) {
-        return status(200).entity(osgiService.create(hashMap)).build();
+    public Response createAccount(HashMap<String, Object> config) {
+        return status(200).entity(osgiService.create(config)).build();
+    }
+
+    // Update an account
+    @Path("/account/{account_pid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @PUT
+    public Response updateAccount(@PathParam("account_pid") String accountPid, HashMap<String, Object> config) {
+        return status(200).entity(osgiService.update(accountPid, config)).build();
     }
 
 }

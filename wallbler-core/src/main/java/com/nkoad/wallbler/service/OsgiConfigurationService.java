@@ -43,18 +43,34 @@ public class OsgiConfigurationService {
         return getWallblerFactories().filter(a -> a.endsWith("Feed")).collect(Collectors.toList());
     }
 
-    public Map<String, Object> create(HashMap<String, Object> hashMap) {
+    public Map<String, Object> create(HashMap<String, Object> config) {
         try {
-            LOGGER.info("creating the account. name: " + hashMap.get("config.name"));
-            String factoryPid = (String) hashMap.get("service.factoryPid");
-            Configuration factoryConfiguration = configAdmin.createFactoryConfiguration(factoryPid);
-            factoryConfiguration.update(mapToDictionary(hashMap));
-            return dictionaryToMap(factoryConfiguration.getProperties());
+            String factoryPid = (String) config.get("service.factoryPid");
+            Configuration configuration = configAdmin.createFactoryConfiguration(factoryPid);
+            setProperties(configuration, mapToDictionary(config));
+            return dictionaryToMap(configuration.getProperties());
         } catch (IOException e) {
-            LOGGER.error("can not create the account: " + hashMap);
+            LOGGER.error("can not create the account: " + config);
             e.printStackTrace();
         }
         return new HashMap<>();
+    }
+
+    public Map<String, Object> update(String accountPid, HashMap<String, Object> config) {
+        try {
+            Configuration configuration = configAdmin.getConfiguration(accountPid);
+            setProperties(configuration, mapToDictionary(config));
+            return dictionaryToMap(configuration.getProperties());
+        } catch (IOException e) {
+            LOGGER.error("can not update the account. account: " + accountPid);
+            e.printStackTrace();
+        }
+        return new HashMap<>();
+    }
+
+    private void setProperties(Configuration configuration, Dictionary<String, Object> properties) throws IOException {
+        configuration.update(properties);
+        configuration.setBundleLocation(null);
     }
 
     private Stream<Map<String, Object>> filterRead(String filter) {
@@ -83,7 +99,7 @@ public class OsgiConfigurationService {
         return keys.stream().collect(Collectors.toMap(Function.identity(), properties::get));
     }
 
-    public static <K, V> Dictionary<K, V> mapToDictionary(Map<K, V> map) {
+    private <K, V> Dictionary<K, V> mapToDictionary(Map<K, V> map) {
         Dictionary<K, V> result = new Hashtable<>();
         if (map == null || map.isEmpty()) {
             return result;
