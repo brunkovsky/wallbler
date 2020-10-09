@@ -1,6 +1,7 @@
 package com.nkoad.wallbler.rest;
 
 import com.nkoad.wallbler.exception.AccountAlreadyExistsException;
+import com.nkoad.wallbler.exception.ConfigNotFoundException;
 import com.nkoad.wallbler.service.OsgiConfigurationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -47,6 +48,34 @@ public class FeedWallblerRest {
             return status(201).entity(osgiService.create(config)).build();
         } catch (AccountAlreadyExistsException e) {
             return status(409).entity(generateErrorMessage(e.getMessage())).build();
+        } catch (IOException e) {
+            return status(500).build();
+        }
+    }
+
+    // Update a feed
+    @Path("/feed/{feed_pid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @PUT
+    public Response updateFeed(@PathParam("feed_pid") String feedPid, HashMap<String, Object> config) {
+        try {
+            return status(200).entity(osgiService.update(feedPid, config)).build();
+        } catch (ConfigNotFoundException e) {
+            return status(404).entity(generateErrorMessage(e.getMessage())).build();
+        } catch (IOException e) {
+            return status(500).build();
+        }
+    }
+
+    // Delete a feed
+    @Path("/feed/{feed_pid}")
+    @DELETE
+    public Response deleteFeed(@PathParam("feed_pid") String feedPid) {
+        try {
+            osgiService.delete(feedPid);
+            return status(204).build();
+        } catch (ConfigNotFoundException e) {
+            return status(404).entity(generateErrorMessage(e.getMessage())).build();
         } catch (IOException e) {
             return status(500).build();
         }

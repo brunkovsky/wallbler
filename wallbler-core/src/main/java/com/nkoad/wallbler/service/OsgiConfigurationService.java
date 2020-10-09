@@ -73,7 +73,7 @@ public class OsgiConfigurationService {
         configAdmin.getConfiguration(pid).delete();
     }
 
-    private boolean nameExists (String factoryPid, String name) {
+    private boolean nameExists(String factoryPid, String name) {
         try {
             String filter = String.format("(&(config.name=%s)(service.factoryPid=%s))", name, factoryPid);
             Configuration[] configurations = configAdmin.listConfigurations(filter);
