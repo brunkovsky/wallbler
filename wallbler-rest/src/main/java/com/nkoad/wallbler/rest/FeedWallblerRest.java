@@ -28,7 +28,7 @@ public class FeedWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public List<String> getFactories() {
-        return osgiService.getWallblerFeedFactories();
+        return osgiService.getWallblerFeedFactories().collect(Collectors.toList());
     }
 
     // Get feed list
@@ -40,7 +40,7 @@ public class FeedWallblerRest {
     }
 
     // Get a single feed
-    @Path("/feed/{feed_pid:([^:]*[^/]$|$)}")
+    @Path("/feed/{feed_pid:([^:]*[^/]$)}")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Response getFeed(@PathParam("feed_pid") String feedPid) {

@@ -28,7 +28,7 @@ public class AccountWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public List<String> getFactories() {
-        return osgiService.getWallblerAccountFactories();
+        return osgiService.getWallblerAccountFactories().collect(Collectors.toList());
     }
 
     // Get account list
@@ -40,7 +40,7 @@ public class AccountWallblerRest {
     }
 
     // Get a single account
-    @Path("/account/{account_pid:([^:]*[^/]$|$)}")
+    @Path("/account/{account_pid:([^:]*[^/]$)}")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Response getAccount(@PathParam("account_pid") String accountPid) {

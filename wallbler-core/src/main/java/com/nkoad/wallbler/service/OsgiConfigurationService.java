@@ -44,12 +44,12 @@ public class OsgiConfigurationService {
         return dictionaryToMap(configAdmin.getConfiguration(pid).getProperties());
     }
 
-    public List<String> getWallblerAccountFactories() {
-        return getWallblerFactories().filter(a -> a.endsWith("Account")).collect(Collectors.toList());
+    public Stream<String> getWallblerAccountFactories() {
+        return getWallblerFactories().filter(a -> a.endsWith("Account"));
     }
 
-    public List<String> getWallblerFeedFactories() {
-        return getWallblerFactories().filter(a -> a.endsWith("Feed")).collect(Collectors.toList());
+    public Stream<String> getWallblerFeedFactories() {
+        return getWallblerFactories().filter(a -> a.endsWith("Feed"));
     }
 
     public Stream<Map<String, Object>> getFeedsFromAccount(String pid) throws IOException {
