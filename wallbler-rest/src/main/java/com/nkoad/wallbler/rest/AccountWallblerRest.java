@@ -47,10 +47,8 @@ public class AccountWallblerRest {
         try {
             Map<String, Object> config = osgiService.read(accountPid);
             return status(200).entity(config).build();
-        } catch (ConfigNotFoundException e) {
+        } catch (Exception e) {
             return status(404).entity(generateErrorMessage(e.getMessage())).build();
-        } catch (IOException e) {
-            return status(500).build();
         }
     }
 
@@ -62,8 +60,8 @@ public class AccountWallblerRest {
         try {
             List<Map<String, Object>> feeds = osgiService.getFeedsFromAccount(accountPid.substring(0, accountPid.length() - 1)).collect(Collectors.toList());
             return status(200).entity(feeds).build();
-        } catch (IOException e) {
-            return status(500).entity(generateErrorMessage(e.getMessage())).build();
+        } catch (Exception e) {
+            return status(404).entity(generateErrorMessage(e.getMessage())).build();
         }
     }
 
@@ -75,10 +73,8 @@ public class AccountWallblerRest {
     public Response createAccount(HashMap<String, Object> config) {
         try {
             return status(201).entity(osgiService.create(config)).build();
-        } catch (AccountAlreadyExistsException e) {
+        } catch (Exception e) {
             return status(409).entity(generateErrorMessage(e.getMessage())).build();
-        } catch (IOException e) {
-            return status(500).build();
         }
     }
 
@@ -90,10 +86,8 @@ public class AccountWallblerRest {
     public Response updateAccount(@PathParam("account_pid") String accountPid, HashMap<String, Object> config) {
         try {
             return status(200).entity(osgiService.update(accountPid, config)).build();
-        } catch (ConfigNotFoundException e) {
+        } catch (Exception e) {
             return status(404).entity(generateErrorMessage(e.getMessage())).build();
-        } catch (IOException e) {
-            return status(500).build();
         }
     }
 
@@ -104,10 +98,8 @@ public class AccountWallblerRest {
         try {
             osgiService.delete(accountPid);
             return status(204).build();
-        } catch (ConfigNotFoundException e) {
+        } catch (Exception e) {
             return status(404).entity(generateErrorMessage(e.getMessage())).build();
-        } catch (IOException e) {
-            return status(500).build();
         }
     }
 
