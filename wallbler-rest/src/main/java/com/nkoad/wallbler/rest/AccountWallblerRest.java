@@ -53,6 +53,14 @@ public class AccountWallblerRest {
         }
     }
 
+    // Get all feeds from the account
+    @Path("/account/{account_pid:[^:]*/$}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public List<Map<String, Object>> getFeedsFromAccount(@PathParam("account_pid") String accountPid) {
+        return osgiService.getFeedsFromAccount(accountPid.substring(0, accountPid.length()-1));
+    }
+
     // Create a new account
     @Path("/account")
     @Produces(MediaType.APPLICATION_JSON)

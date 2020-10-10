@@ -25,7 +25,6 @@ public class OsgiConfigurationService {
     private ConfigurationAdmin configAdmin;
     @Reference
     private MetaTypeService metaTypeService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(OsgiConfigurationService.class);
     private static final String WALLBLER_PREFIX = "com.nkoad.wallbler";
     private static final String ACCOUNT_FILTER = "(service.factoryPid=" + WALLBLER_PREFIX + ".core.implementation.*.*Account)";
     private static final String FEED_FILTER = "(service.factoryPid=" + WALLBLER_PREFIX + ".core.implementation.*.*Feed)";
@@ -51,6 +50,23 @@ public class OsgiConfigurationService {
 
     public List<String> getWallblerFeedFactories() {
         return getWallblerFactories().filter(a -> a.endsWith("Feed")).collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> getFeedsFromAccount(String pid) {
+        List<Configuration> result = new ArrayList<>();
+        try {
+            String name = (String) configAdmin.getConfiguration(pid).getProperties().get("config.name");
+            for (Configuration configuration : configAdmin.listConfigurations(FEED_FILTER)) {
+                String accountFactoryPid = ((String) configuration.getProperties().get("service.factoryPid")).replace("Feed", "Account");
+                if (pid.startsWith(accountFactoryPid) && configuration.getProperties().get("config.accountName").equals(name)) {
+                    result.add(configuration);
+                }
+            }
+            return result.stream().map(a -> dictionaryToMap(a.getProperties())).collect(Collectors.toList());
+        } catch (IOException | InvalidSyntaxException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     public Map<String, Object> create(HashMap<String, Object> config) throws IOException {
