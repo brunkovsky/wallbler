@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.Response.status;
 
@@ -35,7 +36,7 @@ public class FeedWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public List<Map<String, Object>> getFeeds() {
-        return osgiService.readFeeds();
+        return osgiService.readFeeds().collect(Collectors.toList());
     }
 
     // Get a single feed

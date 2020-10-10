@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.Response.status;
 
@@ -35,7 +36,7 @@ public class AccountWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public List<Map<String, Object>> getAccounts() {
-        return osgiService.readAccounts();
+        return osgiService.readAccounts().collect(Collectors.toList());
     }
 
     // Get a single account
@@ -57,8 +58,13 @@ public class AccountWallblerRest {
     @Path("/account/{account_pid:[^:]*/$}")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public List<Map<String, Object>> getFeedsFromAccount(@PathParam("account_pid") String accountPid) {
-        return osgiService.getFeedsFromAccount(accountPid.substring(0, accountPid.length()-1));
+    public Response getFeedsFromAccount(@PathParam("account_pid") String accountPid) {
+        try {
+            List<Map<String, Object>> feeds = osgiService.getFeedsFromAccount(accountPid.substring(0, accountPid.length() - 1)).collect(Collectors.toList());
+            return status(200).entity(feeds).build();
+        } catch (IOException e) {
+            return status(500).entity(generateErrorMessage(e.getMessage())).build();
+        }
     }
 
     // Create a new account

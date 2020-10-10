@@ -29,12 +29,12 @@ public class OsgiConfigurationService {
     private static final String ACCOUNT_FILTER = "(service.factoryPid=" + WALLBLER_PREFIX + ".core.implementation.*.*Account)";
     private static final String FEED_FILTER = "(service.factoryPid=" + WALLBLER_PREFIX + ".core.implementation.*.*Feed)";
 
-    public List<Map<String, Object>> readAccounts() {
-        return filterRead(ACCOUNT_FILTER).collect(Collectors.toList());
+    public Stream<Map<String, Object>> readAccounts() {
+        return filterRead(ACCOUNT_FILTER);
     }
 
-    public List<Map<String, Object>> readFeeds() {
-        return filterRead(FEED_FILTER).collect(Collectors.toList());
+    public Stream<Map<String, Object>> readFeeds() {
+        return filterRead(FEED_FILTER);
     }
 
     public Map<String, Object> read(String pid) throws IOException {
@@ -52,21 +52,11 @@ public class OsgiConfigurationService {
         return getWallblerFactories().filter(a -> a.endsWith("Feed")).collect(Collectors.toList());
     }
 
-    public List<Map<String, Object>> getFeedsFromAccount(String pid) {
-        List<Configuration> result = new ArrayList<>();
-        try {
-            String name = (String) configAdmin.getConfiguration(pid).getProperties().get("config.name");
-            for (Configuration configuration : configAdmin.listConfigurations(FEED_FILTER)) {
-                String accountFactoryPid = ((String) configuration.getProperties().get("service.factoryPid")).replace("Feed", "Account");
-                if (pid.startsWith(accountFactoryPid) && configuration.getProperties().get("config.accountName").equals(name)) {
-                    result.add(configuration);
-                }
-            }
-            return result.stream().map(a -> dictionaryToMap(a.getProperties())).collect(Collectors.toList());
-        } catch (IOException | InvalidSyntaxException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
+    public Stream<Map<String, Object>> getFeedsFromAccount(String pid) throws IOException {
+        String name = (String) configAdmin.getConfiguration(pid).getProperties().get("config.name");
+        return readFeeds()
+                .filter(a -> pid.startsWith(((String) (a.get("service.factoryPid"))).replace("Feed", "Account"))
+                        && a.get("config.accountName").equals(name));
     }
 
     public Map<String, Object> create(HashMap<String, Object> config) throws IOException {
