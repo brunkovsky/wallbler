@@ -1,6 +1,6 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
-import com.nkoad.wallbler.core.HTTPConnectorHelper;
+import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.Validator;
 
@@ -19,7 +19,7 @@ public class FacebookValidator extends Validator {
         try {
             String accessToken = URLEncoder.encode((String) properties.get("config.oAuthAccessToken"), "UTF-8");
             String url = USERS_API_ACCESS_URL + properties.get("config.groupId") + "?access_token=" + accessToken;
-            HTTPRequest httpRequest = new HTTPConnectorHelper().httpGetRequest(url);
+            HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 return true;
             }

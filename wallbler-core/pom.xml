@@ -15,6 +15,10 @@
     <name>Wallbler Core</name>
     <packaging>bundle</packaging>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -61,7 +65,7 @@
                             <!-- rss -->
                             com.rometools.*,org.jdom2.*,org.jaxen,org.jaxen.saxpath,org.jaxen.util,
                             <!-- needs for other modules -->
-                            com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition,com.nkoad.wallbler.service,com.nkoad.wallbler.exception
+                            com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition,com.nkoad.wallbler.service,com.nkoad.wallbler.exception,com.nkoad.wallbler.httpConnector
                         </Export-Package>
                     </instructions>
                 </configuration>

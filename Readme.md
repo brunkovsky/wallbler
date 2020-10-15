@@ -2,8 +2,6 @@ feature:repo-add mvn:com.nkoad/wallbler-features/LATEST/xml
 feature:install wallbler
 feature:uninstall wallbler
 
-https://www.nasa.gov/rss/dyn/breaking_news.rss
-
 ssh -p 8101 karaf@localhost
 
 page id : 663377994414452
@@ -17,3 +15,4 @@ https://graph.facebook.com/v6.0/663377994414452?fields=name,link&access_token=20
 
 https://graph.facebook.com/v6.0/663377994414452/posts?access_token=206081670615853|e26e9591d8b92d0e5262871b09eb49d1&fields=permalink_url,full_picture,message,created_time,comments
 
+curl -d "@data.json" -X PUT http://localhost:9200/data/blog/1 -H "Content-Type: application/json"

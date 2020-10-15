@@ -15,7 +15,7 @@ public @interface RSSFeedConfig {
     String config_accountName() default "rss account";
 
     @AttributeDefinition(name = "RSS url", description = "RSS url")
-    String config_url();
+    String config_url() default "https://www.nasa.gov/rss/dyn/breaking_news.rss";
 
     @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")
     boolean config_enabled() default true;

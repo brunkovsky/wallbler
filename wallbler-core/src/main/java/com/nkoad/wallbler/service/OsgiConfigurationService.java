@@ -110,7 +110,7 @@ public class OsgiConfigurationService {
             return Arrays.stream(Objects.requireNonNull(configAdmin.listConfigurations(filter)))
                     .map(a -> dictionaryToMap((a.getProperties())));
         } catch (Exception e) {
-            e.printStackTrace();
+            // it's ok. just no configurations
         }
         return Stream.empty();
     }

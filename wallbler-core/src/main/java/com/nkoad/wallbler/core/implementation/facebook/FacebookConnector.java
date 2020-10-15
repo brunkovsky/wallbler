@@ -1,7 +1,7 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.cache.definition.Cache;
-import com.nkoad.wallbler.core.HTTPConnectorHelper;
+import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.WallblerItemPack;
@@ -44,7 +44,7 @@ public class FacebookConnector extends Connector {
             String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
             FeedType feedType = feedMap.get(typeOfFeed);
             String url = feedType.buildFullUrl();
-            HTTPRequest httpRequest = new HTTPConnectorHelper().httpGetRequest(url);
+            HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 Set<WallblerItem> wallblerItems = new HashSet<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
@@ -120,7 +120,7 @@ public class FacebookConnector extends Connector {
         try {
             String accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
             String url = USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + "?fields=name,link&access_token=" + accessToken;
-            HTTPRequest httpRequest = new HTTPConnectorHelper().httpGetRequest(url);
+            HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 accountName = new JSONObject(httpRequest.getBody()).getString("name");
             }
