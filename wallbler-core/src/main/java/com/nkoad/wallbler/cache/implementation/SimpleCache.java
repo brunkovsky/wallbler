@@ -3,6 +3,8 @@ package com.nkoad.wallbler.cache.implementation;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.WallblerItemPack;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 
 import java.util.*;
@@ -33,17 +35,13 @@ public class SimpleCache implements Cache {
     }
 
     @Override
-    public List<WallblerItem> getData(String socials, Boolean accepted) {
-        Stream<WallblerItem> result = getWallblerItems()
-                .filter(a -> socials == null || socials.contains(a.getSocialMediaType()))
-                .filter(a -> accepted == null || a.isAccepted() == accepted);
-
-        return result.collect(Collectors.toList());
-    }
-
-    @Override
-    public WallblerItemPack get(String feedPid) {
-        return cache.get(feedPid);
+    public JSONArray getData(String socials, Boolean accepted) {
+//        Stream<WallblerItem> result = getWallblerItems()
+//                .filter(a -> socials == null || socials.contains(a.getSocialMediaType()))
+//                .filter(a -> accepted == null || a.isAccepted() == accepted);
+//
+//        return result.collect(Collectors.toList());
+        return null;
     }
 
     @Override

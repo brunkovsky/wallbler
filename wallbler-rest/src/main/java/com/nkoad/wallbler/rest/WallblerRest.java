@@ -2,6 +2,8 @@ package com.nkoad.wallbler.rest;
 
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.WallblerItem;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -24,7 +26,8 @@ public class WallblerRest {
     @GET
     public Response getData(@QueryParam("socials") String socials,
                             @QueryParam("accepted") Boolean accepted) {
-        return status(200).entity(cache.getData(socials, accepted)).build();
+        JSONArray data = cache.getData(socials, accepted);
+        return status(200).entity(data.toString()).build();
     }
 
     @Path("/")
