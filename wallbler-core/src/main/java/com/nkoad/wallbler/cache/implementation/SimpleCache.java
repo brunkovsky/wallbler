@@ -21,14 +21,35 @@ public class SimpleCache implements Cache {
     @Override
     public void add(String feedPid, WallblerItemPack data) {
         System.out.println("---------------add");
+
+
+        Map<Integer, Boolean> booleanMap = new HashMap<>();
+        for (WallblerItem datum : data.getData()) {
+            String socialMediaType = datum.getSocialMediaType();
+            JSONArray getData = getData(socialMediaType, null);
+            for (int i = 0; i < getData.length(); i++) {
+                JSONObject jsonObject = getData.getJSONObject(i);
+                int socialId = jsonObject.getInt("socialId");
+                if (!jsonObject.isNull("accepted")) {
+                    boolean accepted = jsonObject.getBoolean("accepted");
+                    booleanMap.put(socialId, accepted);
+                }
+            }
+            System.out.println(booleanMap);
+            break;
+        }
+
+
         HTTPConnector httpConnector = new PUTConnector();
         try {
             for (WallblerItem datum : data.getData()) {
-                String url = "http://localhost:9200/" + datum.getSocialMediaType() + "/_doc/" + datum.getSocialId();
-                JSONObject jsonObject = new JSONObject(datum);
-                jsonObject.put("feedPid", feedPid);
-                jsonObject.put("lastRefreshDate", data.getLastRefreshDate().getTime());
-                httpConnector.httpRequest(url, jsonObject.toString());
+                if (!booleanMap.containsKey(datum.getSocialId())) {
+                    String url = "http://localhost:9200/" + datum.getSocialMediaType() + "/_doc/" + datum.getSocialId();
+                    JSONObject jsonObject = new JSONObject(datum);
+                    jsonObject.put("feedPid", feedPid);
+                    jsonObject.put("lastRefreshDate", data.getLastRefreshDate().getTime());
+                    httpConnector.httpRequest(url, jsonObject.toString());
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,8 +82,9 @@ public class SimpleCache implements Cache {
         try {
             for (WallblerItem wallblerItem : wallblerItems) {
                 int socialId = wallblerItem.getSocialId();
+                String socialMediaType = wallblerItem.getSocialMediaType();
                 Boolean accepted = wallblerItem.isAccepted();
-                String url = "http://localhost:9200/_doc/" + socialId + "/_update";
+                String url = "http://localhost:9200/" + socialMediaType + "/_doc/" + socialId + "/_update";
                 HTTPRequest httpRequest = httpConnector.httpRequest(url, "{\n" +
                         "    \"doc\": {\n" +
                         "        \"accepted\": " + accepted + "\n" +
