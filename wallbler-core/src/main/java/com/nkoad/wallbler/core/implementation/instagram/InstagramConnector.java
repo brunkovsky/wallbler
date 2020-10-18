@@ -15,7 +15,7 @@ public class InstagramConnector extends Connector {
     }
 
     @Override
-    public void getData() {
+    public void loadData() {
         try {
             String url = (String) feedProperties.get("config.url");
             int count = (int) feedProperties.get("config.count");

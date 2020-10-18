@@ -4,8 +4,4 @@ import com.nkoad.wallbler.core.WallblerItem;
 
 public class RSSWallblerItem extends WallblerItem {
 
-    public RSSWallblerItem() {
-        super("rss");
-    }
-
 }

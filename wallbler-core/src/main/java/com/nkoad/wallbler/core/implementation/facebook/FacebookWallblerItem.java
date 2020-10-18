@@ -9,10 +9,6 @@ public class FacebookWallblerItem extends WallblerItem {
     private Integer sharedCount;
     private Integer commentsCount;
 
-    public FacebookWallblerItem() {
-        super("facebook");
-    }
-
     public String getTypeOfFeed() {
         return typeOfFeed;
     }

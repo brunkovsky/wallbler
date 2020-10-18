@@ -3,7 +3,6 @@ package com.nkoad.wallbler.cache.implementation;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
-import com.nkoad.wallbler.core.WallblerItemPack;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.httpConnector.HTTPConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
@@ -17,25 +16,29 @@ import java.util.*;
 
 @Component(name = "ElasticSearchCache", service = Cache.class)
 public class SimpleCache implements Cache {
+    private static String HOST = "http://localhost:9200/";
+    private static String ADD_URL = HOST + "%s/_doc/%s";
+    private static String SEARCH_URL = HOST + "%s/_search";
+    private static String UPDATE_URL = HOST + "%s/_doc/%s/_update";
+    private static String REMOVE_URL = HOST + "%s/_delete_by_query";
+    private static String ACCEPT_PAYLOAD = "{\"doc\":{\"accepted\":%s}}";
+    private static String REMOVE_BY_FEED_PID_PAYLOAD = "{\"query\":{\"match\":{\"feedPid\":\"%s\"}}}";
 
     @Override
-    public void add(String feedPid, WallblerItemPack data) {
+    public void add(Set<WallblerItem> data) {
         System.out.println("---------------add");
-        Map<Integer, Boolean> booleanMap = fetchManagedPosts(data);
         HTTPConnector httpConnector = new PUTConnector();
-        try {
-            for (WallblerItem datum : data.getData()) {
-                if (!booleanMap.containsKey(datum.getSocialId())) {
-                    String url = "http://localhost:9200/" + datum.getSocialMediaType() + "/_doc/" + datum.getSocialId();
-                    JSONObject jsonObject = new JSONObject(datum);
-                    jsonObject.put("feedPid", feedPid);
-                    jsonObject.put("lastRefreshDate", data.getLastRefreshDate().getTime());
-                    httpConnector.httpRequest(url, jsonObject.toString());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        data.stream()
+                .filter(a -> !fetchManagedPosts(data).containsKey(a.getSocialId()))
+                .forEach(a -> {
+                    String url = String.format(ADD_URL, a.getSocialMediaType(), a.getSocialId());
+                    String payload = new JSONObject(a).toString();
+                    try {
+                        httpConnector.httpRequest(url, payload);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     @Override
@@ -44,7 +47,8 @@ public class SimpleCache implements Cache {
         JSONArray result = new JSONArray();
         try {
             for (String social : socials.split(",")) {
-                String url = "http://localhost:9200/" + social + "/_search";
+                String url = String.format(SEARCH_URL, social);
+                ;
                 HTTPRequest httpRequest = new GETConnector().httpRequest(url);
                 JSONArray jsonArray = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -61,36 +65,34 @@ public class SimpleCache implements Cache {
     public void setAccept(List<WallblerItem> wallblerItems) {
         System.out.println("---------------setAccept");
         HTTPConnector httpConnector = new POSTConnector();
-        try {
-            for (WallblerItem wallblerItem : wallblerItems) {
-                String url = "http://localhost:9200/" + wallblerItem.getSocialMediaType() + "/_doc/" + wallblerItem.getSocialId() + "/_update";
-                httpConnector.httpRequest(url, "{\"doc\":{\"accepted\":" + wallblerItem.isAccepted() + "}}");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        wallblerItems.forEach(a -> {
+                    String url = String.format(UPDATE_URL, a.getSocialMediaType(), a.getSocialId());
+                    String payload = String.format(ACCEPT_PAYLOAD, a.isAccepted());
+                    try {
+                        httpConnector.httpRequest(url, payload);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     @Override
     public void removeFromCache(String feedPid) {
         System.out.println("---------------removeFromCache");
         try {
-            String socialMediaType = extractSocialMediaType(feedPid);
-            String url = "http://localhost:9200/" + socialMediaType + "/_delete_by_query";
-            new POSTConnector().httpRequest(url, "{\"query\":{\"match\":{\"feedPid\":\"" + feedPid + "\"}}}");
+            String url = String.format(REMOVE_URL, extractSocialMediaType(feedPid));
+            String payload = String.format(REMOVE_BY_FEED_PID_PAYLOAD, feedPid);
+            new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String extractSocialMediaType(String feedPid) {
-        return feedPid.split("\\.")[5];
-    }
-
-    private Map<Integer, Boolean> fetchManagedPosts(WallblerItemPack data) {
-        Map<Integer, Boolean> result = new HashMap<>();
-        String socialMediaType = data.getData().stream().findFirst().get().getSocialMediaType();
+    private Map<Integer, Boolean> fetchManagedPosts(Set<WallblerItem> data) {
+        WallblerItem wallblerItem = data.stream().findFirst().get();
+        String socialMediaType = wallblerItem.getSocialMediaType();
         JSONArray getData = getData(socialMediaType, null);
+        Map<Integer, Boolean> result = new HashMap<>();
         for (int i = 0; i < getData.length(); i++) {
             JSONObject jsonObject = getData.getJSONObject(i);
             int socialId = jsonObject.getInt("socialId");
@@ -100,6 +102,10 @@ public class SimpleCache implements Cache {
             }
         }
         return result;
+    }
+
+    private String extractSocialMediaType(String feedPid) {
+        return feedPid.split("\\.")[5];
     }
 
 }

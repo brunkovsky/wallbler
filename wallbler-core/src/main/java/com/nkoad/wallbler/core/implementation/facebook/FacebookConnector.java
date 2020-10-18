@@ -4,7 +4,6 @@ import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
-import com.nkoad.wallbler.core.WallblerItemPack;
 import com.nkoad.wallbler.core.Connector;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +37,7 @@ public class FacebookConnector extends Connector {
     }
 
     @Override
-    public void getData() {
+    public void loadData() {
         try {
             int count = (int) feedProperties.get("config.count");
             String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
@@ -52,10 +51,11 @@ public class FacebookConnector extends Connector {
                 for (int i = 0; i < minSize; i++) {
                     JSONObject json = data.getJSONObject(i);
                     FacebookWallblerItem item = feedType.retrieveData(json);
-//                    item.setAccepted((boolean) feedProperties.get("config.acceptedByDefault"));
+                    item.setFeedName((String) feedProperties.get("config.name"));
+                    item.setFeedPid((String) feedProperties.get("service.pid"));
                     wallblerItems.add(item);
                 }
-                cache.add((String) feedProperties.get("service.pid"), new WallblerItemPack(wallblerItems));
+                cache.add(wallblerItems);
             }
         } catch (Exception e) {
             e.printStackTrace();

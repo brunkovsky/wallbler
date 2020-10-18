@@ -19,14 +19,15 @@ public abstract class Connector {
         this.cache = cache;
     }
 
-    abstract public void getData();
+    abstract public void loadData();
 
     public void removeFromCache(String feedPid) {
+        //TODO
         cache.removeFromCache(feedPid);
     }
 
     public void getDataLog() {
-        getData();
+        loadData();
         LOGGER.info("got new data. feed name: " + feedProperties.get("config.name"));
     }
 

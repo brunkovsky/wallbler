@@ -5,6 +5,8 @@ import java.util.Objects;
 
 public class WallblerItem {
     private int socialId;
+    private String feedPid;
+    private String feedName;
     private String socialMediaType;
     private String title;
     private String description;
@@ -12,12 +14,35 @@ public class WallblerItem {
     private String url;             // link to the account
     private String linkToSMPage;    // link to the post
     private Boolean accepted;
+    private Date lastRefreshDate;
 
     public WallblerItem() {
+        lastRefreshDate = new Date();
     }
 
-    public WallblerItem(String socialMediaType) {
-        this.socialMediaType = socialMediaType;
+    public int getSocialId() {
+        return socialId;
+    }
+
+    public String getFeedPid() {
+        return feedPid;
+    }
+
+    public void setFeedPid(String feedPid) {
+        this.feedPid = feedPid;
+        this.socialMediaType = feedPid.split("\\.")[5];
+    }
+
+    public String getFeedName() {
+        return feedName;
+    }
+
+    public String getSocialMediaType() {
+        return socialMediaType;
+    }
+
+    public void setFeedName(String feedName) {
+        this.feedName = feedName;
     }
 
     public String getTitle() {
@@ -26,14 +51,6 @@ public class WallblerItem {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getDescription() {
@@ -52,16 +69,20 @@ public class WallblerItem {
         this.date = date;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String getLinkToSMPage() {
         return linkToSMPage;
     }
 
     public void setLinkToSMPage(String linkToSMPage) {
         this.linkToSMPage = linkToSMPage;
-    }
-
-    public String getSocialMediaType() {
-        return socialMediaType;
     }
 
     public Boolean isAccepted() {
@@ -72,8 +93,12 @@ public class WallblerItem {
         this.accepted = accepted;
     }
 
-    public int getSocialId() {
-        return socialId;
+    public Date getLastRefreshDate() {
+        return lastRefreshDate;
+    }
+
+    public void setLastRefreshDate(Date lastRefreshDate) {
+        this.lastRefreshDate = lastRefreshDate;
     }
 
     public void generateSocialId() {
@@ -85,8 +110,7 @@ public class WallblerItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WallblerItem that = (WallblerItem) o;
-        return Objects.equals(socialMediaType, that.socialMediaType) &&
-                Objects.equals(title, that.title) &&
+        return Objects.equals(title, that.title) &&
                 Objects.equals(description, that.description) &&
                 Objects.equals(date, that.date) &&
                 Objects.equals(url, that.url) &&
@@ -95,14 +119,13 @@ public class WallblerItem {
 
     @Override
     public int hashCode() {
-        return Objects.hash(socialMediaType, title, description, date, url, linkToSMPage);
+        return Objects.hash(title, description, date, url, linkToSMPage);
     }
 
     @Override
     public String toString() {
         return "SocialMediaItem{" +
                 "socialId='" + socialId + '\'' +
-                ", socialMediaType='" + socialMediaType + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", date=" + date +
