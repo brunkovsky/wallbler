@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -29,7 +30,7 @@ public class SimpleCache implements Cache {
         System.out.println("---------------add");
         HTTPConnector httpConnector = new PUTConnector();
         data.stream()
-                .filter(a -> !fetchManagedPosts(data).containsKey(a.getSocialId()))
+                .filter(a -> !fetchManagedPosts(data).contains(a.getSocialId()))
                 .forEach(a -> {
                     String url = String.format(ADD_URL, a.getSocialMediaType(), a.getSocialId());
                     String payload = new JSONObject(a).toString();
@@ -42,18 +43,20 @@ public class SimpleCache implements Cache {
     }
 
     @Override
-    public JSONArray getData(String socials, Boolean accepted) {
+    public JSONArray getData(String socials) {
         System.out.println("---------------getData");
         JSONArray result = new JSONArray();
         try {
+            GETConnector getConnector = new GETConnector();
             for (String social : socials.split(",")) {
                 String url = String.format(SEARCH_URL, social);
-                ;
-                HTTPRequest httpRequest = new GETConnector().httpRequest(url);
-                JSONArray jsonArray = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    result.put(jsonArray.getJSONObject(i).getJSONObject("_source"));
-                }
+                try {
+                    HTTPRequest httpRequest = getConnector.httpRequest(url);
+                    JSONArray jsonArray = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        result.put(jsonArray.getJSONObject(i).getJSONObject("_source"));
+                    }
+                } catch (FileNotFoundException ignore) {}
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,17 +91,16 @@ public class SimpleCache implements Cache {
         }
     }
 
-    private Map<Integer, Boolean> fetchManagedPosts(Set<WallblerItem> data) {
+    private Set<Integer> fetchManagedPosts(Set<WallblerItem> data) {
         WallblerItem wallblerItem = data.stream().findFirst().get();
         String socialMediaType = wallblerItem.getSocialMediaType();
-        JSONArray getData = getData(socialMediaType, null);
-        Map<Integer, Boolean> result = new HashMap<>();
+        JSONArray getData = getData(socialMediaType);
+        Set<Integer> result = new HashSet<>();
         for (int i = 0; i < getData.length(); i++) {
             JSONObject jsonObject = getData.getJSONObject(i);
             int socialId = jsonObject.getInt("socialId");
             if (!jsonObject.isNull("accepted")) {
-                boolean accepted = jsonObject.getBoolean("accepted");
-                result.put(socialId, accepted);
+                result.add(socialId);
             }
         }
         return result;

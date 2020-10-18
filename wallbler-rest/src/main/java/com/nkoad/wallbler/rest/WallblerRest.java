@@ -26,7 +26,7 @@ public class WallblerRest {
     @GET
     public Response getData(@QueryParam("socials") String socials,
                             @QueryParam("accepted") Boolean accepted) {
-        JSONArray data = cache.getData(socials, accepted);
+        JSONArray data = cache.getData(socials);
         return status(200).entity(data.toString()).build();
     }
 

@@ -8,7 +8,7 @@ import java.util.Set;
 
 public interface Cache {
     void add(Set<WallblerItem> data);
-    JSONArray getData(String socials, Boolean accepted);
+    JSONArray getData(String socials);
     void setAccept(List<WallblerItem> wallblerItems);
     void removeFromCache(String feedPid);
 }
