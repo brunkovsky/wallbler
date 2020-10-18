@@ -47,18 +47,16 @@ public class SimpleCache implements Cache {
         System.out.println("---------------getData");
         JSONArray result = new JSONArray();
         try {
-            GETConnector getConnector = new GETConnector();
-            for (String social : socials.split(",")) {
-                String url = String.format(SEARCH_URL, social);
-                try {
-                    HTTPRequest httpRequest = getConnector.httpRequest(url);
-                    JSONArray jsonArray = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        result.put(jsonArray.getJSONObject(i).getJSONObject("_source"));
-                    }
-                } catch (FileNotFoundException ignore) {}
+            String url = String.format(SEARCH_URL, socials);
+            HTTPRequest httpRequest = new GETConnector().httpRequest(url);
+            JSONArray hits = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
+            for (int i = 0; i < hits.length(); i++) {
+                result.put(hits.getJSONObject(i).getJSONObject("_source"));
             }
-        } catch (IOException e) {
+        }
+        catch (FileNotFoundException ignore) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
         return result;
@@ -69,14 +67,14 @@ public class SimpleCache implements Cache {
         System.out.println("---------------setAccept");
         HTTPConnector httpConnector = new POSTConnector();
         wallblerItems.forEach(a -> {
-                    String url = String.format(UPDATE_URL, a.getSocialMediaType(), a.getSocialId());
-                    String payload = String.format(ACCEPT_PAYLOAD, a.isAccepted());
-                    try {
-                        httpConnector.httpRequest(url, payload);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+            String url = String.format(UPDATE_URL, a.getSocialMediaType(), a.getSocialId());
+            String payload = String.format(ACCEPT_PAYLOAD, a.isAccepted());
+            try {
+                httpConnector.httpRequest(url, payload);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
