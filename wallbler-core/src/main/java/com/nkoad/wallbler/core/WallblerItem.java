@@ -1,6 +1,5 @@
 package com.nkoad.wallbler.core;
 
-import java.util.Date;
 import java.util.Objects;
 
 public class WallblerItem {
@@ -10,15 +9,15 @@ public class WallblerItem {
     private String socialMediaType;
     private String title;
     private String description;
-    private Date date;
+    private long date;
     private String url;             // link to the account
     private String linkToSMPage;    // link to the post
     private Boolean accepted;
-    private Date lastRefreshDate;
+//    private long lastRefreshDate;
 
-    public WallblerItem() {
-        lastRefreshDate = new Date();
-    }
+//    public WallblerItem() {
+//        lastRefreshDate = new Date().getTime();
+//    }
 
     public int getSocialId() {
         return socialId;
@@ -61,11 +60,11 @@ public class WallblerItem {
         this.description = description;
     }
 
-    public Date getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
@@ -93,13 +92,13 @@ public class WallblerItem {
         this.accepted = accepted;
     }
 
-    public Date getLastRefreshDate() {
-        return lastRefreshDate;
-    }
+//    public long getLastRefreshDate() {
+//        return lastRefreshDate;
+//    }
 
-    public void setLastRefreshDate(Date lastRefreshDate) {
-        this.lastRefreshDate = lastRefreshDate;
-    }
+//    public void setLastRefreshDate(long lastRefreshDate) {
+//        this.lastRefreshDate = lastRefreshDate;
+//    }
 
     public void generateSocialId() {
         this.socialId = this.hashCode();

@@ -1,13 +1,13 @@
 package com.nkoad.wallbler.cache.definition;
 
 import com.nkoad.wallbler.core.WallblerItem;
+import com.nkoad.wallbler.core.WallblerItems;
 import org.json.JSONArray;
 
 import java.util.List;
-import java.util.Set;
 
 public interface Cache {
-    void add(Set<WallblerItem> data);
+    void add(WallblerItems data);
     JSONArray getData(String socials);
     void setAccept(List<WallblerItem> wallblerItems);
     void removeFromCache(String feedPid);

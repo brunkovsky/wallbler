@@ -3,6 +3,7 @@ package com.nkoad.wallbler.cache.implementation;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
+import com.nkoad.wallbler.core.WallblerItems;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.httpConnector.HTTPConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
@@ -19,21 +20,25 @@ import java.util.*;
 public class SimpleCache implements Cache {
     private static String HOST = "http://localhost:9200/";
     private static String ADD_URL = HOST + "%s/_doc/%s";
-    private static String SEARCH_URL = HOST + "%s/_search";
+    private static String SEARCH_URL = HOST + "%s/_search?size=10000";
     private static String UPDATE_URL = HOST + "%s/_doc/%s/_update";
     private static String REMOVE_URL = HOST + "%s/_delete_by_query";
+    private static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
     private static String ACCEPT_PAYLOAD = "{\"doc\":{\"accepted\":%s}}";
     private static String REMOVE_BY_FEED_PID_PAYLOAD = "{\"query\":{\"match\":{\"feedPid\":\"%s\"}}}";
 
     @Override
-    public void add(Set<WallblerItem> data) {
-        System.out.println("---------------add");
+    public void add(WallblerItems data) {
         HTTPConnector httpConnector = new PUTConnector();
-        data.stream()
-                .filter(a -> !fetchManagedPosts(data).contains(a.getSocialId()))
+        Set<Integer> existedPostsId = getExistedPostsId(data);
+        long lastRefreshDate = data.getLastRefreshDate();
+        data.getData().stream()
+                .filter(a -> !existedPostsId.contains(a.getSocialId()))
                 .forEach(a -> {
                     String url = String.format(ADD_URL, a.getSocialMediaType(), a.getSocialId());
-                    String payload = new JSONObject(a).toString();
+                    JSONObject jsonObject = new JSONObject(a);
+                    jsonObject.put("lastRefreshDate", lastRefreshDate);
+                    String payload = jsonObject.toString();
                     try {
                         httpConnector.httpRequest(url, payload);
                     } catch (IOException e) {
@@ -44,14 +49,10 @@ public class SimpleCache implements Cache {
 
     @Override
     public JSONArray getData(String socials) {
-        System.out.println("---------------getData");
-        if (socials == null) {
-            socials = "";
-        }
         JSONArray result = new JSONArray();
         try {
-            String url = String.format(SEARCH_URL, socials);
-            HTTPRequest httpRequest = new GETConnector().httpRequest(url);
+            String url = String.format(SEARCH_URL, Objects.toString(socials, ""));
+            HTTPRequest httpRequest = new GETConnector().httpRequest(url, SEARCH_PAYLOAD);
             JSONArray hits = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
             for (int i = 0; i < hits.length(); i++) {
                 result.put(hits.getJSONObject(i).getJSONObject("_source"));
@@ -67,7 +68,6 @@ public class SimpleCache implements Cache {
 
     @Override
     public void setAccept(List<WallblerItem> wallblerItems) {
-        System.out.println("---------------setAccept");
         HTTPConnector httpConnector = new POSTConnector();
         wallblerItems.forEach(a -> {
             String url = String.format(UPDATE_URL, a.getSocialMediaType(), a.getSocialId());
@@ -82,9 +82,8 @@ public class SimpleCache implements Cache {
 
     @Override
     public void removeFromCache(String feedPid) {
-        System.out.println("---------------removeFromCache");
         try {
-            String url = String.format(REMOVE_URL, extractSocialMediaType(feedPid));
+            String url = String.format(REMOVE_URL, feedPid.split("\\.")[5]);
             String payload = String.format(REMOVE_BY_FEED_PID_PAYLOAD, feedPid);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
@@ -92,23 +91,14 @@ public class SimpleCache implements Cache {
         }
     }
 
-    private Set<Integer> fetchManagedPosts(Set<WallblerItem> data) {
-        WallblerItem wallblerItem = data.stream().findFirst().get();
-        String socialMediaType = wallblerItem.getSocialMediaType();
-        JSONArray getData = getData(socialMediaType);
+    private Set<Integer> getExistedPostsId(WallblerItems data) {
+        String socialMediaType = data.getData().get(0).getSocialMediaType();
+        JSONArray existedPosts = getData(socialMediaType);
         Set<Integer> result = new HashSet<>();
-        for (int i = 0; i < getData.length(); i++) {
-            JSONObject jsonObject = getData.getJSONObject(i);
-            int socialId = jsonObject.getInt("socialId");
-            if (!jsonObject.isNull("accepted")) {
-                result.add(socialId);
-            }
+        for (int i = 0; i < existedPosts.length(); i++) {
+            result.add(existedPosts.getJSONObject(i).getInt("socialId"));
         }
         return result;
-    }
-
-    private String extractSocialMediaType(String feedPid) {
-        return feedPid.split("\\.")[5];
     }
 
 }

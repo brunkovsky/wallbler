@@ -1,6 +1,7 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.cache.definition.Cache;
+import com.nkoad.wallbler.core.WallblerItems;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
@@ -45,7 +46,7 @@ public class FacebookConnector extends Connector {
             String url = feedType.buildFullUrl();
             HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                Set<WallblerItem> wallblerItems = new HashSet<>();
+                List<WallblerItem> wallblerItems = new ArrayList<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
                 int minSize = Math.min(data.length(), count);
                 for (int i = 0; i < minSize; i++) {
@@ -53,9 +54,10 @@ public class FacebookConnector extends Connector {
                     FacebookWallblerItem item = feedType.retrieveData(json);
                     item.setFeedName((String) feedProperties.get("config.name"));
                     item.setFeedPid((String) feedProperties.get("service.pid"));
+                    item.setAccepted((boolean) feedProperties.get("config.acceptedByDefault"));
                     wallblerItems.add(item);
                 }
-                cache.add(wallblerItems);
+                cache.add(new WallblerItems(wallblerItems));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,7 +71,7 @@ public class FacebookConnector extends Connector {
                 FacebookWallblerItem item = new FacebookWallblerItem();
                 item.setTitle(accountName);
                 item.setUrl(FACEBOOK_URL);
-                item.setDate(setDateProperties(json));
+                item.setDate(setDateProperties(json).getTime());
                 item.setDescription(setDescriptionProperty(json, "message"));
                 item.setLinkToSMPage(json.getString("permalink_url"));
                 item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));

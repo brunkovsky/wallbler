@@ -26,7 +26,7 @@ public @interface FacebookFeedConfig {
     @AttributeDefinition(name = "Delay", description = "Delay in seconds", type = AttributeType.INTEGER)
     int config_delay() default 100;
 
-//    @AttributeDefinition(name = "Accepted by default")
-//    boolean config_acceptedByDefault() default true;
+    @AttributeDefinition(name = "Accepted by default")
+    boolean config_acceptedByDefault() default true;
 
 }
