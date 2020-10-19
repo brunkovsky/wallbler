@@ -20,7 +20,7 @@ import java.util.*;
 public class SimpleCache implements Cache {
     private static String HOST = "http://localhost:9200/";
     private static String ADD_URL = HOST + "%s/_doc/%s";
-    private static String SEARCH_URL = HOST + "%s/_search?size=10000";
+    private static String SEARCH_URL = HOST + "%s/_search?size=%d";
     private static String UPDATE_URL = HOST + "%s/_doc/%s/_update";
     private static String REMOVE_URL = HOST + "%s/_delete_by_query";
     private static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
@@ -48,10 +48,13 @@ public class SimpleCache implements Cache {
     }
 
     @Override
-    public JSONArray getData(String socials) {
+    public JSONArray getData(String socials, Integer limit) {
         JSONArray result = new JSONArray();
         try {
-            String url = String.format(SEARCH_URL, Objects.toString(socials, ""));
+            if (limit == null || limit <= 0 || limit > 10000) {
+                limit = 10000;
+            }
+            String url = String.format(SEARCH_URL, Objects.toString(socials, ""), limit);
             HTTPRequest httpRequest = new GETConnector().httpRequest(url, SEARCH_PAYLOAD);
             JSONArray hits = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
             for (int i = 0; i < hits.length(); i++) {
@@ -93,7 +96,7 @@ public class SimpleCache implements Cache {
 
     private Set<Integer> getExistedPostsId(WallblerItems data) {
         String socialMediaType = data.getData().get(0).getSocialMediaType();
-        JSONArray existedPosts = getData(socialMediaType);
+        JSONArray existedPosts = getData(socialMediaType, 10000);
         Set<Integer> result = new HashSet<>();
         for (int i = 0; i < existedPosts.length(); i++) {
             result.add(existedPosts.getJSONObject(i).getInt("socialId"));

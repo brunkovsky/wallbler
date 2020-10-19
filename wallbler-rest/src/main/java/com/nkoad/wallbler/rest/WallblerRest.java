@@ -25,8 +25,8 @@ public class WallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Response getData(@QueryParam("socials") String socials,
-                            @QueryParam("accepted") Boolean accepted) {
-        JSONArray data = cache.getData(socials);
+                            @QueryParam("limit") Integer limit) {
+        JSONArray data = cache.getData(socials, limit);
         return status(200).entity(data.toString()).build();
     }
 
