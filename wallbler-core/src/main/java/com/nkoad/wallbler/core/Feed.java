@@ -70,7 +70,7 @@ public abstract class Feed {
         Integer delay = (Integer) properties.get("config.delay");
         if (connector.isAccept()) {
             scheduledFuture = executorService
-                    .scheduleAtFixedRate(connector::getDataLog, 1, delay, TimeUnit.SECONDS);
+                    .scheduleAtFixedRate(connector::loadData, 1, delay, TimeUnit.SECONDS);
         }
     }
 

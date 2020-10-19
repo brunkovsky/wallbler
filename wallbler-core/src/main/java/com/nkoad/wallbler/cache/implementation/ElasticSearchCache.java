@@ -11,24 +11,28 @@ import com.nkoad.wallbler.httpConnector.PUTConnector;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
 @Component(name = "ElasticSearchCache", service = Cache.class)
-public class SimpleCache implements Cache {
-    private static String HOST = "http://localhost:9200/";
-    private static String ADD_URL = HOST + "%s/_doc/%s";
-    private static String SEARCH_URL = HOST + "%s/_search?size=%d";
-    private static String UPDATE_URL = HOST + "%s/_doc/%s/_update";
-    private static String REMOVE_URL = HOST + "%s/_delete_by_query";
-    private static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
-    private static String ACCEPT_PAYLOAD = "{\"doc\":{\"accepted\":%s}}";
-    private static String REMOVE_BY_FEED_PID_PAYLOAD = "{\"query\":{\"match\":{\"feedPid\":\"%s\"}}}";
+public class ElasticSearchCache implements Cache {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchCache.class);
+    private final static String HOST = "http://localhost:9200/";
+    private final static String ADD_URL = HOST + "%s/_doc/%s";
+    private final static String SEARCH_URL = HOST + "%s/_search?size=%d";
+    private final static String UPDATE_URL = HOST + "%s/_doc/%s/_update";
+    private final static String REMOVE_URL = HOST + "%s/_delete_by_query";
+    private final static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
+    private final static String ACCEPT_PAYLOAD = "{\"doc\":{\"accepted\":%s}}";
+    private final static String REMOVE_BY_FEED_PID_PAYLOAD = "{\"query\":{\"match\":{\"feedPid\":\"%s\"}}}";
 
     @Override
     public void add(WallblerItems data) {
+        LOGGER.info("got new data. feed name: " + data.getData().get(0).getFeedName());
         HTTPConnector httpConnector = new PUTConnector();
         Set<Integer> existedPostsId = getExistedPostsId(data);
         long lastRefreshDate = data.getLastRefreshDate();
@@ -51,7 +55,7 @@ public class SimpleCache implements Cache {
     public JSONArray getData(String socials, Integer limit) {
         JSONArray result = new JSONArray();
         try {
-            if (limit == null || limit <= 0 || limit > 10000) {
+            if (limit == null || limit < 0 || limit > 10000) {
                 limit = 10000;
             }
             String url = String.format(SEARCH_URL, Objects.toString(socials, ""), limit);
@@ -86,7 +90,7 @@ public class SimpleCache implements Cache {
     @Override
     public void removeFromCache(String feedPid) {
         try {
-            String url = String.format(REMOVE_URL, feedPid.split("\\.")[5]);
+            String url = String.format(REMOVE_URL, feedPid);
             String payload = String.format(REMOVE_BY_FEED_PID_PAYLOAD, feedPid);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
