@@ -45,6 +45,9 @@ public class SimpleCache implements Cache {
     @Override
     public JSONArray getData(String socials) {
         System.out.println("---------------getData");
+        if (socials == null) {
+            socials = "";
+        }
         JSONArray result = new JSONArray();
         try {
             String url = String.format(SEARCH_URL, socials);
