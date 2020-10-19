@@ -28,18 +28,21 @@ public class ElasticSearchCache implements Cache {
     private final static String REMOVE_URL = HOST + "%s/_delete_by_query";
     private final static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
     private final static String ACCEPT_PAYLOAD = "{\"doc\":{\"accepted\":%s}}";
-    private final static String REMOVE_BY_FEED_PID_PAYLOAD = "{\"query\":{\"match\":{\"feedPid\":\"%s\"}}}";
+    private final static String REMOVE_BY_FEED_NAME_PAYLOAD = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
+    private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elastic search
 
     @Override
-    public void add(WallblerItems data) {
-        LOGGER.info("got new data. feed name: " + data.getData().get(0).getFeedName());
+    public void add(WallblerItems wallblerItems) {
+        WallblerItem firstWallblerItem = wallblerItems.getData().get(0);
+        LOGGER.info("got new data. feed name: " + firstWallblerItem.getFeedName());
+        String socialMediaType = firstWallblerItem.getSocialMediaType();
+        Set<Integer> existedPostsId = getExistedPostsId(socialMediaType);
+        long lastRefreshDate = wallblerItems.getLastRefreshDate();
         HTTPConnector httpConnector = new PUTConnector();
-        Set<Integer> existedPostsId = getExistedPostsId(data);
-        long lastRefreshDate = data.getLastRefreshDate();
-        data.getData().stream()
+        wallblerItems.getData().stream()
                 .filter(a -> !existedPostsId.contains(a.getSocialId()))
                 .forEach(a -> {
-                    String url = String.format(ADD_URL, a.getSocialMediaType(), a.getSocialId());
+                    String url = String.format(ADD_URL, socialMediaType, a.getSocialId());
                     JSONObject jsonObject = new JSONObject(a);
                     jsonObject.put("lastRefreshDate", lastRefreshDate);
                     String payload = jsonObject.toString();
@@ -55,8 +58,8 @@ public class ElasticSearchCache implements Cache {
     public JSONArray getData(String socials, Integer limit) {
         JSONArray result = new JSONArray();
         try {
-            if (limit == null || limit < 0 || limit > 10000) {
-                limit = 10000;
+            if (limit == null || limit < 0 || limit > MAX_LIMIT) {
+                limit = MAX_LIMIT;
             }
             String url = String.format(SEARCH_URL, Objects.toString(socials, ""), limit);
             HTTPRequest httpRequest = new GETConnector().httpRequest(url, SEARCH_PAYLOAD);
@@ -88,19 +91,18 @@ public class ElasticSearchCache implements Cache {
     }
 
     @Override
-    public void removeFromCache(String feedPid) {
+    public void removeFromCache(String socialMediaType, String feedName) {
         try {
-            String url = String.format(REMOVE_URL, feedPid);
-            String payload = String.format(REMOVE_BY_FEED_PID_PAYLOAD, feedPid);
+            String url = String.format(REMOVE_URL, socialMediaType);
+            String payload = String.format(REMOVE_BY_FEED_NAME_PAYLOAD, feedName);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private Set<Integer> getExistedPostsId(WallblerItems data) {
-        String socialMediaType = data.getData().get(0).getSocialMediaType();
-        JSONArray existedPosts = getData(socialMediaType, 10000);
+    private Set<Integer> getExistedPostsId(String socialMediaType) {
+        JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT);
         Set<Integer> result = new HashSet<>();
         for (int i = 0; i < existedPosts.length(); i++) {
             result.add(existedPosts.getJSONObject(i).getInt("socialId"));

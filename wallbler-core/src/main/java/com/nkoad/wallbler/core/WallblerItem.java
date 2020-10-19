@@ -1,10 +1,10 @@
 package com.nkoad.wallbler.core;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class WallblerItem {
     private int socialId;
-    private String feedPid;
     private String feedName;
     private String socialMediaType;
     private String title;
@@ -13,23 +13,15 @@ public class WallblerItem {
     private String url;             // link to the account
     private String linkToSMPage;    // link to the post
     private Boolean accepted;
-//    private long lastRefreshDate;
 
-//    public WallblerItem() {
-//        lastRefreshDate = new Date().getTime();
-//    }
+    public WallblerItem(Map<String, Object> feedProperties) {
+        this.feedName = (String) feedProperties.get("config.name");
+        this.socialMediaType = ((String) feedProperties.get("service.pid")).split("\\.")[5];
+        this.accepted = (boolean) feedProperties.get("config.acceptedByDefault");
+    }
 
     public int getSocialId() {
         return socialId;
-    }
-
-    public String getFeedPid() {
-        return feedPid;
-    }
-
-    public void setFeedPid(String feedPid) {
-        this.feedPid = feedPid;
-        this.socialMediaType = feedPid.split("\\.")[5];
     }
 
     public String getFeedName() {
@@ -91,14 +83,6 @@ public class WallblerItem {
     public void setAccepted(Boolean accepted) {
         this.accepted = accepted;
     }
-
-//    public long getLastRefreshDate() {
-//        return lastRefreshDate;
-//    }
-
-//    public void setLastRefreshDate(long lastRefreshDate) {
-//        this.lastRefreshDate = lastRefreshDate;
-//    }
 
     public void generateSocialId() {
         this.socialId = this.hashCode();

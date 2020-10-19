@@ -52,9 +52,6 @@ public class FacebookConnector extends Connector {
                 for (int i = 0; i < minSize; i++) {
                     JSONObject json = data.getJSONObject(i);
                     FacebookWallblerItem item = feedType.retrieveData(json);
-                    item.setFeedName((String) feedProperties.get("config.name"));
-                    item.setFeedPid((String) feedProperties.get("service.pid"));
-                    item.setAccepted((boolean) feedProperties.get("config.acceptedByDefault"));
                     wallblerItems.add(item);
                 }
                 cache.add(new WallblerItems(wallblerItems));
@@ -68,7 +65,7 @@ public class FacebookConnector extends Connector {
         feedMap.put("posts", new FeedType(API_POST_ACCESS_URL, "permalink_url,full_picture,message,created_time,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem();
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
                 item.setTitle(accountName);
                 item.setUrl(FACEBOOK_URL);
                 item.setDate(setDateProperties(json).getTime());
@@ -86,7 +83,7 @@ public class FacebookConnector extends Connector {
         feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL, "link,images,width,name,created_time,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem();
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
                 item.setTitle("photos");
                 item.generateSocialId();
                 return item;
@@ -98,7 +95,7 @@ public class FacebookConnector extends Connector {
         feedMap.put("videos", new FeedType(API_VIDEO_ACCESS_URL, "permalink_url,description,updated_time,picture,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem();
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
                 item.setTitle("videos");
                 item.generateSocialId();
                 return item;
@@ -110,7 +107,7 @@ public class FacebookConnector extends Connector {
         feedMap.put("albums", new FeedType(API_ALBUM_ACCESS_URL, "name,link,picture,created_time,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem();
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
                 item.setTitle("albums");
                 item.generateSocialId();
                 return item;

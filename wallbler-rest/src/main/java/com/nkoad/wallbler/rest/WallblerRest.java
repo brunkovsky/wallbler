@@ -39,4 +39,13 @@ public class WallblerRest {
         return status(200).build();
     }
 
+    // Delete posts by feed name
+    @Path("/{social_media_type}/{feed_name}")
+    @DELETE
+    public Response deletePostsByFeedName(@PathParam("social_media_type") String socialMediaType,
+                                          @PathParam("feed_name") String feedName) {
+        cache.removeFromCache(socialMediaType, feedName);
+        return status(200).build();
+    }
+
 }

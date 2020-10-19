@@ -2,12 +2,18 @@ package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.core.WallblerItem;
 
+import java.util.Map;
+
 public class FacebookWallblerItem extends WallblerItem {
     private String typeOfFeed;
     private String thumbnailUrl;  // link to the original image
     private Integer likedCount;
     private Integer sharedCount;
     private Integer commentsCount;
+
+    public FacebookWallblerItem(Map<String, Object> feedProperties) {
+        super(feedProperties);
+    }
 
     public String getTypeOfFeed() {
         return typeOfFeed;
