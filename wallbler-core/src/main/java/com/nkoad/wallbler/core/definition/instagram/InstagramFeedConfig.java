@@ -7,10 +7,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 @ObjectClassDefinition(name = "Wallbler Instagram Feed")
 public @interface InstagramFeedConfig {
 
-    @AttributeDefinition(name = "Name", description = "Unique Feed name")
+    @AttributeDefinition(name = "Name", description = "Unique feed name")
     String config_name() default "instagram feed";
 
-    @AttributeDefinition(name = "Account Name", description = "Linked Account Name")
+    @AttributeDefinition(name = "Account name", description = "Linked account name")
     String config_accountName() default "instagram account";
 
     @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")

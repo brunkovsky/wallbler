@@ -9,4 +9,5 @@ public class RSSWallblerItem extends WallblerItem {
     public RSSWallblerItem(Map<String, Object> feedProperties) {
         super(feedProperties);
     }
+
 }

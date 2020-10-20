@@ -8,10 +8,10 @@ import org.osgi.service.metatype.annotations.Option;
 @ObjectClassDefinition(name = "Wallbler RSS Feed")
 public @interface RSSFeedConfig {
 
-    @AttributeDefinition(name = "Name", description = "Unique Feed name")
+    @AttributeDefinition(name = "Name", description = "Unique feed name")
     String config_name() default "rss feed";
 
-    @AttributeDefinition(name = "Account Name", description = "Linked Account Name")
+    @AttributeDefinition(name = "Account name", description = "Linked account name")
     String config_accountName() default "rss account";
 
     @AttributeDefinition(name = "RSS url", description = "RSS url")

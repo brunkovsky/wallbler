@@ -8,10 +8,10 @@ import org.osgi.service.metatype.annotations.Option;
 @ObjectClassDefinition(name = "Wallbler Facebook Feed")
 public @interface FacebookFeedConfig {
 
-    @AttributeDefinition(name = "Name", description = "Unique Feed name")
+    @AttributeDefinition(name = "Name", description = "Unique feed name")
     String config_name() default "facebook feed";
 
-    @AttributeDefinition(name = "Account Name", description = "Linked Account Name")
+    @AttributeDefinition(name = "Account name", description = "Linked account name")
     String config_accountName() default "facebook account";
 
     @AttributeDefinition(name = "Type of feed", options = { @Option(label = "posts", value = "posts"), @Option(label = "photos", value = "photos"), @Option(label = "videos", value = "videos"), @Option(label = "albums", value = "albums")})
