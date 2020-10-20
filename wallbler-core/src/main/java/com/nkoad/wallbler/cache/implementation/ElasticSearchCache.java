@@ -56,6 +56,7 @@ public class ElasticSearchCache implements Cache {
 
     @Override
     public JSONArray getData(String socials, Integer limit) {
+        LOGGER.info("getting data from cache. socials: " + socials + ". limit: " + limit);
         JSONArray result = new JSONArray();
         try {
             if (limit == null || limit < 0 || limit > MAX_LIMIT) {
@@ -82,6 +83,7 @@ public class ElasticSearchCache implements Cache {
         wallblerItems.forEach(a -> {
             String url = String.format(UPDATE_URL, a.getSocialMediaType(), a.getSocialId());
             String payload = String.format(ACCEPT_PAYLOAD, a.isAccepted());
+            LOGGER.info("setting 'accept' field. socialMediaType: " + a.getSocialMediaType() + ". socialId: " + a.getSocialId() + ". accept: " + a.isAccepted());
             try {
                 httpConnector.httpRequest(url, payload);
             } catch (IOException e) {
@@ -92,6 +94,7 @@ public class ElasticSearchCache implements Cache {
 
     @Override
     public void removeFromCache(String socialMediaType, String feedName) {
+        LOGGER.info("removing data from cache. socialMediaType: " + socialMediaType + ". feedName: " + feedName);
         try {
             String url = String.format(REMOVE_URL, socialMediaType);
             String payload = String.format(REMOVE_BY_FEED_NAME_PAYLOAD, feedName);
