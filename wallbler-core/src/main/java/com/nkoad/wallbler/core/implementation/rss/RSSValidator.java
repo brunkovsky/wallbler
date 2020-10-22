@@ -12,6 +12,7 @@ public class RSSValidator extends Validator {
 
     @Override
     public boolean isAccountValid() {
+        LOGGER.info("rss account is valid. account name: " + properties.get("config.name"));
         return true;
     }
 

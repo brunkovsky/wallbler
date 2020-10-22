@@ -1,14 +1,12 @@
 package com.nkoad.wallbler.core.definition.instagram;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.AttributeType;
-import org.osgi.service.metatype.annotations.Icon;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(name = "Wallbler Instagram Account", icon = @Icon(resource = "icon/instagram-32.png", size = 32))
+@ObjectClassDefinition(name = "Wallbler Instagram Account")
 public @interface InstagramAccountConfig {
 
-    @AttributeDefinition(defaultValue = "instagram account", name = "Name", description = "Unique account name")
+    @AttributeDefinition(name = "Name", description = "Unique account name")
     String config_name() default "instagram account";
 
     @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the account")
@@ -20,7 +18,7 @@ public @interface InstagramAccountConfig {
     @AttributeDefinition(name = "Access token")
     String config_accessToken();
 
-    @AttributeDefinition(name = "Refresh", description = "Refresh access token", type = AttributeType.INTEGER, min = "0", required = false)
-    int config_refresh() default 100;
+    @AttributeDefinition(name = "Refresh period. In days", description = "Refresh access token. No refreshing if '0'")
+    int config_refresh() default 14;
 
 }

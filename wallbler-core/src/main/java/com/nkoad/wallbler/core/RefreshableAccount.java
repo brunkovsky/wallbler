@@ -12,11 +12,13 @@ public abstract class RefreshableAccount extends Account<RefreshableValidator> {
 
     protected void activate(Map<String, Object> properties) {
         super.activate(properties);
-        Integer refreshDelay = (Integer) properties.get("config.refresh");
-        if (validator.isAccept()) {
-            scheduledFuture = executorService.schedule(() -> {
-                setAccessToken(properties, refreshAccessToken());
-            }, refreshDelay, TimeUnit.SECONDS);
+        int delayInHours = (int) properties.get("config.refresh") * 24;
+        if (delayInHours > 0 ) {
+            if (validator.isAccept()) {
+                scheduledFuture = executorService.schedule(() -> {
+                    setAccessToken(properties, refreshAccessToken());
+                }, delayInHours, TimeUnit.HOURS);
+            }
         }
     }
 

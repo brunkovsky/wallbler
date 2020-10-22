@@ -16,7 +16,7 @@ public @interface InstagramFeedConfig {
     @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")
     boolean config_enabled() default true;
 
-    @AttributeDefinition(name = "Delay", description = "Delay in hours", type = AttributeType.INTEGER)
+    @AttributeDefinition(name = "Refresh period. In hours")
     int config_delay() default 1;
 
     @AttributeDefinition(name = "Accepted by default")
