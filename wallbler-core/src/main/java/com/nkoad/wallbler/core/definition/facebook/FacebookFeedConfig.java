@@ -20,11 +20,9 @@ public @interface FacebookFeedConfig {
     @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")
     boolean config_enabled() default true;
 
-    @AttributeDefinition(name = "Count", description = "Quantity", type = AttributeType.INTEGER)
-    int config_count() default 1;
+    @AttributeDefinition(name = "Delay", description = "Delay in hours", type = AttributeType.INTEGER)
+    int config_delay() default 1;
 
-    @AttributeDefinition(name = "Delay", description = "Delay in seconds", type = AttributeType.INTEGER)
-    int config_delay() default 100;
 
     @AttributeDefinition(name = "Accepted by default")
     boolean config_acceptedByDefault() default true;

@@ -67,10 +67,10 @@ public abstract class Feed {
     }
 
     private void execute(Map<String, Object> properties) {
-        Integer delay = (Integer) properties.get("config.delay");
+        int delayInSeconds = (int) properties.get("config.delay") * 60 * 60;
         if (connector.isAccept()) {
             scheduledFuture = executorService
-                    .scheduleAtFixedRate(connector::loadData, 1, delay, TimeUnit.SECONDS);
+                    .scheduleAtFixedRate(connector::loadData, 1, delayInSeconds, TimeUnit.SECONDS);
         }
     }
 

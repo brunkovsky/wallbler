@@ -40,7 +40,6 @@ public class FacebookConnector extends Connector {
     @Override
     public void loadData() {
         try {
-            int count = (int) feedProperties.get("config.count");
             String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
             FeedType feedType = feedMap.get(typeOfFeed);
             String url = feedType.buildFullUrl();
@@ -48,8 +47,7 @@ public class FacebookConnector extends Connector {
             if (httpRequest.getStatusCode() == 200) {
                 List<WallblerItem> wallblerItems = new ArrayList<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
-                int minSize = Math.min(data.length(), count);
-                for (int i = 0; i < minSize; i++) {
+                for (int i = 0; i < data.length(); i++) {
                     JSONObject json = data.getJSONObject(i);
                     FacebookWallblerItem item = feedType.retrieveData(json);
                     wallblerItems.add(item);
