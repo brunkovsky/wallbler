@@ -1,7 +1,5 @@
 package com.nkoad.wallbler.rest;
 
-import com.nkoad.wallbler.exception.AccountAlreadyExistsException;
-import com.nkoad.wallbler.exception.ConfigNotFoundException;
 import com.nkoad.wallbler.service.OsgiConfigurationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -9,7 +7,6 @@ import org.osgi.service.component.annotations.Reference;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +15,7 @@ import java.util.stream.Collectors;
 import static javax.ws.rs.core.Response.status;
 
 @Path("/wallbler")
-@Component(name = "Account Wallbler Rest Service", service = AccountWallblerRest.class, property = {"osgi.jaxrs.resource=true"})
+@Component(name = "Account_Wallbler_Rest_Service", service = AccountWallblerRest.class, property = {"osgi.jaxrs.resource=true"})
 public class AccountWallblerRest {
     @Reference
     private OsgiConfigurationService osgiService;

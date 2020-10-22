@@ -15,10 +15,6 @@
     <name>Wallbler Core</name>
     <packaging>bundle</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -54,9 +50,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.groupId}.${pom.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>${pom.name}</Bundle-Name>
-                        <Bundle-Version>${pom.version}</Bundle-Version>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Activator>
                             com.nkoad.wallbler.activator.Activator
                         </Bundle-Activator>
@@ -68,14 +64,6 @@
                             com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition,com.nkoad.wallbler.service,com.nkoad.wallbler.exception,com.nkoad.wallbler.httpConnector
                         </Export-Package>
                     </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
                 </configuration>
             </plugin>
         </plugins>

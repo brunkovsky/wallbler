@@ -3,7 +3,6 @@ package com.nkoad.wallbler.rest;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.WallblerItem;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -16,7 +15,7 @@ import java.util.List;
 import static javax.ws.rs.core.Response.status;
 
 @Path("/wallbler")
-@Component(name = "Wallbler Rest Service", service = WallblerRest.class, property = {"osgi.jaxrs.resource=true"})
+@Component(name = "Wallbler_Rest_Service", service = WallblerRest.class, property = {"osgi.jaxrs.resource=true"})
 public class WallblerRest {
     @Reference
     private Cache cache;
