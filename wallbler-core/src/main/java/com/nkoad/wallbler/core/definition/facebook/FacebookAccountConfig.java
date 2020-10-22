@@ -13,7 +13,7 @@ public @interface FacebookAccountConfig {
     boolean config_enabled() default true;
 
     @AttributeDefinition(name = "Is valid", description = "It indicates is the account valid. You should not set this checkbox. It will set automatically")
-    boolean config_valid() default false;
+    boolean config_valid();
 
     @AttributeDefinition(name = "Group Key")
     String config_groupId() default "663377994414452";

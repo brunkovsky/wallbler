@@ -19,6 +19,18 @@ public abstract class Connector {
         this.cache = cache;
     }
 
+    protected String getFeedPropertyAsString(String property) {
+        return (String) feedProperties.get(property);
+    }
+
+    protected Boolean getFeedPropertyAsBoolean(String property) {
+        return (Boolean) feedProperties.get(property);
+    }
+
+    protected String getAccountPropertyAsString(String property) {
+        return (String) accountProperties.get(property);
+    }
+
     abstract public void loadData();
 
 //    public void removeFromCache(String feedPid) {

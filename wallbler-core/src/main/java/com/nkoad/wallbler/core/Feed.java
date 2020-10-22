@@ -51,11 +51,11 @@ public abstract class Feed {
         try {
             Configuration[] configurations = Activator.configAdmin.listConfigurations(accountIdentifier);
             if (configurations == null || configurations.length == 0) {
-                LOGGER.warn("no account found");
+                LOGGER.error("no account found");
                 return new Hashtable<>();
             }
             if (configurations.length > 1) {
-                LOGGER.warn("non unique account name found");
+                LOGGER.error("non unique account name found");
                 return new Hashtable<>();
             }
             return configurations[0].getProperties();

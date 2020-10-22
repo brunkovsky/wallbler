@@ -15,7 +15,7 @@ public @interface InstagramAccountConfig {
     boolean config_enabled() default true;
 
     @AttributeDefinition(name = "Is valid", description = "It indicates is the account valid. You should not set this checkbox. It will set automatically")
-    boolean config_valid() default false;
+    boolean config_valid();
 
     @AttributeDefinition(name = "Access token")
     String config_accessToken();
