@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,22 +20,27 @@ public abstract class Feed {
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
     private ScheduledFuture scheduledFuture;
 
-    protected abstract void assignConnector(Map<String, Object> properties);
+    protected abstract void assignConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties);
 
-    protected void activate(Map<String, Object> properties) {
-        LOGGER.info("feed activate: " + properties.get("config.name"));
-        assignConnector(properties);
-        execute(properties);
+    protected void activate(Map<String, Object> feedProperties) {
+        LOGGER.info("feed activate: " + feedProperties.get("config.name"));
+        Dictionary<String, Object> accountProperties = extractAccountProperties(feedProperties);
+        if (accountProperties != null) {
+            assignConnector(feedProperties, accountProperties);
+            execute(feedProperties);
+        } else {
+            LOGGER.error("can not assign connector for feed: " + feedProperties.get("config.name"));
+        }
     }
 
-    protected void modified(Map<String, Object> properties) {
-        LOGGER.info("feed modified: " + properties.get("config.name"));
-        deactivate(properties);
-        activate(properties);
+    protected void modified(Map<String, Object> feedProperties) {
+        LOGGER.info("feed modified: " + feedProperties.get("config.name"));
+        deactivate(feedProperties);
+        activate(feedProperties);
     }
 
-    protected void deactivate(Map<String, Object> properties) {
-        LOGGER.info("feed deactivate: " + properties.get("config.name"));
+    protected void deactivate(Map<String, Object> feedProperties) {
+        LOGGER.info("feed deactivate: " + feedProperties.get("config.name"));
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
@@ -52,22 +56,22 @@ public abstract class Feed {
             Configuration[] configurations = Activator.configAdmin.listConfigurations(accountIdentifier);
             if (configurations == null || configurations.length == 0) {
                 LOGGER.error("no account found");
-                return new Hashtable<>();
+                return null;
             }
             if (configurations.length > 1) {
                 LOGGER.error("non unique account name found");
-                return new Hashtable<>();
+                return null;
             }
             return configurations[0].getProperties();
         } catch (IOException | InvalidSyntaxException e) {
             e.printStackTrace();
         }
         LOGGER.error("something unexpected happened");
-        return new Hashtable<>();
+        return null;
     }
 
-    private void execute(Map<String, Object> properties) {
-        int delayInSeconds = (int) properties.get("config.delay") * 60 * 60;
+    private void execute(Map<String, Object> feedProperties) {
+        int delayInSeconds = (int) feedProperties.get("config.delay") * 60 * 60;
         if (connector.isAccept()) {
             scheduledFuture = executorService
                     .scheduleAtFixedRate(connector::loadData, 1, delayInSeconds, TimeUnit.SECONDS);

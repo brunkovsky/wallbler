@@ -6,6 +6,7 @@ import com.nkoad.wallbler.core.Feed;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 
+import java.util.Dictionary;
 import java.util.Map;
 
 @Component
@@ -15,8 +16,8 @@ public class RSSFeed extends Feed {
     private Cache cache;
 
     @Override
-    public void assignConnector(Map<String, Object> properties) {
-        connector = new RSSConnector(properties, extractAccountProperties(properties), cache);
+    public void assignConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties) {
+        connector = new RSSConnector(feedProperties, accountProperties, cache);
     }
 
     @Activate
