@@ -17,7 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component(name = "OSGi_Configuration_Service", service = OsgiConfigurationService.class)
+@Component(name = "OSGiConfigurationService", service = OsgiConfigurationService.class)
 public class OsgiConfigurationService {
     @Reference
     private ConfigurationAdmin configAdmin;

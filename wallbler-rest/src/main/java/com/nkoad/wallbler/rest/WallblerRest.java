@@ -15,7 +15,7 @@ import java.util.List;
 import static javax.ws.rs.core.Response.status;
 
 @Path("/wallbler")
-@Component(name = "Wallbler_Rest_Service", service = WallblerRest.class, property = {"osgi.jaxrs.resource=true"})
+@Component(name = "WallblerRestService", service = WallblerRest.class, property = {"osgi.jaxrs.resource=true"})
 public class WallblerRest {
     @Reference
     private Cache cache;

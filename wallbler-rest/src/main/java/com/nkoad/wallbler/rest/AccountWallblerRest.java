@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static javax.ws.rs.core.Response.status;
 
 @Path("/wallbler")
-@Component(name = "Account_Wallbler_Rest_Service", service = AccountWallblerRest.class, property = {"osgi.jaxrs.resource=true"})
+@Component(name = "AccountWallblerRestService", service = AccountWallblerRest.class, property = {"osgi.jaxrs.resource=true"})
 public class AccountWallblerRest {
     @Reference
     private OsgiConfigurationService osgiService;
