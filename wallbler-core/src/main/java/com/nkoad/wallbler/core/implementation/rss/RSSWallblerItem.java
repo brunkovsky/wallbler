@@ -10,4 +10,20 @@ public class RSSWallblerItem extends WallblerItem {
         super(feedProperties);
     }
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"lastRefreshDate\":" + lastRefreshDate +
+                ",\"socialId\":" + socialId +
+                ",\"socialMediaType\":\"" + socialMediaType + "\"" +
+                ",\"feedName\":\"" + feedName + "\"" +
+                ",\"title\":\"" + title + "\"" +
+                ",\"description\":\"" + description + "\"" +
+                ",\"date\":" + date +
+                ",\"url\":\"" + url + "\"" +
+                ",\"linkToSMPage\":\"" + linkToSMPage + "\"" +
+                ",\"accepted\":" + accepted +
+                "}";
+    }
+
 }

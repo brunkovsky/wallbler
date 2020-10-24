@@ -4,20 +4,29 @@ import java.util.Map;
 import java.util.Objects;
 
 public class WallblerItem {
-    private int socialId;
-    private String feedName;
-    private String socialMediaType;
-    private String title;
-    private String description;
-    private long date;
-    private String url;             // link to the account
-    private String linkToSMPage;    // link to the post
-    private Boolean accepted;
+    protected long lastRefreshDate;
+    protected int socialId;
+    protected String feedName;
+    protected String socialMediaType;
+    protected String title;
+    protected String description;
+    protected long date;
+    protected String url;             // link to the account
+    protected String linkToSMPage;    // link to the post
+    protected Boolean accepted;
 
     public WallblerItem(Map<String, Object> feedProperties) {
         this.feedName = (String) feedProperties.get("config.name");
         this.socialMediaType = ((String) feedProperties.get("service.pid")).split("\\.")[5];
         this.accepted = (boolean) feedProperties.get("config.acceptedByDefault");
+    }
+
+    public long getLastRefreshDate() {
+        return lastRefreshDate;
+    }
+
+    public void setLastRefreshDate(long lastRefreshDate) {
+        this.lastRefreshDate = lastRefreshDate;
     }
 
     public int getSocialId() {
@@ -103,19 +112,6 @@ public class WallblerItem {
     @Override
     public int hashCode() {
         return Objects.hash(title, description, date, url, linkToSMPage);
-    }
-
-    @Override
-    public String toString() {
-        return "SocialMediaItem{" +
-                "socialId='" + socialId + '\'' +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", date=" + date +
-                ", url='" + url + '\'' +
-                ", linkToSMPage='" + linkToSMPage + '\'' +
-                ", accepted=" + accepted +
-                '}';
     }
 
 }

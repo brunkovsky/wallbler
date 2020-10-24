@@ -3,7 +3,6 @@ package com.nkoad.wallbler.core.implementation.rss;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.core.Connector;
-import com.nkoad.wallbler.core.WallblerItems;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
@@ -21,10 +20,12 @@ public class RSSConnector extends Connector {
     public void loadData() {
         String url = (String) feedProperties.get("config.url");
         try {
+            long lastRefreshDate = new Date().getTime();
             SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(url)));
-            List<WallblerItem> wallblerItems = new ArrayList<>();
+            Set<WallblerItem> wallblerItems = new HashSet<>();
             feed.getEntries().forEach(entity -> {
                 WallblerItem item = new RSSWallblerItem(feedProperties);
+                item.setLastRefreshDate(lastRefreshDate);
                 item.setTitle(entity.getTitle());
                 item.setDescription(entity.getDescription().getValue());
                 item.setDate(entity.getPublishedDate().getTime());
@@ -33,7 +34,7 @@ public class RSSConnector extends Connector {
                 item.generateSocialId();
                 wallblerItems.add(item);
             });
-            cache.add(new WallblerItems(wallblerItems));
+            cache.add(wallblerItems);
         } catch (Exception e) {
             LOGGER.error("can't retrieve rss data, feed url: " + url);
             e.printStackTrace();

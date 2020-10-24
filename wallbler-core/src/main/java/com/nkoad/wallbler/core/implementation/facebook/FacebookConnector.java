@@ -1,7 +1,6 @@
 package com.nkoad.wallbler.core.implementation.facebook;
 
 import com.nkoad.wallbler.cache.definition.Cache;
-import com.nkoad.wallbler.core.WallblerItems;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
@@ -45,14 +44,18 @@ public class FacebookConnector extends Connector {
             String url = feedType.buildFullUrl();
             HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                List<WallblerItem> wallblerItems = new ArrayList<>();
+                long lastRefreshDate = new Date().getTime();
+                Set<WallblerItem> wallblerItems = new HashSet<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
                 for (int i = 0; i < data.length(); i++) {
                     JSONObject json = data.getJSONObject(i);
                     FacebookWallblerItem item = feedType.retrieveData(json);
+                    item.setLastRefreshDate(lastRefreshDate);
+                    item.setTitle(accountName);
+                    item.setUrl(FACEBOOK_URL);
                     wallblerItems.add(item);
                 }
-                cache.add(new WallblerItems(wallblerItems));
+                cache.add(wallblerItems);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,8 +67,6 @@ public class FacebookConnector extends Connector {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setTitle(accountName);
-                item.setUrl(FACEBOOK_URL);
                 item.setDate(setDateProperties(json).getTime());
                 item.setDescription(setDescriptionProperty(json, "message"));
                 item.setLinkToSMPage(json.getString("permalink_url"));

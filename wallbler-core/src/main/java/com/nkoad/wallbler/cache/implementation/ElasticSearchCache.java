@@ -3,11 +3,9 @@ package com.nkoad.wallbler.cache.implementation;
 import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
-import com.nkoad.wallbler.core.WallblerItems;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.httpConnector.HTTPConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
-import com.nkoad.wallbler.httpConnector.PUTConnector;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
@@ -22,36 +20,31 @@ import java.util.*;
 public class ElasticSearchCache implements Cache {
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchCache.class);
     private final static String HOST = "http://localhost:9200/";
-    private final static String ADD_URL = HOST + "%s/_doc/%s";
+    private final static String ADD_BULK_URL = HOST + "_bulk";
     private final static String SEARCH_URL = HOST + "%s/_search?size=%d";
     private final static String UPDATE_URL = HOST + "%s/_doc/%s/_update";
     private final static String REMOVE_URL = HOST + "%s/_delete_by_query";
     private final static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
     private final static String ACCEPT_PAYLOAD = "{\"doc\":{\"accepted\":%s}}";
     private final static String REMOVE_BY_FEED_NAME_PAYLOAD = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
-    private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elastic search
+    private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
 
     @Override
-    public void add(WallblerItems wallblerItems) {
-        WallblerItem firstWallblerItem = wallblerItems.getData().get(0);
+    public void add(Set<WallblerItem> wallblerItems) {
+        WallblerItem firstWallblerItem = wallblerItems.stream().findAny().get();
         LOGGER.info("got new data. feed name: " + firstWallblerItem.getFeedName());
-        String socialMediaType = firstWallblerItem.getSocialMediaType();
-        Set<Integer> existedPostsId = getExistedPostsId(socialMediaType);
-        long lastRefreshDate = wallblerItems.getLastRefreshDate();
-        HTTPConnector httpConnector = new PUTConnector();
-        wallblerItems.getData().stream()
-                .filter(a -> !existedPostsId.contains(a.getSocialId()))
-                .forEach(a -> {
-                    String url = String.format(ADD_URL, socialMediaType, a.getSocialId());
-                    JSONObject jsonObject = new JSONObject(a);
-                    jsonObject.put("lastRefreshDate", lastRefreshDate);
-                    String payload = jsonObject.toString();
-                    try {
-                        httpConnector.httpRequest(url, payload);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+        Set<Integer> existedPostsId = getExistedPostsId(firstWallblerItem.getSocialMediaType());
+        StringBuilder payload = new StringBuilder();
+        for (WallblerItem wallblerItem : wallblerItems) {
+            if (!existedPostsId.contains(wallblerItem.getSocialId())) {
+                generateBulkPayload(payload, wallblerItem);
+            }
+        }
+        try {
+            new POSTConnector().httpRequest(ADD_BULK_URL, payload.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -112,5 +105,17 @@ public class ElasticSearchCache implements Cache {
         }
         return result;
     }
+
+    private void generateBulkPayload(StringBuilder payload, WallblerItem wallblerItem) {
+        payload.append("{\"index\":{\"_index\":\"")
+                .append(wallblerItem.getSocialMediaType())
+                .append("\",\"_id\":\"")
+                .append(wallblerItem.getSocialId())
+                .append("\"}}\n")
+                .append(wallblerItem.toString())
+                .append("\n");
+    }
+
+//    private void deleteOldPosts()
 
 }
