@@ -55,4 +55,25 @@ public class FacebookWallblerItem extends WallblerItem {
         this.commentsCount = commentsCount;
     }
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"lastRefreshDate\":" + lastRefreshDate +
+                ",\"socialId\":" + socialId +
+                ",\"socialMediaType\":\"" + socialMediaType + "\"" +
+                ",\"feedName\":\"" + feedName + "\"" +
+                ",\"title\":\"" + title + "\"" +
+                ",\"description\":\"" + description + "\"" +
+                ",\"date\":" + date +
+                ",\"url\":\"" + url + "\"" +
+                ",\"linkToSMPage\":\"" + linkToSMPage + "\"" +
+                ",\"typeOfFeed\":\"" + typeOfFeed + "\"" +
+                ",\"thumbnailUrl\":\"" + thumbnailUrl + "\"" +
+                ",\"likedCount\":" + likedCount +
+                ",\"sharedCount\":" + sharedCount +
+                ",\"commentsCount\":" + commentsCount +
+                ",\"accepted\":" + accepted +
+                "}";
+    }
+
 }

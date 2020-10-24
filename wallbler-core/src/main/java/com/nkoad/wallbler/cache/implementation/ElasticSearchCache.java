@@ -32,16 +32,11 @@ public class ElasticSearchCache implements Cache {
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
         WallblerItem firstWallblerItem = wallblerItems.stream().findAny().get();
-        LOGGER.info("got new data. feed name: " + firstWallblerItem.getFeedName());
+        LOGGER.info("putting data to cache. socials: " + firstWallblerItem.getSocialMediaType() + ". feed name: " + firstWallblerItem.getFeedName());
         Set<Integer> existedPostsId = getExistedPostsId(firstWallblerItem.getSocialMediaType());
-        StringBuilder payload = new StringBuilder();
-        for (WallblerItem wallblerItem : wallblerItems) {
-            if (!existedPostsId.contains(wallblerItem.getSocialId())) {
-                generateBulkPayload(payload, wallblerItem);
-            }
-        }
+        String payload = generateBulkPayload(wallblerItems, existedPostsId);
         try {
-            new POSTConnector().httpRequest(ADD_BULK_URL, payload.toString());
+            new POSTConnector().httpRequest(ADD_BULK_URL, payload);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,7 +44,7 @@ public class ElasticSearchCache implements Cache {
 
     @Override
     public JSONArray getData(String socials, Integer limit) {
-        LOGGER.info("getting data from cache. socials: " + socials + ". limit: " + limit);
+        LOGGER.debug("getting data from cache. socials: " + socials + ". limit: " + limit);
         JSONArray result = new JSONArray();
         try {
             if (limit == null || limit < 0 || limit > MAX_LIMIT) {
@@ -106,14 +101,20 @@ public class ElasticSearchCache implements Cache {
         return result;
     }
 
-    private void generateBulkPayload(StringBuilder payload, WallblerItem wallblerItem) {
-        payload.append("{\"index\":{\"_index\":\"")
-                .append(wallblerItem.getSocialMediaType())
-                .append("\",\"_id\":\"")
-                .append(wallblerItem.getSocialId())
-                .append("\"}}\n")
-                .append(wallblerItem.toString())
-                .append("\n");
+    private String generateBulkPayload(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) {
+        StringBuilder payload = new StringBuilder();
+        for (WallblerItem wallblerItem : wallblerItems) {
+            if (!existedPostsId.contains(wallblerItem.getSocialId())) {
+                payload.append("{\"index\":{\"_index\":\"")
+                        .append(wallblerItem.getSocialMediaType())
+                        .append("\",\"_id\":\"")
+                        .append(wallblerItem.getSocialId())
+                        .append("\"}}\n")
+                        .append(wallblerItem.toString())
+                        .append("\n");
+            }
+        }
+        return payload.toString();
     }
 
 //    private void deleteOldPosts()
