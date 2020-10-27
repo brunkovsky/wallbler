@@ -30,7 +30,7 @@ public class InstagramAccount extends RefreshableAccount {
     @Modified
     public void modified(Map<String, Object> properties) {
         super.modified(properties);
-        setValid(properties);
+//        setValid(properties);
     }
 
     @Deactivate

@@ -4,7 +4,6 @@ import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.httpConnector.GETConnector;
-import com.nkoad.wallbler.httpConnector.HTTPConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,26 +19,28 @@ import java.util.*;
 public class ElasticSearchCache implements Cache {
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchCache.class);
     private final static String HOST = "http://localhost:9200/";
-    private final static String ADD_BULK_URL = HOST + "_bulk";
+    private final static String BULK_URL = HOST + "_bulk";
     private final static String SEARCH_URL = HOST + "%s/_search?size=%d";
-    private final static String UPDATE_URL = HOST + "%s/_doc/%s/_update";
-    private final static String REMOVE_URL = HOST + "%s/_delete_by_query";
+    private final static String DELETE_URL = HOST + "%s/_delete_by_query";
     private final static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
-    private final static String ACCEPT_PAYLOAD = "{\"doc\":{\"accepted\":%s}}";
-    private final static String REMOVE_BY_FEED_NAME_PAYLOAD = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
+    private final static String DELETE_BY_FEED_NAME_PAYLOAD = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
+    private final static int WALLBLER_MAX_LIMIT = 8;  // max limit for each social type in the cache
 
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
-        WallblerItem firstWallblerItem = wallblerItems.stream().findAny().get();
-        LOGGER.info("putting data to cache. socials: " + firstWallblerItem.getSocialMediaType() + ". feed name: " + firstWallblerItem.getFeedName());
-        Set<Integer> existedPostsId = getExistedPostsId(firstWallblerItem.getSocialMediaType());
-        String payload = generateBulkPayload(wallblerItems, existedPostsId);
-        try {
-            new POSTConnector().httpRequest(ADD_BULK_URL, payload);
-        } catch (IOException e) {
-            e.printStackTrace();
+        WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
+        LOGGER.info("putting data to cache. social: " + wallblerItem.getSocialMediaType() + ". feed name: " + wallblerItem.getFeedName());
+        ExistedPosts existedPosts = getExistedPostsAsDateVsSocialId(wallblerItem.getSocialMediaType());
+        String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getExisted().values()));
+        if (!payload.isEmpty()) {
+            try {
+                new POSTConnector().httpRequest(BULK_URL, payload);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        deleteOldPosts(wallblerItem.getSocialMediaType(), existedPosts.getOutDated().values());
     }
 
     @Override
@@ -56,10 +57,8 @@ public class ElasticSearchCache implements Cache {
             for (int i = 0; i < hits.length(); i++) {
                 result.put(hits.getJSONObject(i).getJSONObject("_source"));
             }
-        }
-        catch (FileNotFoundException ignore) {
-        }
-        catch (IOException e) {
+        } catch (FileNotFoundException ignore) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return result;
@@ -67,41 +66,57 @@ public class ElasticSearchCache implements Cache {
 
     @Override
     public void setAccept(List<WallblerItem> wallblerItems) {
-        HTTPConnector httpConnector = new POSTConnector();
-        wallblerItems.forEach(a -> {
-            String url = String.format(UPDATE_URL, a.getSocialMediaType(), a.getSocialId());
-            String payload = String.format(ACCEPT_PAYLOAD, a.isAccepted());
-            LOGGER.info("setting 'accept' field. socialMediaType: " + a.getSocialMediaType() + ". socialId: " + a.getSocialId() + ". accept: " + a.isAccepted());
+        String payload = generateBulkPayloadForGetting(wallblerItems);
+        if (!payload.isEmpty()) {
             try {
-                httpConnector.httpRequest(url, payload);
+                new POSTConnector().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }
     }
 
     @Override
-    public void removeFromCache(String socialMediaType, String feedName) {
+    public void deletePostsByFeedName(String socialMediaType, String feedName) {
         LOGGER.info("removing data from cache. socialMediaType: " + socialMediaType + ". feedName: " + feedName);
         try {
-            String url = String.format(REMOVE_URL, socialMediaType);
-            String payload = String.format(REMOVE_BY_FEED_NAME_PAYLOAD, feedName);
+            String url = String.format(DELETE_URL, socialMediaType);
+            String payload = String.format(DELETE_BY_FEED_NAME_PAYLOAD, feedName);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private Set<Integer> getExistedPostsId(String socialMediaType) {
+    private void deleteOldPosts(String socialMediaType, Collection<Integer> outdatedPosts) {
+        LOGGER.info("removing outdatedPosts from cache...");
+        try {
+            Thread.sleep(3000);
+            LOGGER.info("...socialMediaType to remove: " + socialMediaType + ". socialIds: " + outdatedPosts);
+            String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
+            if (!payload.isEmpty()) {
+                try {
+                    new POSTConnector().httpRequest(BULK_URL, payload);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ExistedPosts getExistedPostsAsDateVsSocialId(String socialMediaType) {
         JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT);
-        Set<Integer> result = new HashSet<>();
+        ExistedPosts result = new ExistedPosts();
         for (int i = 0; i < existedPosts.length(); i++) {
-            result.add(existedPosts.getJSONObject(i).getInt("socialId"));
+            JSONObject jsonObject = existedPosts.getJSONObject(i);
+            result.put(jsonObject.getLong("date"), jsonObject.getInt("socialId"));
         }
         return result;
     }
 
-    private String generateBulkPayload(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) {
+    private String generateBulkPayloadForAdding(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) {
         StringBuilder payload = new StringBuilder();
         for (WallblerItem wallblerItem : wallblerItems) {
             if (!existedPostsId.contains(wallblerItem.getSocialId())) {
@@ -117,6 +132,52 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-//    private void deleteOldPosts()
+    private String generateBulkPayloadForGetting(List<WallblerItem> wallblerItems) {
+        StringBuilder payload = new StringBuilder();
+        for (WallblerItem wallblerItem : wallblerItems) {
+            payload.append("{\"update\":{\"_index\":\"")
+                    .append(wallblerItem.getSocialMediaType())
+                    .append("\",\"_id\":\"")
+                    .append(wallblerItem.getSocialId())
+                    .append("\"}}\n")
+                    .append("{\"doc\":{\"accepted\":")
+                    .append(wallblerItem.isAccepted())
+                    .append("}}\n");
+        }
+        return payload.toString();
+    }
+
+    private String generateBulkPayloadForDeleting(String socialMediaType, Collection<Integer> outdatedPosts) {
+        StringBuilder payload = new StringBuilder();
+        for (Integer outdatedPost : outdatedPosts) {
+            payload.append("{\"delete\":{\"_index\":\"")
+                    .append(socialMediaType)
+                    .append("\",\"_id\":\"")
+                    .append(outdatedPost)
+                    .append("\"}}\n");
+        }
+        return payload.toString();
+    }
+
+    static class ExistedPosts {
+        private Map<Long, Integer> existed = new HashMap<>();
+        private Map<Long, Integer> outDated = new HashMap<>();
+
+        Map<Long, Integer> getExisted() {
+            return existed;
+        }
+
+        Map<Long, Integer> getOutDated() {
+            return outDated;
+        }
+
+        void put(Long date, Integer socialId) {
+            if (existed.size() < WALLBLER_MAX_LIMIT) {
+                existed.put(date, socialId);
+            } else {
+                outDated.put(date, socialId);
+            }
+        }
+    }
 
 }

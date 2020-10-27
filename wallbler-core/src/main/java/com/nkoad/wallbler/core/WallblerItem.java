@@ -1,9 +1,10 @@
 package com.nkoad.wallbler.core;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
-public class WallblerItem {
+public class WallblerItem implements Serializable {
     protected long lastRefreshDate;
     protected int socialId;
     protected String feedName;
@@ -14,6 +15,9 @@ public class WallblerItem {
     protected String url;             // link to the account
     protected String linkToSMPage;    // link to the post
     protected Boolean accepted;
+
+    public WallblerItem() {
+    }
 
     public WallblerItem(Map<String, Object> feedProperties) {
         this.feedName = (String) feedProperties.get("config.name");

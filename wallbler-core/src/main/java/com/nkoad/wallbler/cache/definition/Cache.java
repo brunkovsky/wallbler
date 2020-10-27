@@ -10,5 +10,5 @@ public interface Cache {
     void add(Set<WallblerItem> data);
     JSONArray getData(String socials, Integer limit);
     void setAccept(List<WallblerItem> wallblerItems);
-    void removeFromCache(String socialMediaType, String feedName);
+    void deletePostsByFeedName(String socialMediaType, String feedName);
 }

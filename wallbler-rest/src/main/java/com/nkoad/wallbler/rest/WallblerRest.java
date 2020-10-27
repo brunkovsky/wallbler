@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.util.List;
+import java.util.Set;
 
 import static javax.ws.rs.core.Response.status;
 
@@ -43,7 +44,7 @@ public class WallblerRest {
     @DELETE
     public Response deletePostsByFeedName(@PathParam("social_media_type") String socialMediaType,
                                           @PathParam("feed_name") String feedName) {
-        cache.removeFromCache(socialMediaType, feedName);
+        cache.deletePostsByFeedName(socialMediaType, feedName);
         return status(200).build();
     }
 

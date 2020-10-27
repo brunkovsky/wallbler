@@ -1,4 +1,4 @@
-feature:repo-add mvn:com.nkoad/wallbler-features/LATEST/xml
+feature:repo-add mvn:com.nkoad/wallbler-features/3.0-SNAPSHOT/xml
 feature:install wallbler
 
 ssh -p 8101 karaf@localhost
