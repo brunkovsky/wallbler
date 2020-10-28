@@ -27,6 +27,8 @@ public class ElasticSearchCache implements Cache {
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
     private final static int WALLBLER_MAX_LIMIT = 8;  // max limit for each social type in the cache
 
+
+    // TODO : The final line of data must end with a newline character \n. Each newline character may be preceded by a carriage return \r. When sending requests to the _bulk endpoint, the Content-Type header should be set to application/x-ndjson.
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
         WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
@@ -89,20 +91,22 @@ public class ElasticSearchCache implements Cache {
     }
 
     private void deleteOldPosts(String socialMediaType, Collection<Integer> outdatedPosts) {
-        LOGGER.info("removing outdatedPosts from cache...");
-        try {
-            Thread.sleep(3000);
-            LOGGER.info("...socialMediaType to remove: " + socialMediaType + ". socialIds: " + outdatedPosts);
-            String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
-            if (!payload.isEmpty()) {
-                try {
-                    new POSTConnector().httpRequest(BULK_URL, payload);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (!outdatedPosts.isEmpty()) {
+            LOGGER.info("removing outdatedPosts from cache...");
+            try {
+                Thread.sleep(3000);
+                LOGGER.info("...socialMediaType to remove: " + socialMediaType + ". socialIds: " + outdatedPosts);
+                String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
+                if (!payload.isEmpty()) {
+                    try {
+                        new POSTConnector().httpRequest(BULK_URL, payload);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
@@ -125,7 +129,7 @@ public class ElasticSearchCache implements Cache {
                         .append("\",\"_id\":\"")
                         .append(wallblerItem.getSocialId())
                         .append("\"}}\n")
-                        .append(wallblerItem.toString())
+                        .append(new JSONObject(wallblerItem))
                         .append("\n");
             }
         }
