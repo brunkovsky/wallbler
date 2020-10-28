@@ -4,7 +4,6 @@ import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.httpConnector.GETConnector;
-import com.nkoad.wallbler.httpConnector.HTTPConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,8 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.util.*;
 
 @Component(name = "ElasticSearchCache", service = Cache.class)
@@ -23,20 +20,19 @@ public class ElasticSearchCache implements Cache {
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchCache.class);
     private final static String HOST = "http://localhost:9200/";
     private final static String BULK_URL = HOST + "_bulk";
-    private final static String SEARCH_URL = HOST + "%s/_search?size=%d";
-    private final static String DELETE_URL = HOST + "%s/_delete_by_query";
+    private final static String SEARCH_URL_TEMPLATE = HOST + "%s/_search?size=%d";
+    private final static String DELETE_URL_TEMPLATE = HOST + "%s/_delete_by_query";
     private final static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
-    private final static String DELETE_BY_FEED_NAME_PAYLOAD = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
+    private final static String DELETE_BY_FEED_NAME_PAYLOAD_TEMPLATE = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
     private final static int WALLBLER_MAX_LIMIT = 25;  // max limit for each social type in the cache
 
-    // TODO : The final line of data must end with a newline character \n. Each newline character may be preceded by a carriage return \r. When sending requests to the _bulk endpoint, the Content-Type header should be set to application/x-ndjson.
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
         WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
         LOGGER.info("putting data to cache. social: " + wallblerItem.getSocialMediaType() + ". feed name: " + wallblerItem.getFeedName());
         ExistedPosts existedPosts = getExistedPostsAsDateVsSocialId(wallblerItem.getSocialMediaType());
-        String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getExisted().values()));
+        String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getRecent().values()));
         if (!payload.isEmpty()) {
             try {
                 new POSTConnector() {
@@ -48,7 +44,7 @@ public class ElasticSearchCache implements Cache {
                 e.printStackTrace();
             }
         }
-        Collection<Integer> outdatedPosts = existedPosts.getOutDated().values();
+        Collection<Integer> outdatedPosts = existedPosts.getOutdated().values();
         if (!outdatedPosts.isEmpty()) {
             deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPosts);
         }
@@ -62,7 +58,7 @@ public class ElasticSearchCache implements Cache {
             if (limit == null || limit < 0 || limit > MAX_LIMIT) {
                 limit = MAX_LIMIT;
             }
-            String url = String.format(SEARCH_URL, Objects.toString(socials, ""), limit);
+            String url = String.format(SEARCH_URL_TEMPLATE, Objects.toString(socials, ""), limit);
             HTTPRequest httpRequest = new GETConnector().httpRequest(url, SEARCH_PAYLOAD);
             JSONArray hits = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
             for (int i = 0; i < hits.length(); i++) {
@@ -91,8 +87,8 @@ public class ElasticSearchCache implements Cache {
     public void deletePostsByFeedName(String socialMediaType, String feedName) {
         LOGGER.info("deleting data from cache. socialMediaType: " + socialMediaType + ". feedName: " + feedName);
         try {
-            String url = String.format(DELETE_URL, socialMediaType);
-            String payload = String.format(DELETE_BY_FEED_NAME_PAYLOAD, feedName);
+            String url = String.format(DELETE_URL_TEMPLATE, socialMediaType);
+            String payload = String.format(DELETE_BY_FEED_NAME_PAYLOAD_TEMPLATE, feedName);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,22 +161,22 @@ public class ElasticSearchCache implements Cache {
     }
 
     static class ExistedPosts {
-        private Map<Long, Integer> existed = new HashMap<>();
-        private Map<Long, Integer> outDated = new HashMap<>();
+        private Map<Long, Integer> recent = new HashMap<>();
+        private Map<Long, Integer> outdated = new HashMap<>();
 
-        Map<Long, Integer> getExisted() {
-            return existed;
+        Map<Long, Integer> getRecent() {
+            return recent;
         }
 
-        Map<Long, Integer> getOutDated() {
-            return outDated;
+        Map<Long, Integer> getOutdated() {
+            return outdated;
         }
 
         void put(Long date, Integer socialId) {
-            if (existed.size() < WALLBLER_MAX_LIMIT) {
-                existed.put(date, socialId);
+            if (recent.size() < WALLBLER_MAX_LIMIT) {
+                recent.put(date, socialId);
             } else {
-                outDated.put(date, socialId);
+                outdated.put(date, socialId);
             }
         }
     }
