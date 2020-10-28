@@ -4,6 +4,7 @@ import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.httpConnector.GETConnector;
+import com.nkoad.wallbler.httpConnector.HTTPConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.util.*;
 
 @Component(name = "ElasticSearchCache", service = Cache.class)
@@ -25,8 +28,7 @@ public class ElasticSearchCache implements Cache {
     private final static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
     private final static String DELETE_BY_FEED_NAME_PAYLOAD = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
-    private final static int WALLBLER_MAX_LIMIT = 8;  // max limit for each social type in the cache
-
+    private final static int WALLBLER_MAX_LIMIT = 25;  // max limit for each social type in the cache
 
     // TODO : The final line of data must end with a newline character \n. Each newline character may be preceded by a carriage return \r. When sending requests to the _bulk endpoint, the Content-Type header should be set to application/x-ndjson.
     @Override
@@ -37,12 +39,19 @@ public class ElasticSearchCache implements Cache {
         String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getExisted().values()));
         if (!payload.isEmpty()) {
             try {
-                new POSTConnector().httpRequest(BULK_URL, payload);
+                new POSTConnector() {
+                    protected String setContentType() {
+                        return "application/x-ndjson";
+                    }
+                }.httpRequest(BULK_URL, payload);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        deleteOldPosts(wallblerItem.getSocialMediaType(), existedPosts.getOutDated().values());
+        Collection<Integer> outdatedPosts = existedPosts.getOutDated().values();
+        if (!outdatedPosts.isEmpty()) {
+            deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPosts);
+        }
     }
 
     @Override
@@ -80,7 +89,7 @@ public class ElasticSearchCache implements Cache {
 
     @Override
     public void deletePostsByFeedName(String socialMediaType, String feedName) {
-        LOGGER.info("removing data from cache. socialMediaType: " + socialMediaType + ". feedName: " + feedName);
+        LOGGER.info("deleting data from cache. socialMediaType: " + socialMediaType + ". feedName: " + feedName);
         try {
             String url = String.format(DELETE_URL, socialMediaType);
             String payload = String.format(DELETE_BY_FEED_NAME_PAYLOAD, feedName);
@@ -90,23 +99,15 @@ public class ElasticSearchCache implements Cache {
         }
     }
 
-    private void deleteOldPosts(String socialMediaType, Collection<Integer> outdatedPosts) {
-        if (!outdatedPosts.isEmpty()) {
-            LOGGER.info("removing outdatedPosts from cache...");
-            try {
-                Thread.sleep(3000);
-                LOGGER.info("...socialMediaType to remove: " + socialMediaType + ". socialIds: " + outdatedPosts);
-                String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
-                if (!payload.isEmpty()) {
-                    try {
-                        new POSTConnector().httpRequest(BULK_URL, payload);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    private void deleteOutdatedPosts(String socialMediaType, Collection<Integer> outdatedPosts) {
+        LOGGER.info("deleting outdatedPosts from cache...");
+        try {
+            Thread.sleep(3000);
+            LOGGER.info("...socialMediaType to delete: " + socialMediaType + ". socialIds: " + outdatedPosts);
+            String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
+            new POSTConnector().httpRequest(BULK_URL, payload);
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -6,7 +6,7 @@ import java.net.ProtocolException;
 public class GETConnector extends HTTPConnector {
 
     @Override
-    void setRequestMethod(HttpURLConnection connection) throws ProtocolException {
+    protected void setRequestMethod(HttpURLConnection connection) throws ProtocolException {
         connection.setRequestMethod("GET");
     }
 

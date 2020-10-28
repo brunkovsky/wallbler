@@ -11,8 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public abstract class HTTPConnector {
-
-    abstract void setRequestMethod(HttpURLConnection connection) throws IOException;
+    abstract protected void setRequestMethod(HttpURLConnection connection) throws IOException;
 
     public HTTPRequest httpRequest(String url, String payload) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
@@ -36,9 +35,13 @@ public abstract class HTTPConnector {
         return httpRequest(url, null);
     }
 
+    protected String setContentType() {
+        return "application/json; utf-8";
+    }
+
     private void setPayload(HttpURLConnection connection, String payload) throws IOException {
         if (payload == null || payload.isEmpty()) return;
-        connection.setRequestProperty("Content-Type", "application/json; utf-8");
+        connection.setRequestProperty("Content-Type", setContentType());
         connection.setRequestProperty("Accept", "application/json");
         connection.setDoOutput(true);
         try (OutputStream os = connection.getOutputStream()) {
