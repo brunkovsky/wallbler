@@ -44,7 +44,7 @@ public class WallblerRest {
     @Path("/nonAccepted")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public Response getNonAcceptedData  (@QueryParam("socials") String socials,
+    public Response getNonAcceptedData(@QueryParam("socials") String socials,
                             @QueryParam("limit") Integer limit) {
         JSONArray data = cache.getNonAcceptedData(socials, limit);
         return status(200).entity(data.toString()).build();

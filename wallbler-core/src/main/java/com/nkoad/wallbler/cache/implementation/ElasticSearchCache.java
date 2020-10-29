@@ -5,6 +5,7 @@ import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
+import com.nkoad.wallbler.httpConnector.POSTConnectorElasticsearch;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
@@ -37,11 +38,7 @@ public class ElasticSearchCache implements Cache {
         String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getRecent().values()));
         if (!payload.isEmpty()) {
             try {
-                new POSTConnector() {
-                    protected String setContentType() {
-                        return "application/x-ndjson";
-                    }
-                }.httpRequest(BULK_URL, payload);
+                new POSTConnectorElasticsearch().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -77,32 +74,12 @@ public class ElasticSearchCache implements Cache {
                 + "}");
     }
 
-    private JSONArray getData(String socials, Integer limit, String payload) {
-        LOGGER.debug("getting data from cache. socials: " + socials + ". limit: " + limit);
-        JSONArray result = new JSONArray();
-        try {
-            if (limit == null || limit < 0 || limit > MAX_LIMIT) {
-                limit = MAX_LIMIT;
-            }
-            String url = String.format(SEARCH_URL_TEMPLATE, Objects.toString(socials, ""), limit);
-            HTTPRequest httpRequest = new GETConnector().httpRequest(url, payload);
-            JSONArray hits = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
-            for (int i = 0; i < hits.length(); i++) {
-                result.put(hits.getJSONObject(i).getJSONObject("_source"));
-            }
-        } catch (FileNotFoundException ignore) {
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
     @Override
     public void setAccept(List<WallblerItem> wallblerItems) {
         String payload = generateBulkPayloadForGetting(wallblerItems);
         if (!payload.isEmpty()) {
             try {
-                new POSTConnector().httpRequest(BULK_URL, payload);
+                new POSTConnectorElasticsearch().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -123,13 +100,34 @@ public class ElasticSearchCache implements Cache {
         }
     }
 
+    private JSONArray getData(String socials, Integer limit, String payload) {
+
+        LOGGER.debug("getting data from cache. socials: " + socials + ". limit: " + limit);
+        JSONArray result = new JSONArray();
+        try {
+            if (limit == null || limit < 0 || limit > MAX_LIMIT) {
+                limit = MAX_LIMIT;
+            }
+            String url = String.format(SEARCH_URL_TEMPLATE, Objects.toString(socials, ""), limit);
+            HTTPRequest httpRequest = new GETConnector().httpRequest(url, payload);
+            JSONArray hits = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
+            for (int i = 0; i < hits.length(); i++) {
+                result.put(hits.getJSONObject(i).getJSONObject("_source"));
+            }
+        } catch (FileNotFoundException ignore) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     private void deleteOutdatedPosts(String socialMediaType, Collection<Integer> outdatedPosts) {
         LOGGER.info("deleting outdatedPosts from cache...");
         try {
             Thread.sleep(3000);
             LOGGER.info("...socialMediaType to delete: " + socialMediaType + ". socialIds: " + outdatedPosts);
             String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
-            new POSTConnector().httpRequest(BULK_URL, payload);
+            new POSTConnectorElasticsearch().httpRequest(BULK_URL, payload);
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
