@@ -11,7 +11,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.util.List;
-import java.util.Set;
 
 import static javax.ws.rs.core.Response.status;
 
@@ -21,15 +20,37 @@ public class WallblerRest {
     @Reference
     private Cache cache;
 
-    @Path("/")
+    // Get all posts
+    @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public Response getData(@QueryParam("socials") String socials,
+    public Response getAllData(@QueryParam("socials") String socials,
                             @QueryParam("limit") Integer limit) {
-        JSONArray data = cache.getData(socials, limit);
+        JSONArray data = cache.getAllData(socials, limit);
         return status(200).entity(data.toString()).build();
     }
 
+    // Get accepted posts only
+    @Path("/accepted")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public Response getAcceptedData(@QueryParam("socials") String socials,
+                            @QueryParam("limit") Integer limit) {
+        JSONArray data = cache.getAcceptedData(socials, limit);
+        return status(200).entity(data.toString()).build();
+    }
+
+    // Get non accepted posts only
+    @Path("/nonAccepted")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public Response getNonAcceptedData  (@QueryParam("socials") String socials,
+                            @QueryParam("limit") Integer limit) {
+        JSONArray data = cache.getNonAcceptedData(socials, limit);
+        return status(200).entity(data.toString()).build();
+    }
+
+    // Set 'accept' to posts by 'socialMediaType', 'socialId' and 'accepted' fields
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

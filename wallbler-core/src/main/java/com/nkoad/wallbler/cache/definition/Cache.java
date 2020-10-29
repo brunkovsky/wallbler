@@ -8,7 +8,9 @@ import java.util.Set;
 
 public interface Cache {
     void add(Set<WallblerItem> data);
-    JSONArray getData(String socials, Integer limit);
+    JSONArray getAllData(String socials, Integer limit);
+    JSONArray getAcceptedData(String socials, Integer limit);
+    JSONArray getNonAcceptedData(String socials, Integer limit);
     void setAccept(List<WallblerItem> wallblerItems);
     void deletePostsByFeedName(String socialMediaType, String feedName);
 }

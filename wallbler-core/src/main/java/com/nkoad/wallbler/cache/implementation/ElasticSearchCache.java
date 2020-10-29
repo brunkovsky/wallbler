@@ -22,8 +22,9 @@ public class ElasticSearchCache implements Cache {
     private final static String BULK_URL = HOST + "_bulk";
     private final static String SEARCH_URL_TEMPLATE = HOST + "%s/_search?size=%d";
     private final static String DELETE_URL_TEMPLATE = HOST + "%s/_delete_by_query";
-    private final static String SEARCH_PAYLOAD = "{\"sort\":[{\"date\":{\"order\":\"desc\"}}]}";
-    private final static String DELETE_BY_FEED_NAME_PAYLOAD_TEMPLATE = "{\"query\":{\"match\":{\"feedName\":\"%s\"}}}";
+    private final static String SORT_BY_DATE_DESC_PAYLOAD = "\"sort\":[{\"date\":{\"order\":\"desc\"}}]";
+    private final static String FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE = "\"query\":{\"match\":{\"accepted\":%s}}";
+    private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match\":{\"feedName\":\"%s\"}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
     private final static int WALLBLER_MAX_LIMIT = 25;  // max limit for each social type in the cache
 
@@ -51,7 +52,21 @@ public class ElasticSearchCache implements Cache {
     }
 
     @Override
-    public JSONArray getData(String socials, Integer limit) {
+    public JSONArray getAllData(String socials, Integer limit) {
+        return getData(socials, limit, "{" + SORT_BY_DATE_DESC_PAYLOAD + "}");
+    }
+
+    @Override
+    public JSONArray getAcceptedData(String socials, Integer limit) {
+        return getData(socials, limit, "{" + SORT_BY_DATE_DESC_PAYLOAD + ",\n" + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, true) + "}");
+    }
+
+    @Override
+    public JSONArray getNonAcceptedData(String socials, Integer limit) {
+        return getData(socials, limit, "{" + SORT_BY_DATE_DESC_PAYLOAD + ",\n" + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, false) + "}");
+    }
+
+    private JSONArray getData(String socials, Integer limit, String payload) {
         LOGGER.debug("getting data from cache. socials: " + socials + ". limit: " + limit);
         JSONArray result = new JSONArray();
         try {
@@ -59,7 +74,7 @@ public class ElasticSearchCache implements Cache {
                 limit = MAX_LIMIT;
             }
             String url = String.format(SEARCH_URL_TEMPLATE, Objects.toString(socials, ""), limit);
-            HTTPRequest httpRequest = new GETConnector().httpRequest(url, SEARCH_PAYLOAD);
+            HTTPRequest httpRequest = new GETConnector().httpRequest(url, payload);
             JSONArray hits = new JSONObject(httpRequest.getBody()).getJSONObject("hits").getJSONArray("hits");
             for (int i = 0; i < hits.length(); i++) {
                 result.put(hits.getJSONObject(i).getJSONObject("_source"));
@@ -88,7 +103,7 @@ public class ElasticSearchCache implements Cache {
         LOGGER.info("deleting data from cache. socialMediaType: " + socialMediaType + ". feedName: " + feedName);
         try {
             String url = String.format(DELETE_URL_TEMPLATE, socialMediaType);
-            String payload = String.format(DELETE_BY_FEED_NAME_PAYLOAD_TEMPLATE, feedName);
+            String payload = String.format("{" + FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE + "}", feedName);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,7 +123,7 @@ public class ElasticSearchCache implements Cache {
     }
 
     private ExistedPosts getExistedPostsAsDateVsSocialId(String socialMediaType) {
-        JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT);
+        JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT, "{" + SORT_BY_DATE_DESC_PAYLOAD + "}");
         ExistedPosts result = new ExistedPosts();
         for (int i = 0; i < existedPosts.length(); i++) {
             JSONObject jsonObject = existedPosts.getJSONObject(i);
