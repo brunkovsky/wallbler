@@ -53,17 +53,27 @@ public class ElasticSearchCache implements Cache {
 
     @Override
     public JSONArray getAllData(String socials, Integer limit) {
-        return getData(socials, limit, "{" + SORT_BY_DATE_DESC_PAYLOAD + "}");
+        return getData(socials, limit, "{"
+                + SORT_BY_DATE_DESC_PAYLOAD
+                + "}");
     }
 
     @Override
     public JSONArray getAcceptedData(String socials, Integer limit) {
-        return getData(socials, limit, "{" + SORT_BY_DATE_DESC_PAYLOAD + ",\n" + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, true) + "}");
+        return getData(socials, limit, "{"
+                + SORT_BY_DATE_DESC_PAYLOAD
+                + ","
+                + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, true)
+                + "}");
     }
 
     @Override
     public JSONArray getNonAcceptedData(String socials, Integer limit) {
-        return getData(socials, limit, "{" + SORT_BY_DATE_DESC_PAYLOAD + ",\n" + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, false) + "}");
+        return getData(socials, limit, "{"
+                + SORT_BY_DATE_DESC_PAYLOAD
+                + ","
+                + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, false)
+                + "}");
     }
 
     private JSONArray getData(String socials, Integer limit, String payload) {
@@ -103,7 +113,9 @@ public class ElasticSearchCache implements Cache {
         LOGGER.info("deleting data from cache. socialMediaType: " + socialMediaType + ". feedName: " + feedName);
         try {
             String url = String.format(DELETE_URL_TEMPLATE, socialMediaType);
-            String payload = String.format("{" + FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE + "}", feedName);
+            String payload = String.format("{"
+                    + FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE
+                    + "}", feedName);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
             e.printStackTrace();
@@ -123,7 +135,9 @@ public class ElasticSearchCache implements Cache {
     }
 
     private ExistedPosts getExistedPostsAsDateVsSocialId(String socialMediaType) {
-        JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT, "{" + SORT_BY_DATE_DESC_PAYLOAD + "}");
+        JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT, "{"
+                + SORT_BY_DATE_DESC_PAYLOAD
+                + "}");
         ExistedPosts result = new ExistedPosts();
         for (int i = 0; i < existedPosts.length(); i++) {
             JSONObject jsonObject = existedPosts.getJSONObject(i);
