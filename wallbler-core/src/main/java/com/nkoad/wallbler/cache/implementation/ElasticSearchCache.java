@@ -23,7 +23,8 @@ public class ElasticSearchCache implements Cache {
     private final static String SEARCH_URL_TEMPLATE = HOST + "%s/_search?size=%d";
     private final static String DELETE_URL_TEMPLATE = HOST + "%s/_delete_by_query";
     private final static String SORT_BY_DATE_DESC_PAYLOAD = "\"sort\":[{\"date\":{\"order\":\"desc\"}}]";
-    private final static String FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE = "\"query\":{\"match\":{\"accepted\":%s}}";
+    private final static String FILTER_BY_ACCEPTED_FALSE_PAYLOAD = "\"query\":{\"match\":{\"accepted\":false}}";
+    private final static String FILTER_BY_ACCEPTED_TRUE_PAYLOAD = "\"query\":{\"match\":{\"accepted\":true}}";
     private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match\":{\"feedName\":\"%s\"}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
     private final static int WALLBLER_MAX_LIMIT = 25;  // max limit for each social type in the cache
@@ -63,7 +64,7 @@ public class ElasticSearchCache implements Cache {
         return getData(socials, limit, "{"
                 + SORT_BY_DATE_DESC_PAYLOAD
                 + ","
-                + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, true)
+                + FILTER_BY_ACCEPTED_TRUE_PAYLOAD
                 + "}");
     }
 
@@ -72,7 +73,7 @@ public class ElasticSearchCache implements Cache {
         return getData(socials, limit, "{"
                 + SORT_BY_DATE_DESC_PAYLOAD
                 + ","
-                + String.format(FILTER_BY_ACCEPTED_PAYLOAD_TEMPLATE, false)
+                + FILTER_BY_ACCEPTED_FALSE_PAYLOAD
                 + "}");
     }
 
