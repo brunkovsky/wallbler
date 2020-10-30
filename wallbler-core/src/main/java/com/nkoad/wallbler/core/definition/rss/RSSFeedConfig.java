@@ -21,7 +21,7 @@ public @interface RSSFeedConfig {
     boolean config_enabled() default true;
 
     @AttributeDefinition(name = "Delay", description = "Delay in hours")
-    int config_delay() default 1;
+    int config_delay() default 6;
 
     @AttributeDefinition(name = "Accepted by default")
     boolean config_acceptedByDefault() default true;

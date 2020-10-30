@@ -38,8 +38,8 @@ public class ElasticSearchCache implements Cache {
                 + ". feed name: "
                 + wallblerItem.getFeedName()
                 + ". size: " + wallblerItems.size());
-        ExistedPosts existedPosts = fetchExistedPosts(wallblerItem.getSocialMediaType());
-        String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getRecent().keySet()));
+        ExistedPosts existedPostsId = fetchExistedPosts(wallblerItem.getSocialMediaType());
+        String payload = generateBulkPayloadForAdding(wallblerItems, existedPostsId.getRecent()); // TODO : if existedPostsId.getRecent() is empty ?
         if (!payload.isEmpty()) {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
@@ -47,7 +47,7 @@ public class ElasticSearchCache implements Cache {
                 e.printStackTrace();
             }
         }
-        Set<Integer> outdatedPosts = existedPosts.getOutdated().keySet();
+        Set<Integer> outdatedPosts = existedPostsId.getOutdated();
         if (!outdatedPosts.isEmpty()) {
             deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPosts);
         }
@@ -124,12 +124,12 @@ public class ElasticSearchCache implements Cache {
         return result;
     }
 
-    private void deleteOutdatedPosts(String socialMediaType, Set<Integer> outdatedPosts) {
+    private void deleteOutdatedPosts(String socialMediaType, Set<Integer> outdatedPostsId) {
         LOGGER.info("deleting outdatedPosts from cache...");
         try {
             Thread.sleep(3000);
-            LOGGER.info("...socialMediaType to delete: " + socialMediaType + ". socialIds: " + outdatedPosts);
-            String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
+            LOGGER.info("...socialMediaType to delete: " + socialMediaType + ". socialIds: " + outdatedPostsId);
+            String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPostsId);
             new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
@@ -143,7 +143,7 @@ public class ElasticSearchCache implements Cache {
         ExistedPosts result = new ExistedPosts();
         for (int i = 0; i < existedPosts.length(); i++) {
             JSONObject jsonObject = existedPosts.getJSONObject(i);
-            result.put(jsonObject.getInt("socialId"), jsonObject.getLong("date"));
+            result.add(jsonObject.getInt("socialId"));
         }
         return result;
     }
@@ -192,22 +192,22 @@ public class ElasticSearchCache implements Cache {
     }
 
     static class ExistedPosts {
-        private Map<Integer, Long> recent = new HashMap<>();
-        private Map<Integer, Long> outdated = new HashMap<>();
+        private Set<Integer> recent = new HashSet<>();
+        private Set<Integer> outdated = new HashSet<>();
 
-        Map<Integer, Long> getRecent() {
+        Set<Integer> getRecent() {
             return recent;
         }
 
-        Map<Integer, Long> getOutdated() {
+        Set<Integer> getOutdated() {
             return outdated;
         }
 
-        void put(Integer socialId, Long date) {
+        void add(Integer socialId) {
             if (recent.size() < WALLBLER_MAX_LIMIT) {
-                recent.put(socialId, date);
+                recent.add(socialId);
             } else {
-                outdated.put(socialId, date);
+                outdated.add(socialId);
             }
         }
     }
