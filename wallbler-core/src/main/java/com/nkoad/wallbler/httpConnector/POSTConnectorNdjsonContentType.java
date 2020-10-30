@@ -1,6 +1,6 @@
 package com.nkoad.wallbler.httpConnector;
 
-public class POSTConnectorElasticsearch extends POSTConnector {
+public class POSTConnectorNdjsonContentType extends POSTConnector {
 
     @Override
     protected String setContentType() {

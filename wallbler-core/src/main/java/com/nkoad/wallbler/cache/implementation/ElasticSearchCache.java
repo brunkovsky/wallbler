@@ -5,7 +5,7 @@ import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
-import com.nkoad.wallbler.httpConnector.POSTConnectorElasticsearch;
+import com.nkoad.wallbler.httpConnector.POSTConnectorNdjsonContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
@@ -33,17 +33,21 @@ public class ElasticSearchCache implements Cache {
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
         WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
-        LOGGER.info("putting data to cache. social: " + wallblerItem.getSocialMediaType() + ". feed name: " + wallblerItem.getFeedName());
-        ExistedPosts existedPosts = getExistedPostsAsDateVsSocialId(wallblerItem.getSocialMediaType());
-        String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getRecent().values()));
+        LOGGER.info("putting data to cache. social: "
+                + wallblerItem.getSocialMediaType()
+                + ". feed name: "
+                + wallblerItem.getFeedName()
+                + ". size: " + wallblerItems.size());
+        ExistedPosts existedPosts = fetchExistedPosts(wallblerItem.getSocialMediaType());
+        String payload = generateBulkPayloadForAdding(wallblerItems, new HashSet<>(existedPosts.getRecent().keySet()));
         if (!payload.isEmpty()) {
             try {
-                new POSTConnectorElasticsearch().httpRequest(BULK_URL, payload);
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        Collection<Integer> outdatedPosts = existedPosts.getOutdated().values();
+        Collection<Integer> outdatedPosts = existedPosts.getOutdated().keySet();
         if (!outdatedPosts.isEmpty()) {
             deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPosts);
         }
@@ -79,7 +83,7 @@ public class ElasticSearchCache implements Cache {
         String payload = generateBulkPayloadForGetting(wallblerItems);
         if (!payload.isEmpty()) {
             try {
-                new POSTConnectorElasticsearch().httpRequest(BULK_URL, payload);
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -127,20 +131,20 @@ public class ElasticSearchCache implements Cache {
             Thread.sleep(3000);
             LOGGER.info("...socialMediaType to delete: " + socialMediaType + ". socialIds: " + outdatedPosts);
             String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPosts);
-            new POSTConnectorElasticsearch().httpRequest(BULK_URL, payload);
+            new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    private ExistedPosts getExistedPostsAsDateVsSocialId(String socialMediaType) {
+    private ExistedPosts fetchExistedPosts(String socialMediaType) {
         JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT, "{"
                 + SORT_BY_DATE_DESC_PAYLOAD
                 + "}");
         ExistedPosts result = new ExistedPosts();
         for (int i = 0; i < existedPosts.length(); i++) {
             JSONObject jsonObject = existedPosts.getJSONObject(i);
-            result.put(jsonObject.getLong("date"), jsonObject.getInt("socialId"));
+            result.put(jsonObject.getInt("socialId"), jsonObject.getLong("date"));
         }
         return result;
     }
@@ -189,22 +193,22 @@ public class ElasticSearchCache implements Cache {
     }
 
     static class ExistedPosts {
-        private Map<Long, Integer> recent = new HashMap<>();
-        private Map<Long, Integer> outdated = new HashMap<>();
+        private Map<Integer, Long> recent = new HashMap<>();
+        private Map<Integer, Long> outdated = new HashMap<>();
 
-        Map<Long, Integer> getRecent() {
+        Map<Integer, Long> getRecent() {
             return recent;
         }
 
-        Map<Long, Integer> getOutdated() {
+        Map<Integer, Long> getOutdated() {
             return outdated;
         }
 
-        void put(Long date, Integer socialId) {
+        void put(Integer socialId, Long date) {
             if (recent.size() < WALLBLER_MAX_LIMIT) {
-                recent.put(date, socialId);
+                recent.put(socialId, date);
             } else {
-                outdated.put(date, socialId);
+                outdated.put(socialId, date);
             }
         }
     }
