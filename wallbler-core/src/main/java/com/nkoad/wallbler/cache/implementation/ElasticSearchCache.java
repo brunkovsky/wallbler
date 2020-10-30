@@ -28,7 +28,7 @@ public class ElasticSearchCache implements Cache {
     private final static String FILTER_BY_ACCEPTED_TRUE_PAYLOAD = "\"query\":{\"match\":{\"accepted\":true}}";
     private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match\":{\"feedName\":\"%s\"}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
-    private final static int WALLBLER_MAX_LIMIT = 25;  // max limit for each social type in the cache
+    private final static int WALLBLER_MAX_LIMIT = 200;  // define max limit for each social type in the cache
 
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
@@ -47,7 +47,7 @@ public class ElasticSearchCache implements Cache {
                 e.printStackTrace();
             }
         }
-        Collection<Integer> outdatedPosts = existedPosts.getOutdated().keySet();
+        Set<Integer> outdatedPosts = existedPosts.getOutdated().keySet();
         if (!outdatedPosts.isEmpty()) {
             deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPosts);
         }
@@ -80,7 +80,7 @@ public class ElasticSearchCache implements Cache {
 
     @Override
     public void setAccept(List<WallblerItem> wallblerItems) {
-        String payload = generateBulkPayloadForGetting(wallblerItems);
+        String payload = generateBulkPayloadForAccepting(wallblerItems);
         if (!payload.isEmpty()) {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
@@ -105,7 +105,6 @@ public class ElasticSearchCache implements Cache {
     }
 
     private JSONArray getData(String socials, Integer limit, String payload) {
-
         LOGGER.debug("getting data from cache. socials: " + socials + ". limit: " + limit);
         JSONArray result = new JSONArray();
         try {
@@ -125,7 +124,7 @@ public class ElasticSearchCache implements Cache {
         return result;
     }
 
-    private void deleteOutdatedPosts(String socialMediaType, Collection<Integer> outdatedPosts) {
+    private void deleteOutdatedPosts(String socialMediaType, Set<Integer> outdatedPosts) {
         LOGGER.info("deleting outdatedPosts from cache...");
         try {
             Thread.sleep(3000);
@@ -165,14 +164,14 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-    private String generateBulkPayloadForGetting(List<WallblerItem> wallblerItems) {
+    private String generateBulkPayloadForAccepting(List<WallblerItem> wallblerItems) {
         StringBuilder payload = new StringBuilder();
         for (WallblerItem wallblerItem : wallblerItems) {
             payload.append("{\"update\":{\"_index\":\"")
                     .append(wallblerItem.getSocialMediaType())
-                    .append("\",\"_id\":\"")
+                    .append("\",\"_id\":")
                     .append(wallblerItem.getSocialId())
-                    .append("\"}}\n")
+                    .append("}}\n")
                     .append("{\"doc\":{\"accepted\":")
                     .append(wallblerItem.isAccepted())
                     .append("}}\n");
@@ -180,7 +179,7 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-    private String generateBulkPayloadForDeleting(String socialMediaType, Collection<Integer> outdatedPosts) {
+    private String generateBulkPayloadForDeleting(String socialMediaType, Set<Integer> outdatedPosts) {
         StringBuilder payload = new StringBuilder();
         for (Integer outdatedPost : outdatedPosts) {
             payload.append("{\"delete\":{\"_index\":\"")
