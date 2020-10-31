@@ -33,7 +33,7 @@ public class ElasticSearchCache implements Cache {
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
         WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
-        LOGGER.info("putting data to cache. social: "
+        LOGGER.info("putting data to the cache. social: "
                 + wallblerItem.getSocialMediaType()
                 + ". feed name: "
                 + wallblerItem.getFeedName()
@@ -44,6 +44,7 @@ public class ElasticSearchCache implements Cache {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
+                LOGGER.error("can not add posts to the elasticsearch");
                 e.printStackTrace();
             }
         }
@@ -85,6 +86,7 @@ public class ElasticSearchCache implements Cache {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
+                LOGGER.error("can not set 'accept' to the elasticsearch");
                 e.printStackTrace();
             }
         }
@@ -100,12 +102,13 @@ public class ElasticSearchCache implements Cache {
                     + "}", feedName);
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
+            LOGGER.error("can not delete posts in the elasticsearch");
             e.printStackTrace();
         }
     }
 
     private JSONArray getData(String socials, Integer limit, String payload) {
-        LOGGER.debug("getting data from cache. socials: " + socials + ". limit: " + limit);
+        LOGGER.debug("getting posts from the cache. socials: " + socials + ". limit: " + limit);
         JSONArray result = new JSONArray();
         try {
             if (limit == null || limit < 0 || limit > MAX_LIMIT) {
@@ -119,19 +122,21 @@ public class ElasticSearchCache implements Cache {
             }
         } catch (FileNotFoundException ignore) {
         } catch (IOException e) {
+            LOGGER.error("can not get posts from the elasticsearch");
             e.printStackTrace();
         }
         return result;
     }
 
     private void deleteOutdatedPosts(String socialMediaType, Set<Integer> outdatedPostsId) {
-        LOGGER.info("deleting outdatedPosts from cache...");
+        LOGGER.info("deleting outdatedPosts from the cache...");
         try {
             Thread.sleep(3000);
             LOGGER.info("...socialMediaType to delete: " + socialMediaType + ". socialIds: " + outdatedPostsId);
             String payload = generateBulkPayloadForDeleting(socialMediaType, outdatedPostsId);
             new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
         } catch (InterruptedException | IOException e) {
+            LOGGER.error("can not delete outdated posts from the elasticsearch");
             e.printStackTrace();
         }
     }
