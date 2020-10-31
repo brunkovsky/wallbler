@@ -4,14 +4,13 @@ import com.nkoad.wallbler.core.WallblerItem;
 
 import java.util.Map;
 
-public class FacebookWallblerItem extends WallblerItem {
+public class FacebookPhotosWallblerItem extends WallblerItem {
     private String typeOfFeed;
     private String thumbnailUrl;  // link to the original image
     private Integer likedCount;
-    private Integer sharedCount;
     private Integer commentsCount;
 
-    public FacebookWallblerItem(Map<String, Object> feedProperties) {
+    public FacebookPhotosWallblerItem(Map<String, Object> feedProperties) {
         super(feedProperties);
     }
 
@@ -37,14 +36,6 @@ public class FacebookWallblerItem extends WallblerItem {
 
     public void setLikedCount(Integer likedCount) {
         this.likedCount = likedCount;
-    }
-
-    public Integer getSharedCount() {
-        return sharedCount;
-    }
-
-    public void setSharedCount(Integer sharedCount) {
-        this.sharedCount = sharedCount;
     }
 
     public Integer getCommentsCount() {

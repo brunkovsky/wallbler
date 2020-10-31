@@ -47,7 +47,7 @@ public class FacebookConnector extends Connector {
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
                 for (int i = 0; i < data.length(); i++) {
                     JSONObject json = data.getJSONObject(i);
-                    FacebookWallblerItem item = feedType.retrieveData(json);
+                    WallblerItem item = feedType.retrieveData(json);
                     item.setLastRefreshDate(lastRefreshDate);
                     item.setUrl(FACEBOOK_URL);
                     wallblerItems.add(item);
@@ -60,16 +60,19 @@ public class FacebookConnector extends Connector {
     }
 
     private void postsManaging() {
-        feedMap.put("posts", new FeedType(API_POST_ACCESS_URL, "permalink_url,full_picture,message,created_time,shares,comments.summary(true).limit(0),likes.summary(true).limit(0),from") {
+        feedMap.put("posts", new FeedType(API_POST_ACCESS_URL,
+                "permalink_url,full_picture,message,created_time,shares,comments.summary(true).limit(0),likes.summary(true).limit(0),from") {
             @Override
-            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
+            FacebookPostsWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookPostsWallblerItem item = new FacebookPostsWallblerItem(feedProperties);
                 item.setDate(extractDateProperties(json).getTime());
                 item.setTitle(json.getJSONObject("from").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "message"));
                 item.setLinkToSMPage(json.getString("permalink_url"));
                 item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));
-                setLikesCommentsSharesProperties(item, json);
+                setLikesProperty(item, json);
+                setSharesProperty(item, json);
+                setCommentsProperty(item, json);
                 item.generateSocialId();
                 return item;
             }
@@ -77,28 +80,36 @@ public class FacebookConnector extends Connector {
     }
 
     private void photosManaging() {
-        feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL, "link,images,name,created_time,comments.summary(true).limit(0),likes.summary(true),from,album") {
+        feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL,
+                "link,images,name,created_time,comments.summary(true).limit(0),likes.summary(true),from,album") {
             @Override
-            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
+            FacebookPhotosWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookPhotosWallblerItem item = new FacebookPhotosWallblerItem(feedProperties);
                 item.setDate(extractDateProperties(json).getTime());
-                item.setTitle(json.getJSONObject("from").getString("name"));
+                item.setTitle(json.getJSONObject("from").getString("name") + " : " + json.getJSONObject("album").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "name"));
-                item.setThumbnailUrl(extractThumbnailUrlProperty(json));
+                item.setThumbnailUrl(extractThumbnailUrlProperty(json)); // we still can fetch only first photo from array
                 item.setLinkToSMPage(json.getString("link"));
                 item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));
-                setLikesCommentsSharesProperties(item, json);
+                setLikesProperty(item, json);
+                setCommentsProperty(item, json);
                 item.generateSocialId();
                 return item;
+            }
+            @Override
+            public String buildFullUrl() {
+                String photosFrom = feedProperties.get("config.album") == null || ((String) feedProperties.get("config.album")).trim().isEmpty() ? (String) accountProperties.get("config.groupId") : (String) feedProperties.get("config.album");
+                return USERS_API_ACCESS_URL + photosFrom + url + extractAccessToken() + "&fields=" + fields;
             }
         });
     }
 
     private void videosManaging() {
-        feedMap.put("videos", new FeedType(API_VIDEO_ACCESS_URL, "permalink_url,description,updated_time,picture,comments") {
+        feedMap.put("videos", new FeedType(API_VIDEO_ACCESS_URL,
+                "permalink_url,description,updated_time,picture,comments") {
             @Override
-            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
+            FacebookPostsWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookPostsWallblerItem item = new FacebookPostsWallblerItem(feedProperties);
                 item.setTitle("videos");
                 item.generateSocialId();
                 return item;
@@ -107,10 +118,11 @@ public class FacebookConnector extends Connector {
     }
 
     private void albumsManaging() {
-        feedMap.put("albums", new FeedType(API_ALBUM_ACCESS_URL, "name,link,picture,created_time,comments") {
+        feedMap.put("albums", new FeedType(API_ALBUM_ACCESS_URL,
+                "name,link,picture,created_time,comments") {
             @Override
-            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
+            FacebookPostsWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookPostsWallblerItem item = new FacebookPostsWallblerItem(feedProperties);
                 item.setTitle("albums");
                 item.generateSocialId();
                 return item;
@@ -152,18 +164,23 @@ public class FacebookConnector extends Connector {
         return result.toString();
     }
 
-    private void setLikesCommentsSharesProperties(FacebookWallblerItem item, JSONObject json) {
-        // todo: need to investigate if we have more than 15 LikesCommentsShares!!!
+    private void setLikesProperty(FacebookPhotosWallblerItem item, JSONObject json) {
         try {
             item.setLikedCount(json.getJSONObject("likes").getJSONObject("summary").getInt("total_count"));
         } catch (JSONException e) {
             item.setLikedCount(0);
         }
+    }
+
+    private void setCommentsProperty(FacebookPhotosWallblerItem item, JSONObject json) {
         try {
             item.setCommentsCount(json.getJSONObject("comments").getJSONObject("summary").getInt("total_count"));
         } catch (JSONException e) {
             item.setCommentsCount(0);
         }
+    }
+
+    private void setSharesProperty(FacebookPostsWallblerItem item, JSONObject json) {
         try {
             item.setSharedCount(json.getJSONObject("shares").getInt("count"));
         } catch (JSONException e) {
@@ -180,17 +197,31 @@ public class FacebookConnector extends Connector {
             this.fields = fields;
         }
 
-        abstract FacebookWallblerItem retrieveData(JSONObject json) throws JSONException;
+        abstract WallblerItem retrieveData(JSONObject json) throws JSONException;
 
         public String buildFullUrl() {
-            String accessToken = null;
-            try {
-                accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            return USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + url + accessToken + "&fields=" + fields;
+            return USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + url + extractAccessToken() + "&fields=" + fields;
         }
     }
 
+    private String extractAccessToken() {
+        String accessToken = null;
+        try {
+            accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return accessToken;
+    }
+
 }
+
+/*
+действительно ли нам надо вытягивать картинки с Определенных альбомов?
+ - да.  тогда нужно придумать механизм определения доступных ID альбомов при валидации аккаунта и потом передать их в качестве опций в фид (сложно)
+        или можно просто вставлять albumId в качестве источника откуда вытягивать картинки (легко)
+        или можно вставлять имя альбома в качестве источника откуда вытягивать картинки и потом из имени формировать albumId (решаемо)
+ - нет. тогда вытягиваются картинки со всей страницы. есть возможность в каждой картинке узнать из какого она альбома
+
+
+ */
