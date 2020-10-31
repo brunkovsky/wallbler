@@ -39,22 +39,21 @@ public class ElasticSearchCache implements Cache {
                 + wallblerItem.getFeedName()
                 + ". size: " + wallblerItems.size());
         ExistedPosts existedPostsId = fetchExistedPosts(wallblerItem.getSocialMediaType());
-        String payload = generateBulkPayloadForAdding(wallblerItems, existedPostsId.getRecent()); // TODO : allow to add posts with changed number of likes, comments, shared (need to update them)
-        String payload2 = generateBulkPayloadForUpdating(wallblerItems);
-        if (!payload.isEmpty()) {
+        String payloadForAdding = generateBulkPayloadForAdding(wallblerItems, existedPostsId.getRecent());
+        if (!payloadForAdding.isEmpty()) {
             try {
-                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForAdding);
             } catch (IOException e) {
-                LOGGER.error("can not add posts to the elasticsearch");
+                LOGGER.error("can not add posts");
                 e.printStackTrace();
             }
         }
-        System.out.println(payload2);
-        if (!payload2.isEmpty()) {
+        String payloadForUpdating = generateBulkPayloadForUpdating(wallblerItems, existedPostsId.getRecent());
+        if (!payloadForUpdating.isEmpty()) {
             try {
-                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload2);
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForUpdating);
             } catch (IOException e) {
-                LOGGER.error("can not add update likes, comments, shares");
+                LOGGER.error("can not update posts");
                 e.printStackTrace();
             }
         }
@@ -179,21 +178,20 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems) { // needs to update likes, comments, shares
+    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) { // needs to update likes, comments, shares
         StringBuilder payload = new StringBuilder();
         for (WallblerItem wallblerItem : wallblerItems) {
-            payload.append("{\"update\":{\"_index\":\"")
-                    .append(wallblerItem.getSocialMediaType())
-                    .append("\",\"_id\":")
-                    .append(wallblerItem.getSocialId())
-                    .append("}}\n")
-                    .append("{\"doc\":{\"likedCount\":")
-                    .append(10)
-                    .append(",\"sharedCount\":")
-                    .append(10)
-                    .append(",\"commentsCount\":")
-                    .append(10)
-                    .append("}}\n");
+            if (existedPostsId.contains(wallblerItem.getSocialId())) {
+                JSONObject obj = new JSONObject(wallblerItem);
+                obj.remove("accepted");
+                payload.append("{\"update\":{\"_index\":\"")
+                        .append(wallblerItem.getSocialMediaType())
+                        .append("\",\"_id\":\"")
+                        .append(wallblerItem.getSocialId())
+                        .append("\"}}\n{\"doc\":")
+                        .append(obj)
+                        .append("}\n");
+            }
         }
         return payload.toString();
     }
@@ -205,8 +203,7 @@ public class ElasticSearchCache implements Cache {
                     .append(wallblerItem.getSocialMediaType())
                     .append("\",\"_id\":")
                     .append(wallblerItem.getSocialId())
-                    .append("}}\n")
-                    .append("{\"doc\":{\"accepted\":")
+                    .append("}}\n{\"doc\":{\"accepted\":")
                     .append(wallblerItem.isAccepted())
                     .append("}}\n");
         }
