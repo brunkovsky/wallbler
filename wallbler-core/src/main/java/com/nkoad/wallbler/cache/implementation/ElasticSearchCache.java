@@ -178,7 +178,7 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) { // needs to update likes, comments, shares
+    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) {
         StringBuilder payload = new StringBuilder();
         for (WallblerItem wallblerItem : wallblerItems) {
             if (existedPostsId.contains(wallblerItem.getSocialId())) {
