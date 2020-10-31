@@ -38,8 +38,8 @@ public class ElasticSearchCache implements Cache {
                 + ". feed name: "
                 + wallblerItem.getFeedName()
                 + ". size: " + wallblerItems.size());
-        ExistedPosts existedPostsId = fetchExistedPosts(wallblerItem.getSocialMediaType());
-        String payloadForAdding = generateBulkPayloadForAdding(wallblerItems, existedPostsId.getRecent());
+        ExistingPosts existingPostsId = fetchExistingPosts(wallblerItem.getSocialMediaType());
+        String payloadForAdding = generateBulkPayloadForAdding(wallblerItems, existingPostsId.getRecent());
         if (!payloadForAdding.isEmpty()) {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForAdding);
@@ -48,7 +48,7 @@ public class ElasticSearchCache implements Cache {
                 e.printStackTrace();
             }
         }
-        String payloadForUpdating = generateBulkPayloadForUpdating(wallblerItems, existedPostsId.getRecent());
+        String payloadForUpdating = generateBulkPayloadForUpdating(wallblerItems, existingPostsId.getRecent());
         if (!payloadForUpdating.isEmpty()) {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForUpdating);
@@ -57,7 +57,7 @@ public class ElasticSearchCache implements Cache {
                 e.printStackTrace();
             }
         }
-        Set<Integer> outdatedPosts = existedPostsId.getOutdated();
+        Set<Integer> outdatedPosts = existingPostsId.getOutdated();
         if (!outdatedPosts.isEmpty()) {
             deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPosts);
         }
@@ -150,11 +150,11 @@ public class ElasticSearchCache implements Cache {
         }
     }
 
-    private ExistedPosts fetchExistedPosts(String socialMediaType) {
+    private ExistingPosts fetchExistingPosts(String socialMediaType) {
         JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT, "{"
                 + SORT_BY_DATE_DESC_PAYLOAD
                 + "}");
-        ExistedPosts result = new ExistedPosts();
+        ExistingPosts result = new ExistingPosts();
         for (int i = 0; i < existedPosts.length(); i++) {
             JSONObject jsonObject = existedPosts.getJSONObject(i);
             result.add(jsonObject.getInt("socialId"));
@@ -222,7 +222,7 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-    static class ExistedPosts {
+    static class ExistingPosts {
         private Set<Integer> recent = new HashSet<>();
         private Set<Integer> outdated = new HashSet<>();
 
