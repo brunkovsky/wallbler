@@ -19,21 +19,19 @@ import java.util.*;
 
 public class FacebookConnector extends Connector {
     private static final String FACEBOOK_URL = "https://www.facebook.com/";
-    private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v6.0/";
+    private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v8.0/";
     private static final String API_PHOTO_ACCESS_URL = "/photos/uploaded?access_token=";
     private static final String API_POST_ACCESS_URL = "/posts?access_token=";
     private static final String API_VIDEO_ACCESS_URL = "/videos/uploaded?access_token=";
     private static final String API_ALBUM_ACCESS_URL = "/albums?access_token=";
-    private static String accountName;
     private static Map<String, FeedType> feedMap = new HashMap<>();
 
     public FacebookConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
-        fetchAccountName();
-        fillMapForPosts();
-        fillMapForPhotos();
-        fillMapForVideos();
-        fillMapForAlbums();
+        postsManaging();
+        photosManaging();
+        videosManaging();
+        albumsManaging();
     }
 
     @Override
@@ -51,7 +49,6 @@ public class FacebookConnector extends Connector {
                     JSONObject json = data.getJSONObject(i);
                     FacebookWallblerItem item = feedType.retrieveData(json);
                     item.setLastRefreshDate(lastRefreshDate);
-                    item.setTitle(accountName);
                     item.setUrl(FACEBOOK_URL);
                     wallblerItems.add(item);
                 }
@@ -62,13 +59,14 @@ public class FacebookConnector extends Connector {
         }
     }
 
-    private void fillMapForPosts() {
-        feedMap.put("posts", new FeedType(API_POST_ACCESS_URL, "permalink_url,full_picture,message,created_time,comments") {
+    private void postsManaging() {
+        feedMap.put("posts", new FeedType(API_POST_ACCESS_URL, "permalink_url,full_picture,message,created_time,shares,comments.summary(true).limit(0),likes.summary(true).limit(0),from") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setDate(setDateProperties(json).getTime());
-                item.setDescription(setDescriptionProperty(json, "message"));
+                item.setDate(extractDateProperties(json).getTime());
+                item.setTitle(json.getJSONObject("from").getString("name"));
+                item.setDescription(extractDescriptionProperty(json, "message"));
                 item.setLinkToSMPage(json.getString("permalink_url"));
                 item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));
                 setLikesCommentsSharesProperties(item, json);
@@ -78,8 +76,8 @@ public class FacebookConnector extends Connector {
         });
     }
 
-    private void fillMapForPhotos() {
-        feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL, "link,images,width,name,created_time,comments") {
+    private void photosManaging() {
+        feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL, "link,images,width,name,created_time,comments,likes.summary(true)") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
@@ -90,7 +88,7 @@ public class FacebookConnector extends Connector {
         });
     }
 
-    private void fillMapForVideos() {
+    private void videosManaging() {
         feedMap.put("videos", new FeedType(API_VIDEO_ACCESS_URL, "permalink_url,description,updated_time,picture,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
@@ -102,7 +100,7 @@ public class FacebookConnector extends Connector {
         });
     }
 
-    private void fillMapForAlbums() {
+    private void albumsManaging() {
         feedMap.put("albums", new FeedType(API_ALBUM_ACCESS_URL, "name,link,picture,created_time,comments") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
@@ -114,30 +112,17 @@ public class FacebookConnector extends Connector {
         });
     }
 
-    private void fetchAccountName() {
-        try {
-            String accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
-            String url = USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + "?fields=name,link&access_token=" + accessToken;
-            HTTPRequest httpRequest = new GETConnector().httpRequest(url);
-            if (httpRequest.getStatusCode() == 200) {
-                accountName = new JSONObject(httpRequest.getBody()).getString("name");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Date setDateProperties(JSONObject json) {
+    private Date extractDateProperties(JSONObject json) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         try {
             return sdf.parse(json.getString("created_time"));
-        } catch (ParseException | JSONException e) {
-            //do nothing
+        } catch (ParseException | JSONException ignore) {
         }
         return null;
     }
 
-    private String setDescriptionProperty(JSONObject json, String s) {
+    // candidate to remove this method
+    private String extractDescriptionProperty(JSONObject json, String s) {
         try {
             return secreteURLsIntoLinks(json.getString(s));
         } catch (JSONException e) {
@@ -161,17 +146,17 @@ public class FacebookConnector extends Connector {
     private void setLikesCommentsSharesProperties(FacebookWallblerItem item, JSONObject json) {
         // todo: need to investigate if we have more than 15 LikesCommentsShares!!!
         try {
-            item.setLikedCount(json.getJSONObject("likes").getJSONArray("data").length());
+            item.setLikedCount(json.getJSONObject("likes").getJSONObject("summary").getInt("total_count"));
         } catch (JSONException e) {
             item.setLikedCount(0);
         }
         try {
-            item.setCommentsCount(json.getJSONObject("comments").getJSONArray("data").length());
+            item.setCommentsCount(json.getJSONObject("comments").getJSONObject("summary").getInt("total_count"));
         } catch (JSONException e) {
             item.setCommentsCount(0);
         }
         try {
-            item.setSharedCount(json.getJSONObject("sharedposts").getJSONArray("data").length());
+            item.setSharedCount(json.getJSONObject("shares").getInt("count"));
         } catch (JSONException e) {
             item.setSharedCount(0);
         }
