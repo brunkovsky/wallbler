@@ -106,16 +106,13 @@ public class WallblerItem implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WallblerItem that = (WallblerItem) o;
-        return Objects.equals(title, that.title) &&
-                Objects.equals(description, that.description) &&
-                Objects.equals(date, that.date) &&
-                Objects.equals(url, that.url) &&
+        return Objects.equals(url, that.url) &&
                 Objects.equals(linkToSMPage, that.linkToSMPage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, date, url, linkToSMPage);
+        return Objects.hash(url, linkToSMPage);
     }
 
 }

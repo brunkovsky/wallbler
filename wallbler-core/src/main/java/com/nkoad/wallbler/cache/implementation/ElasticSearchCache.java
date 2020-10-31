@@ -39,12 +39,22 @@ public class ElasticSearchCache implements Cache {
                 + wallblerItem.getFeedName()
                 + ". size: " + wallblerItems.size());
         ExistedPosts existedPostsId = fetchExistedPosts(wallblerItem.getSocialMediaType());
-        String payload = generateBulkPayloadForAdding(wallblerItems, existedPostsId.getRecent()); // TODO : if existedPostsId.getRecent() is empty ?
+        String payload = generateBulkPayloadForAdding(wallblerItems, existedPostsId.getRecent()); // TODO : allow to add posts with changed number of likes, comments, shared (need to update them)
+        String payload2 = generateBulkPayloadForUpdating(wallblerItems);
         if (!payload.isEmpty()) {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
                 LOGGER.error("can not add posts to the elasticsearch");
+                e.printStackTrace();
+            }
+        }
+        System.out.println(payload2);
+        if (!payload2.isEmpty()) {
+            try {
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload2);
+            } catch (IOException e) {
+                LOGGER.error("can not add update likes, comments, shares");
                 e.printStackTrace();
             }
         }
@@ -165,6 +175,25 @@ public class ElasticSearchCache implements Cache {
                         .append(new JSONObject(wallblerItem))
                         .append("\n");
             }
+        }
+        return payload.toString();
+    }
+
+    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems) { // needs to update likes, comments, shares
+        StringBuilder payload = new StringBuilder();
+        for (WallblerItem wallblerItem : wallblerItems) {
+            payload.append("{\"update\":{\"_index\":\"")
+                    .append(wallblerItem.getSocialMediaType())
+                    .append("\",\"_id\":")
+                    .append(wallblerItem.getSocialId())
+                    .append("}}\n")
+                    .append("{\"doc\":{\"likedCount\":")
+                    .append(10)
+                    .append(",\"sharedCount\":")
+                    .append(10)
+                    .append(",\"commentsCount\":")
+                    .append(10)
+                    .append("}}\n");
         }
         return payload.toString();
     }

@@ -49,7 +49,7 @@ public class FacebookConnector extends Connector {
                     JSONObject json = data.getJSONObject(i);
                     WallblerItem item = feedType.retrieveData(json);
                     item.setLastRefreshDate(lastRefreshDate);
-                    item.setUrl(FACEBOOK_URL);
+                    item.setUrl(FACEBOOK_URL + accountProperties.get("config.groupId"));
                     wallblerItems.add(item);
                 }
                 cache.add(wallblerItems);
@@ -99,7 +99,7 @@ public class FacebookConnector extends Connector {
             @Override
             public String buildFullUrl() {
                 String photosFrom = feedProperties.get("config.album") == null || ((String) feedProperties.get("config.album")).trim().isEmpty() ? (String) accountProperties.get("config.groupId") : (String) feedProperties.get("config.album");
-                return USERS_API_ACCESS_URL + photosFrom + url + extractAccessToken() + "&fields=" + fields;
+                return USERS_API_ACCESS_URL + photosFrom + url + retrieveAccessToken() + "&fields=" + fields;
             }
         });
     }
@@ -200,11 +200,11 @@ public class FacebookConnector extends Connector {
         abstract WallblerItem retrieveData(JSONObject json) throws JSONException;
 
         public String buildFullUrl() {
-            return USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + url + extractAccessToken() + "&fields=" + fields;
+            return USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + url + retrieveAccessToken() + "&fields=" + fields;
         }
     }
 
-    private String extractAccessToken() {
+    private String retrieveAccessToken() {
         String accessToken = null;
         try {
             accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
@@ -219,7 +219,7 @@ public class FacebookConnector extends Connector {
 /*
 действительно ли нам надо вытягивать картинки с Определенных альбомов?
  - да.  тогда нужно придумать механизм определения доступных ID альбомов при валидации аккаунта и потом передать их в качестве опций в фид (сложно)
-        или можно просто вставлять albumId в качестве источника откуда вытягивать картинки (легко)
+        или можно просто вставлять albumId в качестве источника откуда вытягивать картинки (легко) (а albumId можно получить из спецмального запроса)
         или можно вставлять имя альбома в качестве источника откуда вытягивать картинки и потом из имени формировать albumId (решаемо)
  - нет. тогда вытягиваются картинки со всей страницы. есть возможность в каждой картинке узнать из какого она альбома
 
