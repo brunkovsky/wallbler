@@ -20,7 +20,7 @@ import java.util.*;
 public class FacebookConnector extends Connector {
     private static final String FACEBOOK_URL = "https://www.facebook.com/";
     private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v8.0/";
-    private static final String API_PHOTO_ACCESS_URL = "/photos/uploaded?access_token=";
+    private static final String API_PHOTO_ACCESS_URL = "/photos?type=uploaded&access_token=";
     private static final String API_POST_ACCESS_URL = "/posts?access_token=";
     private static final String API_VIDEO_ACCESS_URL = "/videos/uploaded?access_token=";
     private static final String API_ALBUM_ACCESS_URL = "/albums?access_token=";
@@ -77,11 +77,17 @@ public class FacebookConnector extends Connector {
     }
 
     private void photosManaging() {
-        feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL, "link,images,width,name,created_time,comments,likes.summary(true)") {
+        feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL, "link,images,name,created_time,comments.summary(true).limit(0),likes.summary(true),from,album") {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setTitle("photos");
+                item.setDate(extractDateProperties(json).getTime());
+                item.setTitle(json.getJSONObject("from").getString("name"));
+                item.setDescription(extractDescriptionProperty(json, "name"));
+                item.setThumbnailUrl(extractThumbnailUrlProperty(json));
+                item.setLinkToSMPage(json.getString("link"));
+                item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));
+                setLikesCommentsSharesProperties(item, json);
                 item.generateSocialId();
                 return item;
             }
@@ -121,7 +127,10 @@ public class FacebookConnector extends Connector {
         return null;
     }
 
-    // candidate to remove this method
+    private String extractThumbnailUrlProperty(JSONObject json) {
+        return json.getJSONArray("images").getJSONObject(0).getString("source");
+    }
+
     private String extractDescriptionProperty(JSONObject json, String s) {
         try {
             return secreteURLsIntoLinks(json.getString(s));
