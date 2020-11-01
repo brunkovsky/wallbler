@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class FacebookConnector extends Connector {
-    private static final String FACEBOOK_URL = "https://www.facebook.com/";
+    private static final String FACEBOOK_URL = "https://www.facebook.com";
     private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v8.0/";
     private static final String API_PHOTO_ACCESS_URL = "/photos?type=uploaded&access_token=";
     private static final String API_POST_ACCESS_URL = "/posts?access_token=";
@@ -49,7 +49,7 @@ public class FacebookConnector extends Connector {
                     JSONObject json = data.getJSONObject(i);
                     WallblerItem item = feedType.retrieveData(json);
                     item.setLastRefreshDate(lastRefreshDate);
-                    item.setUrl(FACEBOOK_URL + accountProperties.get("config.groupId"));
+                    item.setUrl(FACEBOOK_URL + "/" + accountProperties.get("config.groupId"));
                     wallblerItems.add(item);
                 }
                 cache.add(wallblerItems);
@@ -63,17 +63,15 @@ public class FacebookConnector extends Connector {
         feedMap.put("posts", new FeedType(API_POST_ACCESS_URL,
                 "permalink_url,full_picture,message,created_time,shares,comments.summary(true).limit(0),likes.summary(true).limit(0),from") {
             @Override
-            FacebookPostsWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookPostsWallblerItem item = new FacebookPostsWallblerItem(feedProperties);
+            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
                 item.setDate(extractDateProperties(json).getTime());
                 item.setTitle(json.getJSONObject("from").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "message"));
                 item.setLinkToSMPage(json.getString("permalink_url"));
-                item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));
                 setLikesProperty(item, json);
-                setSharesProperty(item, json);
                 setCommentsProperty(item, json);
-                item.generateSocialId();
+                setSharesProperty(item, json);
                 return item;
             }
         });
@@ -83,17 +81,15 @@ public class FacebookConnector extends Connector {
         feedMap.put("photos", new FeedType(API_PHOTO_ACCESS_URL,
                 "link,images,name,created_time,comments.summary(true).limit(0),likes.summary(true),from,album") {
             @Override
-            FacebookPhotosWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookPhotosWallblerItem item = new FacebookPhotosWallblerItem(feedProperties);
+            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
                 item.setDate(extractDateProperties(json).getTime());
                 item.setTitle(json.getJSONObject("from").getString("name") + " : " + json.getJSONObject("album").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "name"));
                 item.setThumbnailUrl(extractThumbnailUrlProperty(json)); // we still can fetch only first photo from array
                 item.setLinkToSMPage(json.getString("link"));
-                item.setTypeOfFeed((String) feedProperties.get("config.typeOfFeed"));
                 setLikesProperty(item, json);
                 setCommentsProperty(item, json);
-                item.generateSocialId();
                 return item;
             }
             @Override
@@ -106,12 +102,17 @@ public class FacebookConnector extends Connector {
 
     private void videosManaging() {
         feedMap.put("videos", new FeedType(API_VIDEO_ACCESS_URL,
-                "permalink_url,description,updated_time,picture,comments") {
+                "permalink_url,picture,title,description,created_time,comments.summary(true).limit(0),likes.summary(true).limit(0),from") {
             @Override
-            FacebookPostsWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookPostsWallblerItem item = new FacebookPostsWallblerItem(feedProperties);
-                item.setTitle("videos");
-                item.generateSocialId();
+            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
+                item.setDate(extractDateProperties(json).getTime());
+                item.setTitle(json.getJSONObject("from").getString("name"));
+                item.setDescription(extractDescriptionProperty(json, "name"));
+                item.setThumbnailUrl(json.getString("picture"));
+                item.setLinkToSMPage(FACEBOOK_URL + json.getString("permalink_url"));
+                setLikesProperty(item, json);
+                setCommentsProperty(item, json);
                 return item;
             }
         });
@@ -119,12 +120,16 @@ public class FacebookConnector extends Connector {
 
     private void albumsManaging() {
         feedMap.put("albums", new FeedType(API_ALBUM_ACCESS_URL,
-                "name,link,picture,created_time,comments") {
+                "link,picture,name,created_time,comments.summary(true).limit(0),from") {
             @Override
-            FacebookPostsWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookPostsWallblerItem item = new FacebookPostsWallblerItem(feedProperties);
-                item.setTitle("albums");
-                item.generateSocialId();
+            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
+                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
+                item.setDate(extractDateProperties(json).getTime());
+                item.setTitle(json.getJSONObject("from").getString("name"));
+                item.setDescription(extractDescriptionProperty(json, "name"));
+                item.setThumbnailUrl(json.getJSONObject("picture").getJSONObject("data").getString("url"));
+                item.setLinkToSMPage(json.getString("link"));
+                setCommentsProperty(item, json);
                 return item;
             }
         });
@@ -164,7 +169,7 @@ public class FacebookConnector extends Connector {
         return result.toString();
     }
 
-    private void setLikesProperty(FacebookPhotosWallblerItem item, JSONObject json) {
+    private void setLikesProperty(FacebookWallblerItem item, JSONObject json) {
         try {
             item.setLikedCount(json.getJSONObject("likes").getJSONObject("summary").getInt("total_count"));
         } catch (JSONException e) {
@@ -172,7 +177,7 @@ public class FacebookConnector extends Connector {
         }
     }
 
-    private void setCommentsProperty(FacebookPhotosWallblerItem item, JSONObject json) {
+    private void setCommentsProperty(FacebookWallblerItem item, JSONObject json) {
         try {
             item.setCommentsCount(json.getJSONObject("comments").getJSONObject("summary").getInt("total_count"));
         } catch (JSONException e) {
@@ -180,7 +185,7 @@ public class FacebookConnector extends Connector {
         }
     }
 
-    private void setSharesProperty(FacebookPostsWallblerItem item, JSONObject json) {
+    private void setSharesProperty(FacebookWallblerItem item, JSONObject json) {
         try {
             item.setSharedCount(json.getJSONObject("shares").getInt("count"));
         } catch (JSONException e) {

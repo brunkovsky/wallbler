@@ -31,7 +31,6 @@ public class RSSConnector extends Connector {
                 item.setDate(entity.getPublishedDate().getTime());
                 item.setLinkToSMPage(entity.getLink());
                 item.setUrl(feed.getLink());
-                item.generateSocialId();
                 wallblerItems.add(item);
             });
             cache.add(wallblerItems);

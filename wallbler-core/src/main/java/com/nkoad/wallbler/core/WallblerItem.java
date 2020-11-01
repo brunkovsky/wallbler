@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
-public class WallblerItem implements Serializable {
+public class WallblerItem implements Serializable { // does 'Serializable' needed ?
     protected long lastRefreshDate;
     protected int socialId;
     protected String feedName;
@@ -45,10 +45,6 @@ public class WallblerItem implements Serializable {
         return socialMediaType;
     }
 
-    public void setFeedName(String feedName) {
-        this.feedName = feedName;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -87,18 +83,11 @@ public class WallblerItem implements Serializable {
 
     public void setLinkToSMPage(String linkToSMPage) {
         this.linkToSMPage = linkToSMPage;
+        generateSocialId();
     }
 
     public Boolean isAccepted() {
         return accepted;
-    }
-
-    public void setAccepted(Boolean accepted) {
-        this.accepted = accepted;
-    }
-
-    public void generateSocialId() {
-        this.socialId = this.hashCode();
     }
 
     @Override
@@ -106,13 +95,16 @@ public class WallblerItem implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WallblerItem that = (WallblerItem) o;
-        return Objects.equals(url, that.url) &&
-                Objects.equals(linkToSMPage, that.linkToSMPage);
+        return Objects.equals(linkToSMPage, that.linkToSMPage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(url, linkToSMPage);
+        return Objects.hash(linkToSMPage);
+    }
+
+    private void generateSocialId() {
+        this.socialId = this.hashCode();
     }
 
 }
