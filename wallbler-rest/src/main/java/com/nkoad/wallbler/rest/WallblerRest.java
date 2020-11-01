@@ -21,7 +21,7 @@ public class WallblerRest {
     private Cache cache;
 
     // Get all posts
-    @Path("/all")
+    @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Response getAllData(@QueryParam("socials") String socials,
