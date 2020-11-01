@@ -33,11 +33,17 @@
             <artifactId>json</artifactId>
             <version>20160810</version>
         </dependency>
-        <!-- RSS -->
+        <!-- rss -->
         <dependency>
             <groupId>com.rometools</groupId>
             <artifactId>rome</artifactId>
             <version>1.15.0</version>
+        </dependency>
+        <!-- twitter -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.twitter4j</artifactId>
+            <version>4.0.6_1</version>
         </dependency>
     </dependencies>
 
@@ -61,7 +67,9 @@
                             <!-- rss -->
                             com.rometools.*,org.jdom2.*,org.jaxen,org.jaxen.saxpath,org.jaxen.util,
                             <!-- needs for other modules -->
-                            com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition,com.nkoad.wallbler.service,com.nkoad.wallbler.exception,com.nkoad.wallbler.httpConnector
+                            com.nkoad.wallbler.core,com.nkoad.wallbler.cache.definition,com.nkoad.wallbler.service,com.nkoad.wallbler.exception,com.nkoad.wallbler.httpConnector,
+                            <!-- twitter -->
+                            twitter4j.*,android.os,com.google.appengine.api.urlfetch
                         </Export-Package>
                     </instructions>
                 </configuration>

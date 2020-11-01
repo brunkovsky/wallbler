@@ -16,9 +16,9 @@ public @interface FacebookAccountConfig {
     boolean config_valid();
 
     @AttributeDefinition(name = "Group Key")
-    String config_groupId() default "663377994414452";
+    String config_groupId() default "111349400493820";
 
     @AttributeDefinition(name = "oAuthAccessToken")
-    String config_oAuthAccessToken() default "206081670615853|e26e9591d8b92d0e5262871b09eb49d1";
+    String config_oAuthAccessToken() default "EAApiYthtIG8BAA9tsFS3zXZCiX9fixZCCbr9wyrJujZBkbrIq8AZAI3VCzMVlSvdhoMemsuFnNNrFG7isCmVZBEI4nipZBKY11XaeJTYl9ReT7kiKxRzmpZBqTZBZASH5aaJTGu01tjjXMhQ9oG1PY2xqRfXUZCTudTFRSaA7o5Pk2wQZDZD";
 
 }
