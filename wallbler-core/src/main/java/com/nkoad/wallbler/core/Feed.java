@@ -7,12 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class Feed {
     private final static Logger LOGGER = LoggerFactory.getLogger(Feed.class);
@@ -20,11 +21,11 @@ public abstract class Feed {
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
     private ScheduledFuture scheduledFuture;
 
-    protected abstract void assignConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties);
+    protected abstract void assignConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties);
 
     protected void activate(Map<String, Object> feedProperties) {
         LOGGER.info("feed activate: " + feedProperties.get("config.name"));
-        Dictionary<String, Object> accountProperties = extractAccountProperties(feedProperties);
+        Map<String, Object> accountProperties = extractAccountProperties(feedProperties);
         if (accountProperties != null) {
             assignConnector(feedProperties, accountProperties);
             execute(feedProperties);
@@ -48,7 +49,7 @@ public abstract class Feed {
 //        connector.removeFromCache((String) properties.get("service.pid"));
     }
 
-    protected Dictionary<String, Object> extractAccountProperties(Map<String, Object> feedProperties) {
+    protected Map<String, Object> extractAccountProperties(Map<String, Object> feedProperties) {
         String accountName = (String) feedProperties.get("config.accountName");
         String serviceFactoryPid = (String) feedProperties.get("service.factoryPid");
         String accountIdentifier = "(&(config.name=" + accountName + ")(service.factoryPid=" + serviceFactoryPid.replace("Feed", "Account") + "))";
@@ -62,12 +63,20 @@ public abstract class Feed {
                 LOGGER.error("non unique account name found");
                 return null;
             }
-            return configurations[0].getProperties();
+            return dictionaryToMap(configurations[0].getProperties());
         } catch (IOException | InvalidSyntaxException e) {
             e.printStackTrace();
         }
         LOGGER.error("something unexpected happened");
-        return null;
+        return null; // TODO: to return null???
+    }
+
+    private <K, V> Map<K, V> dictionaryToMap(Dictionary<K, V> properties) {
+        if (properties == null || properties.isEmpty()) {
+            return new HashMap<>();
+        }
+        List<K> keys = Collections.list(properties.keys());
+        return keys.stream().collect(Collectors.toMap(Function.identity(), properties::get));
     }
 
     private void execute(Map<String, Object> feedProperties) {

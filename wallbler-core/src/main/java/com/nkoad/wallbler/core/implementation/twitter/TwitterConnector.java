@@ -6,43 +6,25 @@ import com.nkoad.wallbler.core.WallblerItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import twitter4j.*;
-import twitter4j.conf.Configuration;
-import twitter4j.conf.ConfigurationBuilder;
 
 import java.util.*;
 
-public class TwitterConnector extends Connector {
+public class TwitterConnector extends Connector<TwitterValidator> {
     private final static Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
     private final static String TWITTER_PUBLIC_URL = "https://twitter.com/";
-    private final static String TWITTER_DEFAULT_API = "https://api.twitter.com/1.1/";
     private final static int MAX_ITEMS_TO_LOAD = 35; // if 'Apply filters' is ON then MAX could be 100
-    private static Map<Boolean, FeedType> feedMap = new HashMap<>();
-    private String twitterUserAccountName;
-    private Twitter twitter;
+    private static Map<Boolean, FeedType> feedMap = new HashMap<>(); // TODO : enum instead of Boolean
 
-    public TwitterConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
+    public TwitterConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
-        feedMap.put(false, () -> twitter.getUserTimeline(new Paging(1, MAX_ITEMS_TO_LOAD)));
-        feedMap.put(true, () -> twitter.search(buildQuery()).getTweets());
+        feedMap.put(false, () -> validator.twitter.getUserTimeline(new Paging(1, MAX_ITEMS_TO_LOAD)));
+        feedMap.put(true, () -> validator.twitter.search(buildQuery()).getTweets());
+        validator = new TwitterValidator(accountProperties);
+        validator.isAccountValid();
     }
 
     @Override
     public void loadData() {
-        try {
-            Configuration configuration = new ConfigurationBuilder()
-                    .setOAuthConsumerKey(getAccountPropertyAsString("config.oAuthConsumerKey"))
-                    .setOAuthConsumerSecret(getAccountPropertyAsString("config.oAuthConsumerSecret"))
-                    .setOAuthAccessToken(getAccountPropertyAsString("config.oAuthAccessToken"))
-                    .setOAuthAccessTokenSecret(getAccountPropertyAsString("config.oAuthAccessTokenSecret"))
-                    .setRestBaseURL(TWITTER_DEFAULT_API)
-                    .build();
-            twitter = new TwitterFactory(configuration).getInstance();
-            twitterUserAccountName = twitter.getAccountSettings().getScreenName();
-        } catch (Exception e) {
-            LOGGER.error("it seems that 'rate limit exceeded'");
-            e.printStackTrace();
-        }
-
         try {
             long lastRefreshDate = new Date().getTime();
             FeedType feedType = feedMap.get(getFeedPropertyAsBoolean("config.applyFilters"));
@@ -62,8 +44,8 @@ public class TwitterConnector extends Connector {
                 }
                 TwitterWallblerItem item = new TwitterWallblerItem(feedProperties);
                 item.setLastRefreshDate(lastRefreshDate);
-                item.setUrl(TWITTER_PUBLIC_URL + twitterUserAccountName);
-                item.setLinkToSMPage(TWITTER_PUBLIC_URL + twitterUserAccountName + "/status/" + status.getId());
+                item.setUrl(TWITTER_PUBLIC_URL + validator.screenName);
+                item.setLinkToSMPage(TWITTER_PUBLIC_URL + validator.screenName + "/status/" + status.getId());
                 item.setDescription(text);
                 item.setTitle("@" + status.getUser().getName());
                 item.setDate(status.getCreatedAt().getTime());
@@ -134,7 +116,7 @@ public class TwitterConnector extends Connector {
         }
 
         if (stringBuilder.length() == 0) { //if only 'ApplyFilters' checked
-            stringBuilder.append(twitterUserAccountName);
+            stringBuilder.append(validator.screenName);
         }
 
         query.setQuery(stringBuilder.toString());

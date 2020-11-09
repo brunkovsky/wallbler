@@ -16,7 +16,7 @@ public @interface FacebookFeedConfig {
     @AttributeDefinition(name = "Type of feed", options = { @Option(label = "posts", value = "posts"), @Option(label = "photos", value = "photos"), @Option(label = "videos", value = "videos"), @Option(label = "albums", value = "albums")})
     String config_typeOfFeed() default "posts";
 
-    @AttributeDefinition(name = "Album", description = "Album's id")
+    @AttributeDefinition(name = "Album", description = "Album's name")
     String config_album();
 
     @AttributeDefinition(name = "Is enabled", description = "It's possible to temporary disable the feed")

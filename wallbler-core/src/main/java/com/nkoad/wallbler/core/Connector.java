@@ -4,16 +4,16 @@ import com.nkoad.wallbler.cache.definition.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Dictionary;
 import java.util.Map;
 
-public abstract class Connector {
+public abstract class Connector<V extends Validator> {
     protected final static Logger LOGGER = LoggerFactory.getLogger(Connector.class);
     protected Map<String, Object> feedProperties;
-    protected Dictionary<String, Object> accountProperties;
+    protected Map<String, Object> accountProperties;
     protected Cache cache;
+    protected V validator;
 
-    public Connector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
+    public Connector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
         this.feedProperties = feedProperties;
         this.accountProperties = accountProperties;
         this.cache = cache;
@@ -33,10 +33,7 @@ public abstract class Connector {
 
     abstract public void loadData();
 
-//    public void removeFromCache(String feedPid) {
-//        cache.removeFromCache(feedPid);
-//    }
-
+    // TODO : rename to isAccepted()
     public boolean isAccept() {
         boolean accountEnabled = (boolean) accountProperties.get("config.enabled");
         boolean accountValid = (boolean) accountProperties.get("config.valid");

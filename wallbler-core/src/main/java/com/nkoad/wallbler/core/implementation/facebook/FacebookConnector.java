@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class FacebookConnector extends Connector {
+public class FacebookConnector extends Connector<FacebookValidator> {
     private static final String FACEBOOK_URL = "https://www.facebook.com";
     private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v8.0/";
     private static final String API_PHOTO_ACCESS_URL = "/photos?type=uploaded&access_token=";
@@ -26,18 +26,20 @@ public class FacebookConnector extends Connector {
     private static final String API_ALBUM_ACCESS_URL = "/albums?access_token=";
     private static Map<String, FeedType> feedMap = new HashMap<>();
 
-    public FacebookConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
+    public FacebookConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
         postsManaging();
         photosManaging();
         videosManaging();
         albumsManaging();
+        validator = new FacebookValidator(accountProperties);
+        validator.isAccountValid();
     }
 
     @Override
     public void loadData() {
         try {
-            String typeOfFeed = (String) feedProperties.get("config.typeOfFeed");
+            String typeOfFeed = getFeedPropertyAsString("config.typeOfFeed");
             FeedType feedType = feedMap.get(typeOfFeed);
             String url = feedType.buildFullUrl();
             HTTPRequest httpRequest = new GETConnector().httpRequest(url);
@@ -49,7 +51,7 @@ public class FacebookConnector extends Connector {
                     JSONObject json = data.getJSONObject(i);
                     WallblerItem item = feedType.retrieveData(json);
                     item.setLastRefreshDate(lastRefreshDate);
-                    item.setUrl(FACEBOOK_URL + "/" + accountProperties.get("config.groupId"));
+                    item.setUrl(FACEBOOK_URL + "/" + getAccountPropertyAsString("config.groupId"));
                     wallblerItems.add(item);
                 }
                 cache.add(wallblerItems);
@@ -83,7 +85,7 @@ public class FacebookConnector extends Connector {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setDate(extractDateProperties(json).getTime());
+                item.setDate(extractDateProperties(json).getTime()); // TODO : make pure Date
                 item.setTitle(json.getJSONObject("from").getString("name") + " : " + json.getJSONObject("album").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "name"));
                 item.setThumbnailUrl(extractThumbnailUrlProperty(json)); // we still can fetch only first photo from array
@@ -94,7 +96,8 @@ public class FacebookConnector extends Connector {
             }
             @Override
             public String buildFullUrl() {
-                String photosFrom = feedProperties.get("config.album") == null || ((String) feedProperties.get("config.album")).trim().isEmpty() ? (String) accountProperties.get("config.groupId") : (String) feedProperties.get("config.album");
+                String albumName = getFeedPropertyAsString("config.album");
+                String photosFrom = albumName == null || albumName.trim().isEmpty() ? getAccountPropertyAsString("config.groupId") : validator.albums.get(albumName);
                 return USERS_API_ACCESS_URL + photosFrom + url + retrieveAccessToken() + "&fields=" + fields;
             }
         });
@@ -193,6 +196,16 @@ public class FacebookConnector extends Connector {
         }
     }
 
+    private String retrieveAccessToken() {
+        String accessToken = null;
+        try {
+            accessToken = URLEncoder.encode(getAccountPropertyAsString("config.oAuthAccessToken"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return accessToken;
+    }
+
     abstract class FeedType {
         String url;
         String fields;
@@ -205,18 +218,8 @@ public class FacebookConnector extends Connector {
         abstract WallblerItem retrieveData(JSONObject json) throws JSONException;
 
         public String buildFullUrl() {
-            return USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + url + retrieveAccessToken() + "&fields=" + fields;
+            return USERS_API_ACCESS_URL + getAccountPropertyAsString("config.groupId") + url + retrieveAccessToken() + "&fields=" + fields;
         }
-    }
-
-    private String retrieveAccessToken() {
-        String accessToken = null;
-        try {
-            accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return accessToken;
     }
 
 }

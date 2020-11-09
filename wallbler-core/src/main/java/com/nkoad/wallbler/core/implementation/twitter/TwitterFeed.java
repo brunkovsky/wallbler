@@ -16,7 +16,7 @@ public class TwitterFeed extends Feed {
     private Cache cache;
 
     @Override
-    public void assignConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties) {
+    public void assignConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties) {
         connector = new TwitterConnector(feedProperties, accountProperties, cache);
     }
 

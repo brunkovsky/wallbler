@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class InstagramConnector extends Connector {
 
-    public InstagramConnector(Map<String, Object> feedProperties, Dictionary<String, Object> accountProperties, Cache cache) {
+    public InstagramConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
     }
 

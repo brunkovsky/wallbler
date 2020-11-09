@@ -9,6 +9,8 @@ import java.util.Map;
 
 public class TwitterValidator extends Validator {
     private static final String TWITTER_DEFAULT_API = "https://api.twitter.com/1.1/";
+    Twitter twitter;
+    String screenName;
 
     public TwitterValidator(Map<String, Object> properties) {
         super(properties);
@@ -24,9 +26,9 @@ public class TwitterValidator extends Validator {
                     .setOAuthAccessTokenSecret((String) properties.get("config.oAuthAccessTokenSecret"))
                     .setRestBaseURL(TWITTER_DEFAULT_API)
                     .build();
-            Twitter twitter = new twitter4j.TwitterFactory(twitterConfig).getInstance();
-            String name = twitter.getAccountSettings().getScreenName();
-            LOGGER.info("twitter account is valid. name: " + properties.get("config.name") + ". gotten account name: " + name);
+            twitter = new twitter4j.TwitterFactory(twitterConfig).getInstance();
+            screenName = twitter.getAccountSettings().getScreenName();
+            LOGGER.info("twitter account is valid. name: " + properties.get("config.name") + ". gotten account name: " + screenName);
             return true;
         } catch (Exception e) {
             LOGGER.warn("twitter account is not valid. account name: " + properties.get("config.name"));
