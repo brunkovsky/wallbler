@@ -7,10 +7,10 @@ import java.util.Map;
 
 public abstract class Validator {
     protected final static Logger LOGGER = LoggerFactory.getLogger(Validator.class);
-    protected Map<String, Object> properties;
+    protected Map<String, Object> accountProperties;
 
-    public Validator(Map<String, Object> properties) {
-        this.properties = properties;
+    public Validator(Map<String, Object> accountProperties) {
+        this.accountProperties = accountProperties;
     }
 
     public abstract boolean isAccountValid();

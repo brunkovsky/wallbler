@@ -1,14 +1,21 @@
 package com.nkoad.wallbler.core.implementation.instagram;
 
 import com.nkoad.wallbler.cache.definition.Cache;
+import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.core.HTTPRequest;
 import com.nkoad.wallbler.core.Connector;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.util.Dictionary;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class InstagramConnector extends Connector {
+    private static final String INSTAGRAM_PUBLIC_URL = "https://www.instagram.com/";
+    private static final String USER_MEDIA_URL = "https://graph.instagram.com/me/media?fields=caption,id,media_type,media_url,permalink,thumbnail_url,timestamp,username&access_token=";
 
     public InstagramConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
@@ -17,15 +24,40 @@ public class InstagramConnector extends Connector {
     @Override
     public void loadData() {
         try {
-            String url = (String) feedProperties.get("config.url");
-            int count = (int) feedProperties.get("config.count");
+            String url = USER_MEDIA_URL + accountProperties.get("config.accessToken");
             HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                LOGGER.info("Instagram 200");
+                Set<WallblerItem> wallblerItems = new HashSet<>();
+                JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
+                for (int i = 0; i < data.length(); i++) {
+                    wallblerItems.add(retrieveData(data.getJSONObject(i)));
+                }
+                cache.add(wallblerItems);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Instagram Load error ", e);
         }
+    }
+
+    private InstagramWallblerItem retrieveData(JSONObject json) {
+        InstagramWallblerItem item = new InstagramWallblerItem(feedProperties);
+        item.setUrl(INSTAGRAM_PUBLIC_URL + json.getString("username"));
+        item.setTitle(json.getString("username"));
+        item.setDate(setDateProperties(json).getTime());
+        item.setLinkToSMPage(json.getString("permalink"));
+        item.setThumbnailUrl(json.getString("media_url"));
+        item.setMediaType(json.getString("media_type"));
+        return item;
+    }
+
+    private Date setDateProperties(JSONObject json) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            return sdf.parse(json.getString("timestamp"));
+        } catch (ParseException | JSONException e) {
+            //do nothing
+        }
+        return null;
     }
 
 }

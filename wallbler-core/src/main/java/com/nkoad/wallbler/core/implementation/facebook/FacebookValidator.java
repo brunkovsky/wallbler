@@ -23,22 +23,22 @@ public class FacebookValidator extends Validator {
     @Override
     public boolean isAccountValid() {
         try {
-            String accessToken = URLEncoder.encode((String) properties.get("config.oAuthAccessToken"), "UTF-8");
+            String accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
             screenName = fetchScreenName(accessToken);
             albums = fetchAlbums(accessToken);
-            LOGGER.info("facebook account is valid. account name: " + properties.get("config.name")
+            LOGGER.info("facebook account is valid. account name: " + accountProperties.get("config.name")
                     + ". gotten account name: " + screenName
                     + ". albums: " + albums);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LOGGER.warn("facebook account is not valid. account name: " + properties.get("config.name"));
+        LOGGER.warn("facebook account is not valid. account name: " + accountProperties.get("config.name"));
         return false;
     }
 
     private String fetchScreenName(String accessToken) throws IOException {
-        String url = USERS_API_ACCESS_URL + properties.get("config.groupId") + "?access_token=" + accessToken;
+        String url = USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + "?access_token=" + accessToken;
         HTTPRequest httpRequest = new GETConnector().httpRequest(url);
         if (httpRequest.getStatusCode() == 200) {
             return new JSONObject(httpRequest.getBody()).getString("name");
@@ -47,7 +47,7 @@ public class FacebookValidator extends Validator {
     }
 
     private Map<String, String> fetchAlbums(String accessToken) throws IOException {
-        String url = USERS_API_ACCESS_URL + properties.get("config.groupId") + "/albums?fields=name&access_token=" + accessToken;
+        String url = USERS_API_ACCESS_URL + accountProperties.get("config.groupId") + "/albums?fields=name&access_token=" + accessToken;
         HTTPRequest httpRequest = new GETConnector().httpRequest(url);
         if (httpRequest.getStatusCode() == 200) {
             Map<String, String> albumsMap = new HashMap<>();

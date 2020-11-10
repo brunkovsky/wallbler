@@ -20,18 +20,19 @@ public class TwitterValidator extends Validator {
     public boolean isAccountValid() {
         try {
             Configuration twitterConfig = new ConfigurationBuilder()
-                    .setOAuthConsumerKey((String) properties.get("config.oAuthConsumerKey"))
-                    .setOAuthConsumerSecret((String) properties.get("config.oAuthConsumerSecret"))
-                    .setOAuthAccessToken((String) properties.get("config.oAuthAccessToken"))
-                    .setOAuthAccessTokenSecret((String) properties.get("config.oAuthAccessTokenSecret"))
+                    .setOAuthConsumerKey((String) accountProperties.get("config.oAuthConsumerKey"))
+                    .setOAuthConsumerSecret((String) accountProperties.get("config.oAuthConsumerSecret"))
+                    .setOAuthAccessToken((String) accountProperties.get("config.oAuthAccessToken"))
+                    .setOAuthAccessTokenSecret((String) accountProperties.get("config.oAuthAccessTokenSecret"))
                     .setRestBaseURL(TWITTER_DEFAULT_API)
                     .build();
             twitter = new twitter4j.TwitterFactory(twitterConfig).getInstance();
             screenName = twitter.getAccountSettings().getScreenName();
-            LOGGER.info("twitter account is valid. name: " + properties.get("config.name") + ". gotten account name: " + screenName);
+            LOGGER.info("twitter account is valid. name: " + accountProperties.get("config.name")
+                    + ". gotten account name: " + screenName);
             return true;
         } catch (Exception e) {
-            LOGGER.warn("twitter account is not valid. account name: " + properties.get("config.name"));
+            LOGGER.warn("twitter account is not valid. account name: " + accountProperties.get("config.name"));
             return false;
         }
     }

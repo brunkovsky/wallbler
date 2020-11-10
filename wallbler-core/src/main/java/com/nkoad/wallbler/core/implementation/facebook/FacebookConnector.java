@@ -20,10 +20,9 @@ import java.util.*;
 public class FacebookConnector extends Connector<FacebookValidator> {
     private static final String FACEBOOK_URL = "https://www.facebook.com";
     private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v8.0/";
-    private static final String API_PHOTO_ACCESS_URL = "/photos?type=uploaded&access_token=";
     private static final String API_POST_ACCESS_URL = "/posts?access_token=";
+    private static final String API_PHOTO_ACCESS_URL = "/photos?type=uploaded&access_token=";
     private static final String API_VIDEO_ACCESS_URL = "/videos/uploaded?access_token=";
-    private static final String API_ALBUM_ACCESS_URL = "/albums?access_token=";
     private static Map<String, FeedType> feedMap = new HashMap<>();
 
     public FacebookConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
@@ -31,7 +30,6 @@ public class FacebookConnector extends Connector<FacebookValidator> {
         postsManaging();
         photosManaging();
         videosManaging();
-        albumsManaging();
         validator = new FacebookValidator(accountProperties);
         validator.isAccountValid();
     }
@@ -115,23 +113,6 @@ public class FacebookConnector extends Connector<FacebookValidator> {
                 item.setThumbnailUrl(json.getString("picture"));
                 item.setLinkToSMPage(FACEBOOK_URL + json.getString("permalink_url"));
                 setLikesProperty(item, json);
-                setCommentsProperty(item, json);
-                return item;
-            }
-        });
-    }
-
-    private void albumsManaging() {
-        feedMap.put("albums", new FeedType(API_ALBUM_ACCESS_URL,
-                "link,picture,name,created_time,comments.summary(true).limit(0),from") {
-            @Override
-            FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
-                FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setDate(extractDateProperties(json).getTime());
-                item.setTitle(json.getJSONObject("from").getString("name"));
-                item.setDescription(extractDescriptionProperty(json, "name"));
-                item.setThumbnailUrl(json.getJSONObject("picture").getJSONObject("data").getString("url"));
-                item.setLinkToSMPage(json.getString("link"));
                 setCommentsProperty(item, json);
                 return item;
             }

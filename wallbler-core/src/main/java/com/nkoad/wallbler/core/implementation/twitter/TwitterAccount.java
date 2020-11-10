@@ -29,7 +29,6 @@ public class TwitterAccount extends Account<Validator> {
     @Modified
     public void modified(Map<String, Object> properties) {
         super.modified(properties);
-//        setValid(properties);
     }
 
     @Deactivate

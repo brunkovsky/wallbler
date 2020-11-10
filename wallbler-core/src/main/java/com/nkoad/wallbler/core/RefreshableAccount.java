@@ -10,21 +10,22 @@ public abstract class RefreshableAccount extends Account<RefreshableValidator> {
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
     private ScheduledFuture scheduledFuture;
 
-    protected void activate(Map<String, Object> properties) {
-        super.activate(properties);
-        int delayInDays = (int) properties.get("config.refresh");
+    protected void activate(Map<String, Object> accountProperties) {
+        super.activate(accountProperties);
+        int delayInDays = (int) accountProperties.get("config.refresh");
         if (delayInDays > 0) {
             if (validator.isAccept()) {
                 scheduledFuture = executorService.schedule(() -> {
-                    setAccessToken(properties, refreshAccessToken());
-                }, delayInDays, TimeUnit.DAYS);
+                    setAccessToken(accountProperties, refreshAccessToken());
+                    refreshLinkedFeeds(accountProperties);
+                }, delayInDays, TimeUnit.MINUTES);
             }
         }
     }
 
     protected abstract String refreshAccessToken();
 
-    protected void deactivate(Map<String, Object> properties) {
+    protected void deactivate(Map<String, Object> accountProperties) {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }

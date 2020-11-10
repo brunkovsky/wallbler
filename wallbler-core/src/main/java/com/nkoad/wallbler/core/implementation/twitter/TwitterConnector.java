@@ -17,10 +17,10 @@ public class TwitterConnector extends Connector<TwitterValidator> {
 
     public TwitterConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties, Cache cache) {
         super(feedProperties, accountProperties, cache);
-        feedMap.put(false, () -> validator.twitter.getUserTimeline(new Paging(1, MAX_ITEMS_TO_LOAD)));
-        feedMap.put(true, () -> validator.twitter.search(buildQuery()).getTweets());
         validator = new TwitterValidator(accountProperties);
         validator.isAccountValid();
+        feedMap.put(false, () -> validator.twitter.getUserTimeline(new Paging(1, MAX_ITEMS_TO_LOAD)));
+        feedMap.put(true, () -> validator.twitter.search(buildQuery()).getTweets());
     }
 
     @Override

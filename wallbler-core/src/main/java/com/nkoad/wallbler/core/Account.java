@@ -15,43 +15,45 @@ public abstract class Account<V extends Validator> {
     private final static Logger LOGGER = LoggerFactory.getLogger(Account.class);
     protected V validator;
 
-    public abstract void assignValidator(Map<String, Object> properties);
+    public abstract void assignValidator(Map<String, Object> accountProperties);
 
-    protected void activate(Map<String, Object> properties) {
-        LOGGER.info("account activate: " + properties.get("config.name"));
-        assignValidator(properties);
-        refreshLinkedFeeds(properties);
+    protected void activate(Map<String, Object> accountProperties) {
+        LOGGER.info("account activate: " + accountProperties.get("config.name"));
+        assignValidator(accountProperties);
+        refreshLinkedFeeds(accountProperties);
     }
 
-    protected void modified(Map<String, Object> properties) {
-        LOGGER.info("account modified: " + properties.get("config.name"));
-        deactivate(properties);
-        activate(properties);
+    protected void modified(Map<String, Object> accountProperties) {
+        LOGGER.info("account modified: " + accountProperties.get("config.name"));
+        deactivate(accountProperties);
+        activate(accountProperties);
     }
 
-    protected void deactivate(Map<String, Object> properties) {
-        LOGGER.info("account deactivate: " + properties.get("config.name"));
+    protected void deactivate(Map<String, Object> accountProperties) {
+        LOGGER.info("account deactivate: " + accountProperties.get("config.name"));
     }
 
-    protected void setValid(Map<String, Object> properties) {
-        boolean isAccountCurrentlyValid = (boolean) properties.get("config.valid");
-        boolean isAccountRealValid = validator.isAccountValid();
-        if (isAccountCurrentlyValid != isAccountRealValid) {
-            setIsValid(properties, isAccountRealValid);
+    protected void setValid(Map<String, Object> accountProperties) {
+        boolean isAccountValidState = (boolean) accountProperties.get("config.valid");
+        boolean isAccountReallyValid = validator.isAccountValid();
+        if (isAccountValidState != isAccountReallyValid) {
+            setIsValid(accountProperties, isAccountReallyValid);
         }
     }
 
     void setAccessToken(Map<String, Object> accountProperties, String newAccessToken) {
-        String factoryPid = (String) accountProperties.get("service.pid");
-        Map<String, Object> map = new HashMap<>();
-        map.put("config.accessToken", newAccessToken);
-        updateProperties(factoryPid, map);
+        if (newAccessToken != null) {
+            String factoryPid = (String) accountProperties.get("service.pid");
+            Map<String, Object> map = new HashMap<>();
+            map.put("config.accessToken", newAccessToken);
+            updateProperties(factoryPid, map);
+        }
     }
 
-    private void refreshLinkedFeeds(Map<String, Object> properties) {
+    void refreshLinkedFeeds(Map<String, Object> accountProperties) {
         try {
-            String accountName = (String) properties.get("config.name");
-            String factoryPid = ((String) properties.get("service.factoryPid")).replace("Account", "Feed");
+            String accountName = (String) accountProperties.get("config.name");
+            String factoryPid = ((String) accountProperties.get("service.factoryPid")).replace("Account", "Feed");
             String filter = "(&(config.accountName=" + accountName + ")(service.factoryPid=" + factoryPid + "))";
             Configuration[] configurations = Activator.configAdmin.listConfigurations(filter);
             if (configurations != null) {
@@ -72,11 +74,11 @@ public abstract class Account<V extends Validator> {
         updateProperties(factoryPid, map);
     }
 
-    private void updateProperties(String pid, Map<String, Object> properties) {
+    private void updateProperties(String pid, Map<String, Object> accountProperties) {
         try {
             Configuration configuration = Activator.configAdmin.getConfiguration(pid);
             Dictionary<String, Object> props = configuration.getProperties();
-            properties.forEach((key, value) -> props.put(key, value != null ? value : ""));
+            accountProperties.forEach((key, value) -> props.put(key, value != null ? value : ""));
             configuration.update(props);
             configuration.setBundleLocation(null); // TODO :
         } catch (IOException e) {
