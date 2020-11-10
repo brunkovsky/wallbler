@@ -34,9 +34,8 @@ public class ElasticSearchCache implements Cache {
     public void add(Set<WallblerItem> wallblerItems) {
         WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
         ExistingPosts existingPostsId = fetchExistingPosts(wallblerItem.getSocialMediaType());
-        LOGGER.info("putting data to the cache. social: " + wallblerItem.getSocialMediaType()
-                + ". feed name: " + wallblerItem.getFeedName()
-                + ". size: " + existingPostsId.getRecent().size());
+        LOGGER.info("refreshing cache for social: " + wallblerItem.getSocialMediaType()
+                + ". feed name: " + wallblerItem.getFeedName());
         String payloadForAdding = generateBulkPayloadForAdding(wallblerItems, existingPostsId.getRecent());
         if (!payloadForAdding.isEmpty()) {
             try {

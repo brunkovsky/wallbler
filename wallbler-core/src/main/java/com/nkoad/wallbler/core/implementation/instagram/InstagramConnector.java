@@ -51,13 +51,12 @@ public class InstagramConnector extends Connector {
     }
 
     private Date setDateProperties(JSONObject json) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         try {
-            return sdf.parse(json.getString("timestamp"));
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                    .parse(json.getString("timestamp"));
         } catch (ParseException | JSONException e) {
-            //do nothing
+            throw new IllegalArgumentException();
         }
-        return null;
     }
 
 }

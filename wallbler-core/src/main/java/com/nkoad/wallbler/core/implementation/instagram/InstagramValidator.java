@@ -62,7 +62,8 @@ public class InstagramValidator extends RefreshableValidator {
         if (httpRequest.getStatusCode() == 200) {
             JSONObject jsonObject = new JSONObject(httpRequest.getBody());
             String access_token = jsonObject.getString("access_token");
-            String expiresIn = jsonObject.getString("expires_in");
+            long expiresIn = jsonObject.getLong("expires_in");
+            LOGGER.info("got new instagram access token: " + access_token);
             LOGGER.info("got new instagram access token. expires in: " + expiresIn);
             return access_token;
         }
