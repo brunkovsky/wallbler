@@ -80,7 +80,7 @@ public abstract class Feed {
     }
 
     private void execute(Map<String, Object> feedProperties) {
-        int delayInSeconds = (int) feedProperties.get("config.delay") * 60;
+        int delayInSeconds = (int) feedProperties.get("config.delay") * 60 * 60;
         if (connector.isAccept()) {
             scheduledFuture = executorService
                     .scheduleAtFixedRate(connector::loadData, 1, delayInSeconds, TimeUnit.SECONDS);
