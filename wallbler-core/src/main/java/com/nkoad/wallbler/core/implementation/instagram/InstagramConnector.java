@@ -29,25 +29,23 @@ public class InstagramConnector extends Connector {
             if (httpRequest.getStatusCode() == 200) {
                 Set<WallblerItem> wallblerItems = new HashSet<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
+                long lastRefreshDate = new Date().getTime();
                 for (int i = 0; i < data.length(); i++) {
-                    wallblerItems.add(retrieveData(data.getJSONObject(i)));
+                    JSONObject json = data.getJSONObject(i);
+                    InstagramWallblerItem item = new InstagramWallblerItem(feedProperties);
+                    item.setUrl(INSTAGRAM_PUBLIC_URL + json.getString("username"));
+                    item.setTitle(json.getString("username"));
+                    item.setDate(setDateProperties(json).getTime());
+                    item.setLastRefreshDate(lastRefreshDate);
+                    item.setLinkToSMPage(json.getString("permalink"));
+                    item.setThumbnailUrl(json.getString("media_url"));
+                    item.setMediaType(json.getString("media_type"));
                 }
                 cache.add(wallblerItems);
             }
         } catch (Exception e) {
             LOGGER.error("Instagram Load error ", e);
         }
-    }
-
-    private InstagramWallblerItem retrieveData(JSONObject json) {
-        InstagramWallblerItem item = new InstagramWallblerItem(feedProperties);
-        item.setUrl(INSTAGRAM_PUBLIC_URL + json.getString("username"));
-        item.setTitle(json.getString("username"));
-        item.setDate(setDateProperties(json).getTime());
-        item.setLinkToSMPage(json.getString("permalink"));
-        item.setThumbnailUrl(json.getString("media_url"));
-        item.setMediaType(json.getString("media_type"));
-        return item;
     }
 
     private Date setDateProperties(JSONObject json) {
