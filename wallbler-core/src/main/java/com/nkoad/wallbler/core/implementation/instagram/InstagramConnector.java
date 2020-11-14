@@ -40,6 +40,7 @@ public class InstagramConnector extends Connector {
                     item.setLinkToSMPage(json.getString("permalink"));
                     item.setThumbnailUrl(json.getString("media_url"));
                     item.setMediaType(json.getString("media_type"));
+                    wallblerItems.add(item);
                 }
                 cache.add(wallblerItems);
             }
