@@ -42,7 +42,7 @@ public class FacebookConnector extends Connector<FacebookValidator> {
             String url = feedType.buildFullUrl();
             HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
-                long lastRefreshDate = new Date().getTime();
+                Date lastRefreshDate = new Date();
                 Set<WallblerItem> wallblerItems = new HashSet<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
                 for (int i = 0; i < data.length(); i++) {
@@ -65,7 +65,7 @@ public class FacebookConnector extends Connector<FacebookValidator> {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setDate(extractDateProperties(json).getTime());
+                item.setDate(extractDateProperties(json));
                 item.setTitle(json.getJSONObject("from").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "message"));
                 item.setLinkToSMPage(json.getString("permalink_url"));
@@ -83,7 +83,7 @@ public class FacebookConnector extends Connector<FacebookValidator> {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setDate(extractDateProperties(json).getTime()); // TODO : make pure Date
+                item.setDate(extractDateProperties(json));
                 item.setTitle(json.getJSONObject("from").getString("name") + " : " + json.getJSONObject("album").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "name"));
                 item.setThumbnailUrl(extractThumbnailUrlProperty(json)); // we still can fetch only first photo from array
@@ -107,7 +107,7 @@ public class FacebookConnector extends Connector<FacebookValidator> {
             @Override
             FacebookWallblerItem retrieveData(JSONObject json) throws JSONException {
                 FacebookWallblerItem item = new FacebookWallblerItem(feedProperties);
-                item.setDate(extractDateProperties(json).getTime());
+                item.setDate(extractDateProperties(json));
                 item.setTitle(json.getJSONObject("from").getString("name"));
                 item.setDescription(extractDescriptionProperty(json, "name"));
                 item.setThumbnailUrl(json.getString("picture"));

@@ -29,13 +29,13 @@ public class InstagramConnector extends Connector {
             if (httpRequest.getStatusCode() == 200) {
                 Set<WallblerItem> wallblerItems = new HashSet<>();
                 JSONArray data = new JSONObject(httpRequest.getBody()).getJSONArray("data");
-                long lastRefreshDate = new Date().getTime();
+                Date lastRefreshDate = new Date();
                 for (int i = 0; i < data.length(); i++) {
                     JSONObject json = data.getJSONObject(i);
                     InstagramWallblerItem item = new InstagramWallblerItem(feedProperties);
                     item.setUrl(INSTAGRAM_PUBLIC_URL + json.getString("username"));
                     item.setTitle(json.getString("username"));
-                    item.setDate(setDateProperties(json).getTime());
+                    item.setDate(setDateProperties(json));
                     item.setLastRefreshDate(lastRefreshDate);
                     item.setLinkToSMPage(json.getString("permalink"));
                     item.setThumbnailUrl(json.getString("media_url"));

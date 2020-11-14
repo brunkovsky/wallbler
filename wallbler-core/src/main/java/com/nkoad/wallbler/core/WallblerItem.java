@@ -1,20 +1,22 @@
 package com.nkoad.wallbler.core;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
-public class WallblerItem implements Serializable { // does 'Serializable' needed ?
-    protected long lastRefreshDate;
-    protected int socialId;
-    protected String feedName;
-    protected String socialMediaType;
-    protected String title;
-    protected String description;
-    protected long date;
-    protected String url;             // link to the account
-    protected String linkToSMPage;    // link to the post
-    protected Boolean accepted;
+public class WallblerItem implements Serializable {
+    private String lastRefreshDate;
+    private int socialId;
+    private String feedName;
+    private String socialMediaType;
+    private String title;
+    private String description;
+    private String date;
+    private String url;             // link to the account
+    private String linkToSMPage;    // link to the post
+    private Boolean accepted;
 
     public WallblerItem() {
     }
@@ -25,12 +27,13 @@ public class WallblerItem implements Serializable { // does 'Serializable' neede
         this.accepted = (boolean) feedProperties.get("config.acceptedByDefault");
     }
 
-    public long getLastRefreshDate() {
+    public String getLastRefreshDate() {
         return lastRefreshDate;
     }
 
-    public void setLastRefreshDate(long lastRefreshDate) {
-        this.lastRefreshDate = lastRefreshDate;
+    public void setLastRefreshDate(Date lastRefreshDate) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        this.lastRefreshDate = sdf.format(lastRefreshDate);
     }
 
     public int getSocialId() {
@@ -61,12 +64,13 @@ public class WallblerItem implements Serializable { // does 'Serializable' neede
         this.description = description;
     }
 
-    public long getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(long date) {
-        this.date = date;
+    public void setDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        this.date = sdf.format(date);
     }
 
     public String getUrl() {

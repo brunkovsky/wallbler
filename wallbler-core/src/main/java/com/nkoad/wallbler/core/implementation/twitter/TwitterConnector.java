@@ -26,7 +26,7 @@ public class TwitterConnector extends Connector<TwitterValidator> {
     @Override
     public void loadData() {
         try {
-            long lastRefreshDate = new Date().getTime();
+            Date lastRefreshDate = new Date();
             FeedType feedType = feedMap.get(getFeedPropertyAsBoolean("config.applyFilters"));
             List<Status> tweets = feedType.buildTweets();
             Set<WallblerItem> wallblerItems = new HashSet<>();
@@ -48,7 +48,7 @@ public class TwitterConnector extends Connector<TwitterValidator> {
                 item.setLinkToSMPage(TWITTER_PUBLIC_URL + validator.screenName + "/status/" + status.getId());
                 item.setDescription(text);
                 item.setTitle("@" + status.getUser().getName());
-                item.setDate(status.getCreatedAt().getTime());
+                item.setDate(status.getCreatedAt());
                 item.setSharedCount(status.getRetweetCount());
                 item.setLikedCount(status.getFavoriteCount());
                 if (status.isRetweet() && (status.getRetweetedStatus() != null)) {
