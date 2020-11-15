@@ -48,7 +48,3 @@ oAuthKey
 oAuthSecret
 5gnyAetIZtuCIPixGUWaz1FpRGVP1HUnphNvc1FAs8OeE
 
-youtube
-apikey
-AIzaSyB8HHQEIaeusJAefu4XkazhrD4K5
-

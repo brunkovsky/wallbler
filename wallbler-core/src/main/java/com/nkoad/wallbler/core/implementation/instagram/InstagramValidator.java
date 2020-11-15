@@ -6,6 +6,7 @@ import com.nkoad.wallbler.httpConnector.GETConnector;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -21,13 +22,15 @@ public class InstagramValidator extends RefreshableValidator {
 
     @Override
     public String refreshAccessToken() {
+        String accessToken = encodedAccessToken((String) accountProperties.get("config.accessToken"));
         try {
-            String accessToken = URLEncoder.encode((String) accountProperties.get("config.accessToken"), "UTF-8");
             return getNewAccessToken(accessToken);
         } catch (Exception e) {
+            LOGGER.warn("could not refresh access token for: " + accountProperties.get("config.name")
+            + ". the access token remains the same");
             e.printStackTrace();
         }
-        return null;
+        return accessToken;
     }
 
     @Override
@@ -42,6 +45,16 @@ public class InstagramValidator extends RefreshableValidator {
         }
         LOGGER.warn("instagram account is not valid. account name: " + accountProperties.get("config.name"));
         return false;
+    }
+
+    private String encodedAccessToken(String accessToken) {
+        String encodedAccessToken = "";
+        try {
+            encodedAccessToken = URLEncoder.encode(accessToken, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return encodedAccessToken;
     }
 
     private String fetchScreenName(String accessToken) throws IOException {
