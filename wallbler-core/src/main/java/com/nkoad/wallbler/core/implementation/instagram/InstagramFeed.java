@@ -6,7 +6,6 @@ import com.nkoad.wallbler.core.Feed;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
 
-import java.util.Dictionary;
 import java.util.Map;
 
 @Component
@@ -27,6 +26,9 @@ public class InstagramFeed extends Feed {
 
     @Modified
     public void modified(Map<String, Object> properties) {
+        String socialMediaType = ((String) properties.get("service.pid")).split("\\.")[5];
+        String feedName = (String) properties.get("config.name");
+        cache.deletePostsByFeedName(socialMediaType, feedName);
         super.modified(properties);
     }
 

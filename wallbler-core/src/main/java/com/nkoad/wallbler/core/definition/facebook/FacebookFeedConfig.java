@@ -13,7 +13,7 @@ public @interface FacebookFeedConfig {
     @AttributeDefinition(name = "Account name", description = "Linked account name")
     String config_accountName() default "facebook account";
 
-    @AttributeDefinition(name = "Type of feed", options = { @Option(label = "posts", value = "posts"), @Option(label = "photos", value = "photos"), @Option(label = "videos", value = "videos"), @Option(label = "albums", value = "albums")})
+    @AttributeDefinition(name = "Type of feed", options = { @Option(label = "posts", value = "posts"), @Option(label = "photos", value = "photos"), @Option(label = "videos", value = "videos")})
     String config_typeOfFeed() default "posts";
 
     @AttributeDefinition(name = "Album", description = "Album's name")
