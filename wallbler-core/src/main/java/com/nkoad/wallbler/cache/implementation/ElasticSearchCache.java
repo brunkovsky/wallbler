@@ -28,7 +28,7 @@ public class ElasticSearchCache implements Cache {
     private final static String FILTER_BY_ACCEPTED_TRUE_PAYLOAD = "\"query\":{\"match\":{\"accepted\":true}}";
     private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match_phrase\":{\"feedName\":\"%s\"}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
-    private final static int WALLBLER_MAX_LIMIT = 200;  // define max limit for each social type in the cache
+    private final static int WALLBLER_MAX_LIMIT = 500;  // define max limit for each social type in the cache
 
     @Override
     public void add(Set<WallblerItem> wallblerItems) {

@@ -25,6 +25,7 @@ public class InstagramConnector extends Connector {
     public void loadData() {
         try {
             String url = USER_MEDIA_URL + accountProperties.get("config.accessToken");
+            LOGGER.info("getting instagram posts using url: " + url);
             HTTPRequest httpRequest = new GETConnector().httpRequest(url);
             if (httpRequest.getStatusCode() == 200) {
                 Set<WallblerItem> wallblerItems = new HashSet<>();
