@@ -1,7 +1,6 @@
 package com.nkoad.wallbler.core.definition.facebook;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @ObjectClassDefinition(name = "Wallbler Facebook Account")

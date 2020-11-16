@@ -16,9 +16,9 @@ public @interface InstagramAccountConfig {
     boolean config_valid();
 
     @AttributeDefinition(name = "Access token")
-    String config_accessToken() default "IGQVJVWWI4OGtReUdCV0FIcVRDdC1POVVUTTMzdnFyS1pVMXFUYzE3aEl5bzRTRTNUdjlUZA0pjTzNxNXB0ZAzkwWVZArcWw3cm1jblV3ZAUR6dUxGczNlNEZA3MmlxQ3Nwc1cyWm54M0thejVjYnlCZAkRzSAZDZD";
+    String config_accessToken() default "IGQVJVOHN4SjJISms0WWdGcmN2UUlsUER5VlEwRmJXbHJjOXhBclJvaU5MdzBsNWE3eFRNUDBRYk9oeVphamtMbDcwMXhGOHF0OFg2OXNadldOZAFZAJVHVJRDN3OEpDUWNyelZA6eWpn";
 
     @AttributeDefinition(name = "Refresh period. In days", description = "Refresh access token. No refreshing if '0'")
-    int config_refresh() default 14;
+    int config_refresh() default 5;
 
 }
