@@ -17,7 +17,6 @@ public abstract class RefreshableAccount extends Account<RefreshableValidator> {
             if (validator.isAccept()) {
                 scheduledFuture = executorService.schedule(() -> {
                     setAccessToken(accountProperties, refreshAccessToken());
-                    refreshLinkedFeeds(accountProperties);
                 }, delayInDays, TimeUnit.DAYS);
             }
         }
