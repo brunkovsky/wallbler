@@ -41,7 +41,7 @@ public class WallblerRest {
     }
 
     // Get non accepted posts only
-    @Path("/nonAccepted")
+    @Path("/non_accepted")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Response getNonAcceptedData(@QueryParam("socials") String socials,

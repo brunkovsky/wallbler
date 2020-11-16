@@ -26,17 +26,17 @@ public class ElasticSearchCache implements Cache {
     private final static String SORT_BY_DATE_DESC_PAYLOAD = "\"sort\":[{\"date\":{\"order\":\"desc\"}}]";
     private final static String FILTER_BY_ACCEPTED_FALSE_PAYLOAD = "\"query\":{\"match\":{\"accepted\":false}}";
     private final static String FILTER_BY_ACCEPTED_TRUE_PAYLOAD = "\"query\":{\"match\":{\"accepted\":true}}";
-    private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match\":{\"feedName\":\"%s\"}}";
+    private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match_phrase\":{\"feedName\":\"%s\"}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
     private final static int WALLBLER_MAX_LIMIT = 200;  // define max limit for each social type in the cache
 
     @Override
     public void add(Set<WallblerItem> wallblerItems) {
         WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
-        ExistingPosts existingPostsId = fetchExistingPosts(wallblerItem.getSocialMediaType());
+        ExistingPostsIds existingPostsIds = retrieveExistingPostsIds(wallblerItem.getSocialMediaType());
         LOGGER.info("refreshing cache for social: " + wallblerItem.getSocialMediaType()
                 + ". feed name: " + wallblerItem.getFeedName());
-        String payloadForAdding = generateBulkPayloadForAdding(wallblerItems, existingPostsId.getRecent());
+        String payloadForAdding = generateBulkPayloadForAdding(wallblerItems, existingPostsIds.getRecent());
         if (!payloadForAdding.isEmpty()) {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForAdding);
@@ -45,7 +45,7 @@ public class ElasticSearchCache implements Cache {
                 e.printStackTrace();
             }
         }
-        String payloadForUpdating = generateBulkPayloadForUpdating(wallblerItems, existingPostsId.getRecent());
+        String payloadForUpdating = generateBulkPayloadForUpdating(wallblerItems, existingPostsIds.getRecent());
         if (!payloadForUpdating.isEmpty()) {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForUpdating);
@@ -54,9 +54,9 @@ public class ElasticSearchCache implements Cache {
                 e.printStackTrace();
             }
         }
-        Set<Integer> outdatedPosts = existingPostsId.getOutdated();
-        if (!outdatedPosts.isEmpty()) {
-            deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPosts);
+        Set<Integer> outdatedPostsIds = existingPostsIds.getOutdated();
+        if (!outdatedPostsIds.isEmpty()) {
+            deleteOutdatedPosts(wallblerItem.getSocialMediaType(), outdatedPostsIds);
         }
     }
 
@@ -147,22 +147,22 @@ public class ElasticSearchCache implements Cache {
         }
     }
 
-    private ExistingPosts fetchExistingPosts(String socialMediaType) {
-        JSONArray existedPosts = getData(socialMediaType, MAX_LIMIT, "{"
+    private ExistingPostsIds retrieveExistingPostsIds(String socialMediaType) {
+        JSONArray existingPosts = getData(socialMediaType, MAX_LIMIT, "{"
                 + SORT_BY_DATE_DESC_PAYLOAD
                 + "}");
-        ExistingPosts result = new ExistingPosts();
-        for (int i = 0; i < existedPosts.length(); i++) {
-            JSONObject jsonObject = existedPosts.getJSONObject(i);
+        ExistingPostsIds result = new ExistingPostsIds();
+        for (int i = 0; i < existingPosts.length(); i++) {
+            JSONObject jsonObject = existingPosts.getJSONObject(i);
             result.add(jsonObject.getInt("socialId"));
         }
         return result;
     }
 
-    private String generateBulkPayloadForAdding(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) {
+    private String generateBulkPayloadForAdding(Set<WallblerItem> wallblerItems, Set<Integer> recentPostsIds) {
         StringBuilder payload = new StringBuilder();
         for (WallblerItem wallblerItem : wallblerItems) {
-            if (!existedPostsId.contains(wallblerItem.getSocialId())) {
+            if (!recentPostsIds.contains(wallblerItem.getSocialId())) {
                 payload.append("{\"index\":{\"_index\":\"")
                         .append(wallblerItem.getSocialMediaType())
                         .append("\",\"_id\":\"")
@@ -175,12 +175,12 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems, Set<Integer> existedPostsId) {
+    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems, Set<Integer> recentPostsIds) {
         StringBuilder payload = new StringBuilder();
         for (WallblerItem wallblerItem : wallblerItems) {
-            if (existedPostsId.contains(wallblerItem.getSocialId())) {
+            if (recentPostsIds.contains(wallblerItem.getSocialId())) {
                 JSONObject obj = new JSONObject(wallblerItem);
-                obj.remove("accepted");
+                obj.remove("accepted"); // in order to the 'accepted' field is not changing while updating
                 payload.append("{\"update\":{\"_index\":\"")
                         .append(wallblerItem.getSocialMediaType())
                         .append("\",\"_id\":\"")
@@ -219,7 +219,7 @@ public class ElasticSearchCache implements Cache {
         return payload.toString();
     }
 
-    static class ExistingPosts {
+    static class ExistingPostsIds {
         private Set<Integer> recent = new HashSet<>();
         private Set<Integer> outdated = new HashSet<>();
 

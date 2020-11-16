@@ -26,9 +26,9 @@ public class TwitterFeed extends Feed {
 
     @Modified
     public void modified(Map<String, Object> properties) {
-        String socialMediaType = ((String) properties.get("service.pid")).split("\\.")[5];
-        String feedName = (String) properties.get("config.name");
-        cache.deletePostsByFeedName(socialMediaType, feedName);
+//        String socialMediaType = ((String) properties.get("service.pid")).split("\\.")[5];
+//        String feedName = (String) properties.get("config.name");
+//        cache.deletePostsByFeedName(socialMediaType, feedName);
         super.modified(properties);
     }
 
