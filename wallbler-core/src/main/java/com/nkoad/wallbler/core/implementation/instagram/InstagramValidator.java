@@ -16,8 +16,8 @@ public class InstagramValidator extends RefreshableValidator {
     private static final String REFRESH_TOKEN_URL = INSTAGRAM_URL + "refresh_access_token?grant_type=ig_refresh_token&access_token=";
     String screenName;
 
-    public InstagramValidator(Map<String, Object> properties) {
-        super(properties);
+    public InstagramValidator(Map<String, Object> accountProperties) {
+        super(accountProperties);
     }
 
     @Override

@@ -55,6 +55,7 @@ public class FacebookConnector extends Connector<FacebookValidator> {
                 cache.add(wallblerItems);
             }
         } catch (Exception e) {
+            LOGGER.error("Can't get facebook posts, feed name: '" + feedProperties.get("config.name") + "'", e);
             e.printStackTrace();
         }
     }

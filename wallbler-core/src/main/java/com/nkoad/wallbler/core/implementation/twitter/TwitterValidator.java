@@ -12,8 +12,8 @@ public class TwitterValidator extends Validator {
     Twitter twitter;
     String screenName;
 
-    public TwitterValidator(Map<String, Object> properties) {
-        super(properties);
+    public TwitterValidator(Map<String, Object> accountProperties) {
+        super(accountProperties);
     }
 
     @Override

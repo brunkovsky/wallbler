@@ -61,7 +61,7 @@ public class TwitterConnector extends Connector<TwitterValidator> {
             }
             cache.add(wallblerItems);
         } catch (Exception e) {
-            LOGGER.error("Can't get tweets, feed: " + feedProperties.get("service.pid"), e);
+            LOGGER.error("Can't get tweets, feed name: '" + feedProperties.get("config.name") + "'", e);
         }
     }
 

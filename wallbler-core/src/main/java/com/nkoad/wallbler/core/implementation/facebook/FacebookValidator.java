@@ -16,8 +16,8 @@ public class FacebookValidator extends Validator {
     protected String screenName;
     protected Map<String, String> albums;
 
-    public FacebookValidator(Map<String, Object> properties) {
-        super(properties);
+    public FacebookValidator(Map<String, Object> accountProperties) {
+        super(accountProperties);
     }
 
     @Override

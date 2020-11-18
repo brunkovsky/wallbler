@@ -46,7 +46,7 @@ public class InstagramConnector extends Connector {
                 cache.add(wallblerItems);
             }
         } catch (Exception e) {
-            LOGGER.error("Instagram Load error ", e);
+            LOGGER.error("Can't get instagram posts, feed name: '" + feedProperties.get("config.name") + "'", e);
         }
     }
 

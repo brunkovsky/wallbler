@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class WallblerItem implements Serializable {
-    private String lastRefreshDate;
     private int socialId;
+    private String lastRefreshDate;
     private String feedName;
     private String socialMediaType;
     private String title;

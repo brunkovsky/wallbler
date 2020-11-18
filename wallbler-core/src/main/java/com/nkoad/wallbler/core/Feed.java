@@ -30,7 +30,7 @@ public abstract class Feed {
             assignConnector(feedProperties, accountProperties);
             execute(feedProperties);
         } else {
-            LOGGER.error("can not assign connector for feed: " + feedProperties.get("config.name"));
+            LOGGER.error("can not assign connector for feed name: '" + feedProperties.get("config.name") + "'");
         }
     }
 
@@ -45,8 +45,6 @@ public abstract class Feed {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
-        // TODO may be we can add boolean in each feed with question 'remove posts when removing the feed'
-//        connector.removeFromCache((String) properties.get("service.pid"));
     }
 
     protected Map<String, Object> extractAccountProperties(Map<String, Object> feedProperties) {

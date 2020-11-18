@@ -17,9 +17,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component(name = "ElasticSearchCache", service = Cache.class)
-public class ElasticSearchCache implements Cache {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchCache.class);
+@Component(name = "ElasticsearchCache", service = Cache.class)
+public class ElasticsearchCache implements Cache {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchCache.class);
     private final static String HOST = "http://localhost:9200/";
     private final static String BULK_URL = HOST + "_bulk";
     private final static String SEARCH_URL_TEMPLATE = HOST + "%s/_search?size=%d";
@@ -32,52 +32,53 @@ public class ElasticSearchCache implements Cache {
     private final static int WALLBLER_MAX_LIMIT = 100;  // define max limit for each social type in the cache
 
     @Override
-    public void add(Set<WallblerItem> wallblerItems) {
-        WallblerItem wallblerItem = wallblerItems.stream().findAny().get();
-        String socialMediaType = wallblerItem.getSocialMediaType();
-        String feedName = wallblerItem.getFeedName();
-        ExistingPosts existingPosts = retrieveExistingPosts(socialMediaType);
-        LOGGER.info("refreshing cache for social: " + socialMediaType
-                + ". feed name: " + feedName + "\n"
-                + "existing posts quantity: " + (existingPosts.recent.size() + existingPosts.outdated.size()) + "\n"
-                + "recent posts quantity: " + existingPosts.recent.size() + "\n"
-                + "outdated posts quantity: " + existingPosts.outdated.size());
+    public void add(Set<WallblerItem> wallblerItemsToHandle) {
+        WallblerItem wallblerItem = wallblerItemsToHandle.stream().findAny().get();
+        String socialMediaTypeToHandle = wallblerItem.getSocialMediaType();
+        String feedNameToHandle = wallblerItem.getFeedName();
+        ExistingPosts existingPosts = retrieveExistingPosts(socialMediaTypeToHandle);
+        LOGGER.info("refreshing cache for social: '" + socialMediaTypeToHandle + "'"
+                + ". feed name: '" + feedNameToHandle + "'"
+                + ". recent posts quantity: " + existingPosts.recent.size()
+                + ". outdated posts quantity: " + existingPosts.outdated.size());
 
-        Payload payloadForAdding = generateBulkPayloadForAdding(wallblerItems, existingPosts.getRecentAsIds());
-        if (payloadForAdding.quantity > 0) {
-            LOGGER.info("adding social: " + socialMediaType + " to cache"
-                    + ". feed name: " + feedName
-                    + ". quantity to add: " + payloadForAdding.quantity);
+        Set<WallblerItem> itemsForAdding = existingPosts.onlyItemsForAdding(wallblerItemsToHandle);
+        if (itemsForAdding.size() > 0) {
+            String payloadForAdding = generateBulkPayloadForAdding(itemsForAdding);
+            LOGGER.info("adding new posts for social: '" + socialMediaTypeToHandle + "'"
+                    + ". feed name: '" + feedNameToHandle + "'"
+                    + ". quantity to add: " + itemsForAdding.size());
             try {
-                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForAdding.payload);
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForAdding);
             } catch (IOException e) {
                 LOGGER.error("can not add posts");
                 e.printStackTrace();
             }
         }
 
-        Payload payloadForUpdating = generateBulkPayloadForUpdating(wallblerItems, existingPosts.getRecentAsIds());
-        if (payloadForUpdating.quantity > 0) {
-            LOGGER.info("updating social: " + socialMediaType
-                    + ". feed name: " + feedName
-                    + ". quantity to update: " + payloadForUpdating.quantity);
+        Set<WallblerItem> itemsForUpdating = existingPosts.onlyItemsForUpdating(wallblerItemsToHandle);
+        if (itemsForUpdating.size() > 0) {
+            String payloadForUpdating = generateBulkPayloadForUpdating(itemsForUpdating);
+            LOGGER.info("updating recent posts for social: '" + socialMediaTypeToHandle + "'"
+                    + ". feed name: '" + feedNameToHandle + "'"
+                    + ". quantity to update: " + itemsForUpdating.size());
             try {
-                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForUpdating.payload);
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForUpdating);
             } catch (IOException e) {
                 LOGGER.error("can not update posts");
                 e.printStackTrace();
             }
         }
 
-        Payload payloadForDeleting = generateBulkPayloadForDeleting(socialMediaType, existingPosts.getOutdatedAsIds());
-        if (payloadForDeleting.quantity > 0) {
-            LOGGER.info("deleting outdated posts for social: " + socialMediaType
-                    + ". feed name: " + feedName
-                    + ". quantity to delete: " + payloadForDeleting.quantity);
+        if (existingPosts.outdatedAsIds.size() > 0) {
+            String payloadForDeleting = generateBulkPayloadForDeleting(socialMediaTypeToHandle, existingPosts.outdatedAsIds);
+            LOGGER.info("deleting outdated posts for social: '" + socialMediaTypeToHandle + "'"
+                    + ". feed name: '" + feedNameToHandle + "'"
+                    + ". quantity to delete: " + existingPosts.outdatedAsIds.size());
             try {
-                Thread.sleep(3000);
-                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForDeleting.payload);
-            } catch (Exception e) {
+                Thread.sleep(3000); //TODO: try to remove it...
+                new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForDeleting);
+            } catch (Exception e) { //TODO: ...and 'IOException' here
                 LOGGER.error("can not delete posts");
                 e.printStackTrace();
             }
@@ -116,7 +117,7 @@ public class ElasticSearchCache implements Cache {
             try {
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payload);
             } catch (IOException e) {
-                LOGGER.error("can not set 'accept' to the elasticsearch");
+                LOGGER.error("can not set 'accept' to elasticsearch");
                 e.printStackTrace();
             }
         }
@@ -138,7 +139,7 @@ public class ElasticSearchCache implements Cache {
     }
 
     private JSONArray getData(String socials, Integer limit, String payload) {
-        LOGGER.debug("getting posts from the cache. socials: " + socials + ". limit: " + limit);
+        LOGGER.debug("getting posts from cache. socials: " + socials + ". limit: " + limit);
         JSONArray result = new JSONArray();
         try {
             if (limit == null || limit < 0 || limit > MAX_LIMIT) {
@@ -152,7 +153,7 @@ public class ElasticSearchCache implements Cache {
             }
         } catch (FileNotFoundException ignore) {
         } catch (IOException e) {
-            LOGGER.error("can not get posts from the elasticsearch");
+            LOGGER.error("can not get posts from elasticsearch");
             e.printStackTrace();
         }
         return result;
@@ -170,56 +171,46 @@ public class ElasticSearchCache implements Cache {
         return result;
     }
 
-    private Payload generateBulkPayloadForAdding(Set<WallblerItem> wallblerItems, Set<Integer> recentPostsIds) {
+    private String generateBulkPayloadForAdding(Set<WallblerItem> wallblerItems) {
         StringBuilder payload = new StringBuilder();
-        int count = 0;
         for (WallblerItem item : wallblerItems) {
-            if (!recentPostsIds.contains(item.getSocialId())) {
-                payload.append("{\"index\":{\"_index\":\"")
-                        .append(item.getSocialMediaType())
-                        .append("\",\"_id\":\"")
-                        .append(item.getSocialId())
-                        .append("\"}}\n")
-                        .append(new JSONObject(item))
-                        .append("\n");
-                count++;
-            }
+            payload.append("{\"index\":{\"_index\":\"")
+                    .append(item.getSocialMediaType())
+                    .append("\",\"_id\":\"")
+                    .append(item.getSocialId())
+                    .append("\"}}\n")
+                    .append(new JSONObject(item))
+                    .append("\n");
         }
-        return new Payload(payload.toString(), count);
+        return payload.toString();
     }
 
-    private Payload generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems, Set<Integer> recentPostsIds) {
+    private String generateBulkPayloadForUpdating(Set<WallblerItem> wallblerItems) {
         StringBuilder payload = new StringBuilder();
-        int count = 0;
         for (WallblerItem item : wallblerItems) {
-            if (recentPostsIds.contains(item.getSocialId())) {
-                JSONObject obj = new JSONObject(item);
-                obj.remove("accepted"); // in order to the 'accepted' field is not changing while updating
-                payload.append("{\"update\":{\"_index\":\"")
-                        .append(item.getSocialMediaType())
-                        .append("\",\"_id\":\"")
-                        .append(item.getSocialId())
-                        .append("\"}}\n{\"doc\":")
-                        .append(obj)
-                        .append("}\n");
-                count++;
-            }
+            JSONObject obj = new JSONObject(item);
+            obj.remove("accepted"); // in order to the 'accepted' field is not changing while updating
+            payload.append("{\"update\":{\"_index\":\"")
+                    .append(item.getSocialMediaType())
+                    .append("\",\"_id\":\"")
+                    .append(item.getSocialId())
+                    .append("\"}}\n{\"doc\":")
+                    .append(obj)
+                    .append("}\n");
         }
-        return new Payload(payload.toString(), count);
+        return payload.toString();
     }
 
-    private Payload generateBulkPayloadForDeleting(String socialMediaType, Set<Integer> outdatedPostsIds) {
+    private String generateBulkPayloadForDeleting(String socialMediaType, Set<Integer> outdatedPostsIds) {
         StringBuilder payload = new StringBuilder();
-        int count = 0;
         for (Integer postId : outdatedPostsIds) {
             payload.append("{\"delete\":{\"_index\":\"")
                     .append(socialMediaType)
                     .append("\",\"_id\":\"")
                     .append(postId)
                     .append("\"}}\n");
-            count++;
         }
-        return new Payload(payload.toString(), count);
+        return payload.toString();
     }
 
     private String generateBulkPayloadForAccepting(List<WallblerItem> wallblerItems) {
@@ -239,32 +230,29 @@ public class ElasticSearchCache implements Cache {
     static class ExistingPosts {
         private Set<JSONObject> recent = new HashSet<>();
         private Set<JSONObject> outdated = new HashSet<>();
+        private Set<Integer> recentAsIds = new HashSet<>();
+        private Set<Integer> outdatedAsIds = new HashSet<>();
 
         void add(JSONObject jsonObject) {
             if (recent.size() < WALLBLER_MAX_LIMIT) {
                 recent.add(jsonObject);
+                recentAsIds.add(jsonObject.getInt("socialId"));
             } else {
                 outdated.add(jsonObject);
+                outdatedAsIds.add(jsonObject.getInt("socialId"));
             }
         }
 
-        Set<Integer> getRecentAsIds() {
-            return recent.stream().map(a -> a.getInt("socialId")).collect(Collectors.toSet());
+        Set<WallblerItem> onlyItemsForAdding(Set<WallblerItem> wallblerItems) {
+            return wallblerItems.stream()
+                    .filter(a -> !recentAsIds.contains(a.getSocialId()))
+                    .collect(Collectors.toSet());
         }
 
-        Set<Integer> getOutdatedAsIds() {
-            return outdated.stream().map(a -> a.getInt("socialId")).collect(Collectors.toSet());
-        }
-    }
-
-    static class Payload {
-        private String payload;
-        private int quantity;
-
-        public Payload(String payload, int quantity) {
-            this.payload = payload;
-            this.quantity = quantity;
+        Set<WallblerItem> onlyItemsForUpdating(Set<WallblerItem> wallblerItems) {
+            return wallblerItems.stream()
+                    .filter(a -> recentAsIds.contains(a.getSocialId()))
+                    .collect(Collectors.toSet());
         }
     }
-
 }
