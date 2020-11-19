@@ -1,6 +1,6 @@
 package com.nkoad.wallbler.rest;
 
-import com.nkoad.wallbler.service.OsgiConfigurationService;
+import com.nkoad.wallbler.service.OSGiConfigurationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -18,7 +18,7 @@ import static javax.ws.rs.core.Response.status;
 @Component(name = "AccountWallblerRestService", service = AccountWallblerRest.class, property = {"osgi.jaxrs.resource=true"})
 public class AccountWallblerRest {
     @Reference
-    private OsgiConfigurationService osgiService;
+    private OSGiConfigurationService osgiService;
 
     // Get account factories
     @Path("/account/factories")
@@ -67,7 +67,7 @@ public class AccountWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @POST
-    public Response createAccount(HashMap<String, Object> config) {
+    public Response createAccount(Map<String, Object> config) {
         try {
             return status(201).entity(osgiService.create(config)).build();
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class AccountWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @PUT
-    public Response updateAccount(@PathParam("account_pid") String accountPid, HashMap<String, Object> config) {
+    public Response updateAccount(@PathParam("account_pid") String accountPid, Map<String, Object> config) {
         try {
             return status(200).entity(osgiService.update(accountPid, config)).build();
         } catch (Exception e) {

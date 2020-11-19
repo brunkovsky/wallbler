@@ -26,7 +26,7 @@ public class InstagramValidator extends RefreshableValidator {
         try {
             return getNewAccessToken(accessToken);
         } catch (Exception e) {
-            LOGGER.warn("could not refresh access token for: " + accountProperties.get("config.name")
+            LOGGER.warn("could not refresh access token for: '" + accountProperties.get("config.name") + "'"
             + ". the access token remains the same");
             e.printStackTrace();
         }
@@ -38,12 +38,12 @@ public class InstagramValidator extends RefreshableValidator {
         try {
             String accessToken = URLEncoder.encode((String) accountProperties.get("config.accessToken"), "UTF-8");
             screenName = fetchScreenName(accessToken);
-            LOGGER.info("instagram account is valid. account name: " + accountProperties.get("config.name"));
+            LOGGER.info("instagram account is valid. account name: '" + accountProperties.get("config.name") + "'");
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LOGGER.warn("instagram account is not valid. account name: " + accountProperties.get("config.name"));
+        LOGGER.warn("instagram account is not valid. account name: '" + accountProperties.get("config.name") + "'");
         return false;
     }
 

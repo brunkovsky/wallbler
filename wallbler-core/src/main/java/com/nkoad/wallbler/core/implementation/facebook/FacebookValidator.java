@@ -26,14 +26,14 @@ public class FacebookValidator extends Validator {
             String accessToken = URLEncoder.encode((String) accountProperties.get("config.oAuthAccessToken"), "UTF-8");
             screenName = fetchScreenName(accessToken);
             albums = fetchAlbums(accessToken);
-            LOGGER.info("facebook account is valid. account name: " + accountProperties.get("config.name")
+            LOGGER.info("facebook account is valid. account name: '" + accountProperties.get("config.name") + "'"
                     + ". gotten account name: " + screenName
                     + ". albums: " + albums);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LOGGER.warn("facebook account is not valid. account name: " + accountProperties.get("config.name"));
+        LOGGER.warn("facebook account is not valid. account name: '" + accountProperties.get("config.name") + "'");
         return false;
     }
 

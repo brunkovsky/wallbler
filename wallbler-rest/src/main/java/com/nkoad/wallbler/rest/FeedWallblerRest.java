@@ -1,6 +1,6 @@
 package com.nkoad.wallbler.rest;
 
-import com.nkoad.wallbler.service.OsgiConfigurationService;
+import com.nkoad.wallbler.service.OSGiConfigurationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -18,7 +18,7 @@ import static javax.ws.rs.core.Response.status;
 @Component(name = "FeedWallblerRestService", service = FeedWallblerRest.class, property = {"osgi.jaxrs.resource=true"})
 public class FeedWallblerRest {
     @Reference
-    private OsgiConfigurationService osgiService;
+    private OSGiConfigurationService osgiService;
 
     // Get feed factories
     @Path("/feed/factories")
@@ -54,7 +54,7 @@ public class FeedWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @POST
-    public Response createFeed(HashMap<String, Object> config) {
+    public Response createFeed(Map<String, Object> config) {
         try {
             return status(201).entity(osgiService.create(config)).build();
         } catch (Exception e) {
@@ -67,7 +67,7 @@ public class FeedWallblerRest {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @PUT
-    public Response updateFeed(@PathParam("feed_pid") String feedPid, HashMap<String, Object> config) {
+    public Response updateFeed(@PathParam("feed_pid") String feedPid, Map<String, Object> config) {
         try {
             return status(200).entity(osgiService.update(feedPid, config)).build();
         } catch (Exception e) {

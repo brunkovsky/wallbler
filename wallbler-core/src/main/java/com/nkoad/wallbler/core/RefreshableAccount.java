@@ -1,5 +1,6 @@
 package com.nkoad.wallbler.core;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,6 +28,15 @@ public abstract class RefreshableAccount extends Account<RefreshableValidator> {
     protected void deactivate(Map<String, Object> accountProperties) {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
+        }
+    }
+
+    private void setAccessToken(Map<String, Object> accountProperties, String newAccessToken) {
+        if (newAccessToken != null) {
+            String factoryPid = (String) accountProperties.get("service.pid");
+            Map<String, Object> map = new HashMap<>();
+            map.put("config.accessToken", newAccessToken);
+            updateProperties(factoryPid, map);
         }
     }
 

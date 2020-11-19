@@ -1,8 +1,8 @@
 package com.nkoad.wallbler.core;
 
-import com.nkoad.wallbler.activator.Activator;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class Feed {
+public abstract class Feed { // TODO : try to extend OSGiConfigurationService
     private final static Logger LOGGER = LoggerFactory.getLogger(Feed.class);
     protected Connector connector;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
@@ -24,7 +24,7 @@ public abstract class Feed {
     protected abstract void assignConnector(Map<String, Object> feedProperties, Map<String, Object> accountProperties);
 
     protected void activate(Map<String, Object> feedProperties) {
-        LOGGER.info("feed activate: " + feedProperties.get("config.name"));
+        LOGGER.info("feed activate: '" + feedProperties.get("config.name") + "'");
         Map<String, Object> accountProperties = extractAccountProperties(feedProperties);
         if (accountProperties != null) {
             assignConnector(feedProperties, accountProperties);
@@ -35,13 +35,13 @@ public abstract class Feed {
     }
 
     protected void modified(Map<String, Object> feedProperties) {
-        LOGGER.info("feed modified: " + feedProperties.get("config.name"));
+        LOGGER.info("feed modified: '" + feedProperties.get("config.name") + "'");
         deactivate(feedProperties);
         activate(feedProperties);
     }
 
     protected void deactivate(Map<String, Object> feedProperties) {
-        LOGGER.info("feed deactivate: " + feedProperties.get("config.name"));
+        LOGGER.info("feed deactivate: '" + feedProperties.get("config.name") + "'");
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
@@ -52,13 +52,13 @@ public abstract class Feed {
         String serviceFactoryPid = (String) feedProperties.get("service.factoryPid");
         String accountIdentifier = "(&(config.name=" + accountName + ")(service.factoryPid=" + serviceFactoryPid.replace("Feed", "Account") + "))";
         try {
-            Configuration[] configurations = Activator.configAdmin.listConfigurations(accountIdentifier);
+            Configuration[] configurations = getConfigAdmin().listConfigurations(accountIdentifier);
             if (configurations == null || configurations.length == 0) {
                 LOGGER.error("no account found");
                 return null;
             }
             if (configurations.length > 1) {
-                LOGGER.error("non unique account name found");
+                LOGGER.error("non unique account name found. account name: '" + accountName + "'");
                 return null;
             }
             return dictionaryToMap(configurations[0].getProperties());
@@ -83,6 +83,13 @@ public abstract class Feed {
             scheduledFuture = executorService
                     .scheduleAtFixedRate(connector::loadData, 1, delayInSeconds, TimeUnit.SECONDS);
         }
+    }
+
+    private ConfigurationAdmin getConfigAdmin() {
+        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+        BundleContext bundleContext = bundle.getBundleContext();
+        ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+        return (ConfigurationAdmin) bundleContext.getService(ref);
     }
 
 }

@@ -28,11 +28,11 @@ public class TwitterValidator extends Validator {
                     .build();
             twitter = new twitter4j.TwitterFactory(twitterConfig).getInstance();
             screenName = twitter.getAccountSettings().getScreenName();
-            LOGGER.info("twitter account is valid. name: " + accountProperties.get("config.name")
-                    + ". gotten account name: " + screenName);
+            LOGGER.info("twitter account is valid. name: '" + accountProperties.get("config.name") + "'"
+                    + ". gotten account name: '" + screenName + "'");
             return true;
         } catch (Exception e) {
-            LOGGER.warn("twitter account is not valid. account name: " + accountProperties.get("config.name"));
+            LOGGER.warn("twitter account is not valid. account name: '" + accountProperties.get("config.name") + "'");
             return false;
         }
     }

@@ -17,8 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component(name = "OSGiConfigurationService", service = OsgiConfigurationService.class)
-public class OsgiConfigurationService {
+@Component(name = "OSGiConfigurationService", service = OSGiConfigurationService.class)
+public class OSGiConfigurationService {
     @Reference
     private ConfigurationAdmin configAdmin;
     @Reference
@@ -57,7 +57,7 @@ public class OsgiConfigurationService {
                         && a.get("config.accountName").equals(name));
     }
 
-    public Map<String, Object> create(HashMap<String, Object> config) throws IOException {
+    public Map<String, Object> create(Map<String, Object> config) throws IOException {
         String factoryPid = (String) config.get("service.factoryPid");
         String name = (String) config.get("config.name");
         if (nameExists(factoryPid, name)) {
@@ -68,7 +68,7 @@ public class OsgiConfigurationService {
         return dictionaryToMap(configuration.getProperties());
     }
 
-    public Map<String, Object> update(String pid, HashMap<String, Object> config) throws IOException {
+    public Map<String, Object> update(String pid, Map<String, Object> config) throws IOException {
         if (!configurationExists(pid)) {
             throw new ConfigNotFoundException(pid);
         }

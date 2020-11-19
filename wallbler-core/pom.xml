@@ -58,9 +58,6 @@
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.name}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Bundle-Activator>
-                            com.nkoad.wallbler.activator.Activator
-                        </Bundle-Activator>
                         <Export-Package>
                             org.json,
                             <!-- twitter -->
