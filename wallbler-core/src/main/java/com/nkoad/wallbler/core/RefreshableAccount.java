@@ -32,7 +32,7 @@ public abstract class RefreshableAccount extends Account<RefreshableValidator> {
     }
 
     private void setAccessToken(Map<String, Object> accountProperties, String newAccessToken) {
-        if (newAccessToken != null) {
+        if (newAccessToken != null) { // TODO : we can remove this check now
             String factoryPid = (String) accountProperties.get("service.pid");
             Map<String, Object> map = new HashMap<>();
             map.put("config.accessToken", newAccessToken);

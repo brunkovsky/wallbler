@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FacebookValidator extends Validator {
-    private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v6.0/";
+    private static final String USERS_API_ACCESS_URL = "https://graph.facebook.com/v8.0/";
     protected String screenName;
     protected Map<String, String> albums;
 

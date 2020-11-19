@@ -1,0 +1,47 @@
+### Create new account
+POST {{base}}/wallbler/account
+Content-Type: application/json
+Accept: application/json
+
+{
+  "config.name": "test facebook account",
+  "config.oAuthAccessToken": "EAApiYthtIG8BAA9tsFS3zXZCiX9fixZCCbr9wyrJujZBkbrIq8AZAI3VCzMVlSvdhoMemsuFnNNrFG7isCmVZBEI4nipZBKY11XaeJTYl9ReT7kiKxRzmpZBqTZBZASH5aaJTGu01tjjXMhQ9oG1PY2xqRfXUZCTudTFRSaA7o5Pk2wQZDZD",
+  "config.enabled": false,
+  "config.valid": false,
+  "config.groupId": "111349400493820",
+  "service.factoryPid": "com.nkoad.wallbler.core.implementation.facebook.FacebookAccount"
+}
+
+> {% client.global.set("pid", response.body['service.pid']); %}
+
+
+### Get a single account
+GET {{base}}/wallbler/account/{{pid}}
+Accept: application/json
+
+
+### Get all feeds from account
+GET {{base}}/wallbler/account/{{pid}}/
+Accept: application/json
+
+
+### Update account
+PUT {{base}}/wallbler/account/{{pid}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "config.name": "test facebook account changed",
+  "config.oAuthAccessToken": "EAApiYthtIG8BAA9tsFS3zXZCiX9fixZCCbr9wyrJujZBkbrIq8AZAI3VCzMVlSvdhoMemsuFnNNrFG7isCmVZBEI4nipZBKY11XaeJTYl9ReT7kiKxRzmpZBqTZBZASH5aaJTGu01tjjXMhQ9oG1PY2xqRfXUZCTudTFRSaA7o5Pk2wQZDZD",
+  "config.valid": true,
+  "config.enabled": true,
+  "config.groupId": "111349400493820"
+}
+
+
+### Delete account
+DELETE {{base}}/wallbler/account/{{pid}}
+
+> {% client.global.clear("pid"); %}
+###
+
