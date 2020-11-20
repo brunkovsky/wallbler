@@ -62,14 +62,6 @@ public abstract class Account<V extends Validator> { // TODO : try to extend OSG
         }
     }
 
-//    void updateProperties(String pid, Map<String, Object> accountProperties) {
-//        try {
-//            getOSGiConfigurationService().update(pid, accountProperties);
-//        } catch (IOException e) {
-//            LOGGER.error("couldn't set properties. pid: " + pid);
-//        }
-//    }
-
     void updateProperties(String pid, Map<String, Object> accountProperties) {
         try {
             Configuration configuration = getConfigAdmin().getConfiguration(pid);
@@ -92,17 +84,15 @@ public abstract class Account<V extends Validator> { // TODO : try to extend OSG
     private ConfigurationAdmin getConfigAdmin() {
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
         BundleContext bundleContext = bundle.getBundleContext();
-        ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+        ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class);
         return (ConfigurationAdmin) bundleContext.getService(ref);
     }
 
-    /*
-    private OSGiConfigurationService getOSGiConfigurationService() {
-        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-        BundleContext bundleContext = bundle.getBundleContext();
-        ServiceReference ref = bundleContext.getServiceReference(OSGiConfigurationService.class.getName());
-        return (OSGiConfigurationService) bundleContext.getService(ref);
-    }
-    */
+//    private OSGiConfigurationService getOSGiConfigurationService() {
+//        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+//        BundleContext bundleContext = bundle.getBundleContext();
+//        ServiceReference ref = bundleContext.getServiceReference(OSGiConfigurationService.class);
+//        return (OSGiConfigurationService) bundleContext.getService(ref);
+//    }
 
 }

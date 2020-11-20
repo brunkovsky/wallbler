@@ -1,0 +1,45 @@
+### Create new account
+POST {{base}}/wallbler/account
+Content-Type: application/json
+Accept: application/json
+
+{
+  "config.name": "test youtube account",
+  "config.apiKey": "AIzaSyB8HHQEIaeusJAefu4XkazhrD4K5-IDTGc",
+  "config.enabled": false,
+  "config.valid": false,
+  "service.factoryPid": "com.nkoad.wallbler.core.implementation.youtube.YoutubeAccount"
+}
+
+> {% client.global.set("pid", response.body['service.pid']); %}
+
+
+### Get a single account
+GET {{base}}/wallbler/account/{{pid}}
+Accept: application/json
+
+
+### Get all feeds from account
+GET {{base}}/wallbler/account/{{pid}}/
+Accept: application/json
+
+
+### Update account
+PUT {{base}}/wallbler/account/{{pid}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "config.name": "test youtube account",
+  "config.apiKey": "AIzaSyB8HHQEIaeusJAefu4XkazhrD4K5-IDTGc",
+  "config.enabled": true,
+  "config.valid": true
+}
+
+
+### Delete account
+DELETE {{base}}/wallbler/account/{{pid}}
+
+> {% client.global.clear("pid"); %}
+###
+

@@ -1,5 +1,6 @@
 package com.nkoad.wallbler.core;
 
+import com.nkoad.wallbler.cache.definition.Cache;
 import com.nkoad.wallbler.cache.implementation.ElasticsearchCache;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
@@ -87,20 +88,17 @@ public abstract class Feed { // TODO : try to extend OSGiConfigurationService
     }
 
     private ConfigurationAdmin getConfigAdmin() {
-        BundleContext bundleContext = retrieveBundleContext();
-        ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+        BundleContext bundleContext = bundle.getBundleContext();
+        ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class);
         return (ConfigurationAdmin) bundleContext.getService(ref);
     }
 
-    private ElasticsearchCache getCache() {
-        BundleContext bundleContext = retrieveBundleContext();
-        ServiceReference ref = bundleContext.getServiceReference(ElasticsearchCache.class.getName());
-        return (ElasticsearchCache) bundleContext.getService(ref);
-    }
-
-    private BundleContext retrieveBundleContext() {
-        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-        return bundle.getBundleContext();
-    }
+//    private ElasticsearchCache getCache() {
+//        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+//        BundleContext bundleContext = bundle.getBundleContext();
+//        ServiceReference ref = bundleContext.getServiceReference(Cache.class);
+//        return (ElasticsearchCache) bundleContext.getService(ref);
+//    }
 
 }
