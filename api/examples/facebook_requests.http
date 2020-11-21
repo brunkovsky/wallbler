@@ -12,21 +12,11 @@ Accept: application/json
   "service.factoryPid": "com.nkoad.wallbler.core.implementation.facebook.FacebookAccount"
 }
 
-> {% client.global.set("pid", response.body['service.pid']); %}
-
-
-### Get a single account
-GET {{base}}/wallbler/account/{{pid}}
-Accept: application/json
-
-
-### Get all feeds from account
-GET {{base}}/wallbler/account/{{pid}}/
-Accept: application/json
+> {% client.global.set("account_pid", response.body['service.pid']); %}
 
 
 ### Update account
-PUT {{base}}/wallbler/account/{{pid}}
+PUT {{base}}/wallbler/account/{{account_pid}}
 Content-Type: application/json
 Accept: application/json
 
@@ -39,9 +29,62 @@ Accept: application/json
 }
 
 
-### Delete account
-DELETE {{base}}/wallbler/account/{{pid}}
+### Get a single account
+GET {{base}}/wallbler/account/{{account_pid}}
+Accept: application/json
 
-> {% client.global.clear("pid"); %}
+
+### Create new feed
+POST {{base}}/wallbler/feed
+Content-Type: application/json
+Accept: application/json
+
+{
+  "config.name": "test facebook feed",
+  "config.accountName": "test facebook account",
+  "config.enabled": false,
+  "config.delay": 12,
+  "config.acceptedByDefault": false,
+  "service.factoryPid": "com.nkoad.wallbler.core.implementation.facebook.FacebookFeed"
+}
+
+> {% client.global.set("feed_pid", response.body['service.pid']); %}
+
+
+### Update feed
+PUT {{base}}/wallbler/feed/{{feed_pid}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "config.name": "test facebook feed changed",
+  "config.accountName": "test facebook account",
+  "config.enabled": true,
+  "config.delay": 24,
+  "config.acceptedByDefault": true
+}
+
+
+### Get a single feed
+GET {{base}}/wallbler/feed/{{feed_pid}}
+Accept: application/json
+
+
+### Get all feeds from account
+GET {{base}}/wallbler/account/{{account_pid}}/
+Accept: application/json
+
+
+### Delete feed
+DELETE {{base}}/wallbler/feed/{{feed_pid}}
+
+> {% client.global.clear("feed_pid"); %}
+
+
+### Delete account
+DELETE {{base}}/wallbler/account/{{account_pid}}
+
+> {% client.global.clear("account_pid"); %}
+
 ###
 

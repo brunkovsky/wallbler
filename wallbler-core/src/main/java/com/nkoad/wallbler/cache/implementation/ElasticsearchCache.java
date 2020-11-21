@@ -29,7 +29,7 @@ public class ElasticsearchCache implements Cache {
     private final static String FILTER_BY_ACCEPTED_TRUE_PAYLOAD = "\"query\":{\"match\":{\"accepted\":true}}";
     private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match_phrase\":{\"feedName\":\"%s\"}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
-    private final static int WALLBLER_MAX_LIMIT = 100;  // define max limit for each social type in the cache
+    private final static int SOCIAL_TYPE_MAX_LIMIT = 1000;  // define max limit for each social type in the cache
 
     @Override
     public void add(Set<WallblerItem> wallblerItemsToHandle) {
@@ -70,15 +70,16 @@ public class ElasticsearchCache implements Cache {
             }
         }
 
+        // TODO : I don't like how deleting proceed. better to delete only feedNameToHandle's posts -> need to filter it
         if (existingPosts.outdatedAsIds.size() > 0) {
             String payloadForDeleting = generateBulkPayloadForDeleting(socialMediaTypeToHandle, existingPosts.outdatedAsIds);
             LOGGER.info("deleting outdated posts for social: '" + socialMediaTypeToHandle + "'"
                     + ". feed name: '" + feedNameToHandle + "'"
                     + ". quantity to delete: " + existingPosts.outdatedAsIds.size());
             try {
-                Thread.sleep(3000); //TODO: try to remove it...
+                Thread.sleep(3000); // TODO: try to remove it...
                 new POSTConnectorNdjsonContentType().httpRequest(BULK_URL, payloadForDeleting);
-            } catch (Exception e) { //TODO: ...and 'IOException' here
+            } catch (Exception e) { // TODO: ...then 'IOException' here
                 LOGGER.error("can not delete posts");
                 e.printStackTrace();
             }
@@ -234,7 +235,7 @@ public class ElasticsearchCache implements Cache {
         private Set<Integer> outdatedAsIds = new HashSet<>();
 
         void add(JSONObject jsonObject) {
-            if (recent.size() < WALLBLER_MAX_LIMIT) {
+            if (recent.size() < SOCIAL_TYPE_MAX_LIMIT) {
                 recent.add(jsonObject);
                 recentAsIds.add(jsonObject.getInt("socialId"));
             } else {
@@ -255,4 +256,5 @@ public class ElasticsearchCache implements Cache {
                     .collect(Collectors.toSet());
         }
     }
+
 }

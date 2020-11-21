@@ -4,11 +4,12 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "config.name": "test youtube account",
-  "config.apiKey": "AIzaSyB8HHQEIaeusJAefu4XkazhrD4K5-IDTGc",
+  "config.name": "test instagram account",
+  "config.accessToken": "IGQVJVOHN4SjJISms0WWdGcmN2UUlsUER5VlEwRmJXbHJjOXhBclJvaU5MdzBsNWE3eFRNUDBRYk9oeVphamtMbDcwMXhGOHF0OFg2OXNadldOZAFZAJVHVJRDN3OEpDUWNyelZA6eWpn",
   "config.enabled": false,
   "config.valid": false,
-  "service.factoryPid": "com.nkoad.wallbler.core.implementation.youtube.YoutubeAccount"
+  "config.refresh": 0,
+  "service.factoryPid": "com.nkoad.wallbler.core.implementation.instagram.InstagramAccount"
 }
 
 > {% client.global.set("account_pid", response.body['service.pid']); %}
@@ -30,10 +31,11 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "config.name": "test youtube account",
-  "config.apiKey": "AIzaSyB8HHQEIaeusJAefu4XkazhrD4K5-IDTGc",
+  "config.name": "test instagram account",
+  "config.accessToken": "IGQVJVOHN4SjJISms0WWdGcmN2UUlsUER5VlEwRmJXbHJjOXhBclJvaU5MdzBsNWE3eFRNUDBRYk9oeVphamtMbDcwMXhGOHF0OFg2OXNadldOZAFZAJVHVJRDN3OEpDUWNyelZA6eWpn",
   "config.enabled": true,
-  "config.valid": true
+  "config.valid": true,
+  "config.refresh": 0
 }
 
 
