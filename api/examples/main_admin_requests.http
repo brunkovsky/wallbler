@@ -1,0 +1,15 @@
+### Get account factories
+GET {{base}}/wallbler/account/factories
+
+
+### Get account list
+GET {{base}}/wallbler/account
+Accept: application/json
+
+
+### Get feed list
+GET {{base}}/wallbler/feed
+Accept: application/json
+
+###
+

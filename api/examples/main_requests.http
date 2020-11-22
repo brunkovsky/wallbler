@@ -1,13 +1,43 @@
-### Get account factories
-GET {{base}}/wallbler/account/factories
-
-
-### Get account list
-GET {{base}}/wallbler/account
+### Get all posts (parameter 'socials' is not necessary)
+GET {{base}}/wallbler?socials=facebook,twitter,instagram,youtube,rss
 Accept: application/json
 
 
-### Get feed list
-GET {{base}}/wallbler/feed
+### Get accepted posts only (parameter 'socials' is not necessary)
+GET {{base}}/wallbler/accepted?socials=instagram,rss
 Accept: application/json
+
+
+### Get non accepted posts only (parameter 'socials' is not necessary)
+GET {{base}}/wallbler/non_accepted
+Accept: application/json
+
+
+### Set 'is accepted'
+PATCH {{base}}/wallbler
+Content-Type: application/json
+
+[
+    {
+        "socialMediaType": "youtube",
+        "socialId": -739104832,
+        "accepted": false
+    },
+    {
+        "socialMediaType": "youtube",
+        "socialId": 153370983,
+        "accepted": true
+    },
+    {
+        "socialMediaType": "twitter",
+        "socialId": -654942679,
+        "accepted": true
+    }
+]
+
+
+### Delete posts by feed name
+DELETE {{base}}/wallbler/youtube/test%20youtube%20feed
+
+###
 

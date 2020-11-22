@@ -6,8 +6,10 @@ import com.nkoad.wallbler.core.WallblerItem;
 import com.nkoad.wallbler.httpConnector.GETConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnector;
 import com.nkoad.wallbler.httpConnector.POSTConnectorNdjsonContentType;
+import com.nkoad.wallbler.httpConnector.PUTConnector;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,14 @@ public class ElasticsearchCache implements Cache {
     private final static String FILTER_BY_FEED_NAME_PAYLOAD_TEMPLATE = "\"query\":{\"match_phrase\":{\"feedName\":\"%s\"}}";
     private final static int MAX_LIMIT = 10000;  // max limit for '_search' in elasticsearch by default
     private final static int SOCIAL_TYPE_MAX_LIMIT = 1000;  // define max limit for each social type in the cache
+
+    // TODO : need to discuss how to implement it in other extensions such as 'youtube' and 'rss' (Activator?)
+    @Activate
+    void activate() {
+        createIndex("facebook");
+        createIndex("instagram");
+        createIndex("twitter");
+    }
 
     @Override
     public void add(Set<WallblerItem> wallblerItemsToHandle) {
@@ -135,6 +145,16 @@ public class ElasticsearchCache implements Cache {
             new POSTConnector().httpRequest(url, payload);
         } catch (IOException e) {
             LOGGER.error("can not delete posts in the elasticsearch");
+            e.printStackTrace();
+        }
+    }
+
+    private void createIndex(String index) {
+        LOGGER.debug("creating index for social: " + index);
+        try {
+            new PUTConnector().httpRequest(HOST + index); // TODO : maybe it needs to get the response and analyze it
+        } catch (IOException e) {
+            LOGGER.error("can not create index for social: " + index);
             e.printStackTrace();
         }
     }
