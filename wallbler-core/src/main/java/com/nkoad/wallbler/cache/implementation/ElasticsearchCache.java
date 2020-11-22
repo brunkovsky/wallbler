@@ -174,7 +174,7 @@ public class ElasticsearchCache implements Cache {
             }
         } catch (FileNotFoundException ignore) {
         } catch (IOException e) {
-            LOGGER.error("can not get posts from elasticsearch");
+            LOGGER.error("can not get posts from elasticsearch. socials: " + socials);
             e.printStackTrace();
         }
         return result;
