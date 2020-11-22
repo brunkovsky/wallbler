@@ -36,9 +36,9 @@ public class ElasticsearchCache implements Cache {
     // TODO : need to discuss how to implement it in other extensions such as 'youtube' and 'rss' (Activator?)
     @Activate
     void activate() {
-        createIndex("facebook");
-        createIndex("instagram");
-        createIndex("twitter");
+//        createIndex("facebook");
+//        createIndex("instagram");
+//        createIndex("twitter");
     }
 
     @Override
